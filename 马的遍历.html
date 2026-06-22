@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P1443 马的遍历 — BFS 过程演示</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8; color: #2d3748;
+  min-height: 100vh;
+}
+header {
+  background: linear-gradient(135deg, #1a365d, #2a5298);
+  color: #fff; padding: 20px 32px;
+  display: flex; align-items: center; gap: 16px;
+}
+header h1 { font-size: 1.5rem; font-weight: 700; }
+header .badge { background: #ed8936; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; }
+.container { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
+.card {
+  background: #fff; border-radius: 12px; padding: 20px 24px;
+  margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card h2 { font-size: 1.1rem; margin-bottom: 10px; color: #1a365d; }
+.card p { line-height: 1.7; font-size: 0.92rem; color: #4a5568; }
+
+/* 控制栏 */
+.controls {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px;
+}
+.controls label { font-size: 0.85rem; font-weight: 600; color: #4a5568; }
+.controls input {
+  width: 64px; padding: 6px 8px; border: 1px solid #cbd5e0; border-radius: 6px;
+  font-size: 0.9rem; text-align: center;
+}
+.btn {
+  padding: 7px 16px; border: none; border-radius: 6px; font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: #2b6cb0; color: #fff; }
+.btn-primary:hover { background: #2c5282; }
+.btn-success { background: #38a169; color: #fff; }
+.btn-success:hover { background: #2f855a; }
+.btn-warning { background: #dd6b20; color: #fff; }
+.btn-warning:hover { background: #c05621; }
+.btn-gray { background: #a0aec0; color: #fff; }
+.btn-gray:hover { background: #718096; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 棋盘 */
+.board-wrapper { overflow-x: auto; margin-bottom: 12px; }
+.board {
+  display: inline-grid; gap: 2px;
+  border: 3px solid #2d3748; border-radius: 4px; padding: 2px; background: #2d3748;
+}
+.cell {
+  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700; border-radius: 2px;
+  cursor: pointer; transition: transform 0.1s;
+  position: relative;
+}
+.cell:hover { transform: scale(1.08); z-index: 1; }
+.cell.unvisited { background: #e2e8f0; color: #a0aec0; }
+.cell.queued { background: #bee3f8; color: #2b6cb0; }
+.cell.current { background: #f6e05e; color: #744210; animation: pulse 0.8s infinite; }
+.cell.visited { background: #c6f6d5; color: #22543d; }
+.cell.start { background: #f687b3; color: #702459; }
+.cell.unreachable { background: #fed7d7; color: #c53030; }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(246,224,94,0.6); }
+  50% { box-shadow: 0 0 0 6px rgba(246,224,94,0); }
+}
+
+/* 图例 */
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; margin-bottom: 8px; }
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-swatch { width: 16px; height: 16px; border-radius: 3px; }
+
+/* 状态信息 */
+.status-bar {
+  display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem;
+  padding: 10px 16px; background: #edf2f7; border-radius: 8px; margin-bottom: 12px;
+}
+.status-item strong { color: #1a365d; }
+.queue-display {
+  font-family: "SF Mono", "Fira Code", monospace; font-size: 0.78rem;
+  background: #1a202c; color: #68d391; padding: 8px 12px; border-radius: 6px;
+  max-height: 80px; overflow-y: auto; word-break: break-all;
+}
+
+/* 步骤历史 */
+.step-list {
+  max-height: 200px; overflow-y: auto; font-size: 0.8rem;
+}
+.step-list .step {
+  padding: 4px 8px; border-left: 3px solid transparent; margin-bottom: 2px; cursor: pointer;
+}
+.step-list .step.active { background: #ebf8ff; border-left-color: #3182ce; }
+.step-list .step .step-num { font-weight: 700; color: #2b6cb0; margin-right: 8px; }
+
+/* 代码块 */
+.code-block {
+  background: #1a202c; color: #e2e8f0; padding: 16px; border-radius: 8px;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 0.8rem;
+  line-height: 1.6; overflow-x: auto; white-space: pre;
+}
+.code-block .kw { color: #9f7aea; }
+.code-block .type { color: #68d391; }
+.code-block .num { color: #fbd38d; }
+.code-block .str { color: #fc8181; }
+.code-block .cmt { color: #718096; font-style: italic; }
+.code-block .fn { color: #63b3ed; }
+.code-block .op { color: #f6ad55; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+/* 移动方向指示 */
+.direction-hint {
+  position: absolute; font-size: 0.55rem; color: #ed8936;
+  pointer-events: none; font-weight: 900;
+}
+
+/* 8方向推导棋盘 */
+.dir-board-wrapper {
+  display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start;
+}
+.dir-board-container {
+  position: relative; display: inline-block;
+}
+.dir-board {
+  display: inline-grid; gap: 2px;
+  border: 3px solid #2d3748; border-radius: 4px; padding: 2px; background: #2d3748;
+}
+.dir-cell {
+  width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; border-radius: 2px;
+  position: relative; transition: transform 0.15s;
+}
+.dir-cell:hover { transform: scale(1.06); z-index: 1; }
+.dir-cell.empty { background: #f7fafc; }
+.dir-cell.center { background: #f687b3; color: #702459; font-size: 1.1rem; }
+.dir-cell.target { background: #bee3f8; color: #2b6cb0; cursor: default; }
+.dir-cell.target .dir-num {
+  position: absolute; top: -6px; right: -6px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #e53e3e; color: #fff; font-size: 0.65rem;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; border: 1px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.dir-cell.target .dir-delta {
+  position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
+  font-size: 0.5rem; color: #718096; white-space: nowrap;
+}
+.dir-arrow-svg {
+  position: absolute; top: 0; left: 0; pointer-events: none; z-index: 2;
+}
+.dir-legend {
+  flex: 1; min-width: 240px;
+}
+.dir-legend table {
+  width: 100%; border-collapse: collapse; font-size: 0.82rem;
+}
+.dir-legend th {
+  background: #2b6cb0; color: #fff; padding: 6px 10px; text-align: center;
+  font-weight: 600; font-size: 0.78rem;
+}
+.dir-legend td {
+  padding: 5px 10px; text-align: center; border-bottom: 1px solid #e2e8f0;
+}
+.dir-legend tr:hover td { background: #ebf8ff; }
+.dir-legend .dir-dot {
+  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+  margin-right: 4px; vertical-align: middle;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🐴 P1443 马的遍历</h1>
+  <span class="badge">BFS 过程演示</span>
+</header>
+
+<div class="container">
+
+  <!-- 题目说明 -->
+  <div class="card">
+    <h2>📋 题目描述</h2>
+    <p>有一个 <strong>n × m</strong> 的棋盘，在某个点 <strong>(x, y)</strong> 上有一个马。<br>
+    要求计算出马到达棋盘上<strong>任意一个点</strong>最少要走几步（马走"日"字，8 个方向）。<br>
+    不能到达则输出 <strong>-1</strong>。</p>
+    <p style="margin-top:6px;font-size:0.82rem;color:#718096;">
+      数据范围：1 ≤ x ≤ n ≤ 400，1 ≤ y ≤ m ≤ 400（演示中限制 ≤ 15 以便显示）
+    </p>
+  </div>
+
+  <!-- 参数输入 -->
+  <div class="card">
+    <div class="controls">
+      <label>棋盘大小:</label>
+      <input id="inputN" type="number" value="8" min="3" max="15" title="行数 n">
+      <span>×</span>
+      <input id="inputM" type="number" value="8" min="3" max="15" title="列数 m">
+      <label style="margin-left:12px;">起点:</label>
+      <span>(</span>
+      <input id="inputX" type="number" value="1" min="1" max="15" title="行坐标 x">
+      <span>,</span>
+      <input id="inputY" type="number" value="1" min="1" max="15" title="列坐标 y">
+      <span>)</span>
+      <button class="btn btn-primary" onclick="resetBoard()">🔄 重置棋盘</button>
+      <button class="btn btn-success" id="btnAuto" onclick="autoPlay()">▶️ 自动演示</button>
+    </div>
+    <div class="controls">
+      <button class="btn btn-warning" id="btnStep" onclick="stepForward()">⏭ 单步执行</button>
+      <button class="btn btn-gray" id="btnReset" onclick="resetBFS()" disabled>↺ 重置 BFS</button>
+      <span style="font-size:0.82rem;color:#718096;margin-left:8px;">
+        速度: <input id="speedSlider" type="range" min="100" max="1500" value="600" step="50" style="width:100px;vertical-align:middle;"> 
+        <span id="speedLabel">600ms</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- 8方向推导棋盘 -->
+  <div class="card">
+    <h2>🧭 马走"日"字 — 8 个方向推导</h2>
+    <p style="margin-bottom:12px;font-size:0.88rem;color:#4a5568;">
+      马从中心 <strong>🐴</strong> 出发，每次移动：先直走 1 格再斜走 1 格（或先直走 2 格再横走 1 格），
+      即 <strong>Δx 与 Δy 一个是 ±1、另一个是 ±2</strong>。一共 <strong>8</strong> 种组合。
+    </p>
+    <div class="dir-board-wrapper">
+      <div class="dir-board-container" id="dirBoardContainer"></div>
+      <div class="dir-legend" id="dirLegend"></div>
+    </div>
+  </div>
+
+  <!-- 棋盘 + 状态 -->
+  <div class="card">
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch" style="background:#f687b3;"></span> 起点</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:#f6e05e;"></span> 当前处理</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:#bee3f8;"></span> 队列中</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:#c6f6d5;"></span> 已访问</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:#e2e8f0;"></span> 未访问</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:#fed7d7;"></span> 不可达 (-1)</div>
+    </div>
+    <div class="board-wrapper"><div class="board" id="board"></div></div>
+    <div class="status-bar">
+      <div class="status-item"><strong>当前步骤：</strong><span id="stepNum">0</span> / <span id="stepTotal">0</span></div>
+      <div class="status-item"><strong>正在处理：</strong><span id="curNode">—</span></div>
+      <div class="status-item"><strong>队列大小：</strong><span id="queueSize">0</span></div>
+      <div class="status-item"><strong>已访问：</strong><span id="visitedCount">0</span></div>
+    </div>
+    <div class="queue-display" id="queueDisplay">队列为空</div>
+  </div>
+
+  <!-- 双栏：步骤历史 + 代码 -->
+  <div class="two-col">
+    <div class="card">
+      <h2>📜 步骤历史</h2>
+      <div class="step-list" id="stepList">
+        <div style="color:#a0aec0;">点击"单步执行"或"自动演示"开始</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>💻 参考代码 (C++)</h2>
+      <div class="code-block">
+<span class="cmt">// P1443 马的遍历 — BFS 解法</span>
+<span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="kw">const int</span> <span class="type">N</span> = <span class="num">405</span>;
+<span class="type">int</span> n, m, x, y;
+<span class="type">int</span> dist[N][N];
+<span class="type">int</span> dx[] = {<span class="num">1,2,2,1,-1,-2,-2,-1</span>};
+<span class="type">int</span> dy[] = {<span class="num">2,1,-1,-2,-2,-1,1,2</span>};
+
+<span class="type">void</span> <span class="fn">bfs</span>() {
+    <span class="fn">memset</span>(dist, <span class="num">-1</span>, <span class="kw">sizeof</span>(dist));
+    queue&lt;pair&lt;<span class="type">int</span>,<span class="type">int</span>&gt;&gt; q;
+    dist[x][y] <span class="op">=</span> <span class="num">0</span>;
+    q.<span class="fn">push</span>({x, y});
+
+    <span class="kw">while</span> (<span class="op">!</span>q.<span class="fn">empty</span>()) {
+        <span class="kw">auto</span> [cx, cy] <span class="op">=</span> q.<span class="fn">front</span>();
+        q.<span class="fn">pop</span>();
+        <span class="kw">for</span> (<span class="type">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op">&lt;</span> <span class="num">8</span>; i<span class="op">++</span>) {
+            <span class="type">int</span> nx <span class="op">=</span> cx <span class="op">+</span> dx[i];
+            <span class="type">int</span> ny <span class="op">=</span> cy <span class="op">+</span> dy[i];
+            <span class="kw">if</span> (nx <span class="op">&gt;=</span> <span class="num">1</span> <span class="op">&amp;&amp;</span> nx <span class="op">&lt;=</span> n
+             <span class="op">&amp;&amp;</span> ny <span class="op">&gt;=</span> <span class="num">1</span> <span class="op">&amp;&amp;</span> ny <span class="op">&lt;=</span> m
+             <span class="op">&amp;&amp;</span> dist[nx][ny] <span class="op">==</span> <span class="num">-1</span>) {
+                dist[nx][ny] <span class="op">=</span> dist[cx][cy] <span class="op">+</span> <span class="num">1</span>;
+                q.<span class="fn">push</span>({nx, ny});
+            }
+        }
+    }
+}
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    cin <span class="op">&gt;&gt;</span> n <span class="op">&gt;&gt;</span> m <span class="op">&gt;&gt;</span> x <span class="op">&gt;&gt;</span> y;
+    <span class="fn">bfs</span>();
+    <span class="kw">for</span> (<span class="type">int</span> i <span class="op">=</span> <span class="num">1</span>; i <span class="op">&lt;=</span> n; i<span class="op">++</span>) {
+        <span class="kw">for</span> (<span class="type">int</span> j <span class="op">=</span> <span class="num">1</span>; j <span class="op">&lt;=</span> m; j<span class="op">++</span>)
+            cout <span class="op">&lt;&lt;</span> dist[i][j] <span class="op">&lt;&lt;</span> <span class="str">" "</span>;
+        cout <span class="op">&lt;&lt;</span> endl;
+    }
+}
+      </div>
+    </div>
+  </div>
+
+  <!-- 思路说明 -->
+  <div class="card">
+    <h2>🧠 解题思路</h2>
+    <p>
+      <strong>①</strong> 把棋盘上每个位置都当作一个<strong>状态</strong>。<br>
+      <strong>②</strong> 初始状态为起点 <strong>(x, y)</strong>。<br>
+      <strong>③</strong> 若两个状态可通过马走一步到达，则两状态互相<strong>可达</strong>。<br>
+      <strong>④</strong> 题目要求<strong>最少步数</strong> → 等价于求<strong>最短路</strong>。<br>
+      <strong>⑤</strong> 边权均为 1 的最短路 → 使用<strong>广度优先搜索 (BFS)</strong>。
+    </p>
+    <p style="margin-top:8px;font-size:0.85rem;color:#718096;">
+      💡 BFS 的逐层扩展特性保证了<strong>第一次到达某个格子时的步数就是最短步数</strong>。
+      马走"日"字共 8 个方向：(±1, ±2) 和 (±2, ±1) 的组合。
+    </p>
+  </div>
+
+</div>
+
+<script>
+// ============ BFS 引擎 ============
+const DX = [1, 2, 2, 1, -1, -2, -2, -1];
+const DY = [2, 1, -1, -2, -2, -1, 1, 2];
+
+let n, m, startX, startY;
+let dist = [];        // 最短步数，-1 表示未访问
+let bfsSteps = [];    // 每步的快照
+let currentStep = -1; // 当前显示到第几步
+let autoTimer = null;
+let bfsCompleted = false;
+
+function initData(nn, mm, sx, sy) {
+  n = nn; m = mm; startX = sx; startY = sy;
+  dist = Array.from({length: n+1}, () => Array(m+1).fill(-1));
+  bfsSteps = [];
+  currentStep = -1;
+  bfsCompleted = false;
+}
+
+// 运行完整 BFS 并记录每一步快照
+function runBFS() {
+  bfsSteps = [];
+  const q = [];
+  
+  dist[startX][startY] = 0;
+  q.push([startX, startY]);
+  
+  // 快照 0：初始状态
+  bfsSteps.push({
+    type: 'start',
+    node: [startX, startY],
+    queue: q.map(x => [...x]),
+    dist: dist.map(row => [...row]),
+    desc: `起点 (${startX}, ${startY}) 入队，步数 = 0`
+  });
+  
+  let head = 0;
+  while (head < q.length) {
+    const [cx, cy] = q[head];
+    head++;
+    
+    bfsSteps.push({
+      type: 'pop',
+      node: [cx, cy],
+      queue: q.slice(head).map(x => [...x]),
+      dist: dist.map(row => [...row]),
+      desc: `从队列取出 (${cx}, ${cy})，当前步数 = ${dist[cx][cy]}，尝试扩展 8 个方向`
+    });
+    
+    let expanded = [];
+    for (let i = 0; i < 8; i++) {
+      const nx = cx + DX[i];
+      const ny = cy + DY[i];
+      if (nx >= 1 && nx <= n && ny >= 1 && ny <= m && dist[nx][ny] === -1) {
+        dist[nx][ny] = dist[cx][cy] + 1;
+        q.push([nx, ny]);
+        expanded.push([nx, ny]);
+      }
+    }
+    
+    if (expanded.length > 0) {
+      bfsSteps.push({
+        type: 'expand',
+        node: [cx, cy],
+        expanded: expanded,
+        queue: q.slice(head).map(x => [...x]),
+        dist: dist.map(row => [...row]),
+        desc: `从 (${cx}, ${cy}) 扩展出 ${expanded.length} 个新位置：${expanded.map(p => `(${p[0]},${p[1]})`).join('、')}，步数 = ${dist[cx][cy] + 1}`
+      });
+    }
+  }
+  
+  // 最终快照
+  bfsSteps.push({
+    type: 'done',
+    node: null,
+    queue: [],
+    dist: dist.map(row => [...row]),
+    desc: 'BFS 完成！队列已空，所有可达位置的最短步数已计算完毕。'
+  });
+  
+  bfsCompleted = true;
+}
+
+// ============ 渲染 ============
+function renderBoard(stepIndex) {
+  const boardEl = document.getElementById('board');
+  if (stepIndex < 0) {
+    // 显示初始棋盘（全未访问）
+    boardEl.style.gridTemplateColumns = `repeat(${m}, 36px)`;
+    boardEl.innerHTML = '';
+    for (let i = 1; i <= n; i++) {
+      for (let j = 1; j <= m; j++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell unvisited';
+        cell.textContent = '-';
+        cell.title = `(${i}, ${j})`;
+        if (i === startX && j === startY) {
+          cell.className = 'cell start';
+          cell.textContent = '马';
+        }
+        boardEl.appendChild(cell);
+      }
+    }
+    return;
+  }
+  
+  const step = bfsSteps[stepIndex];
+  const d = step.dist;
+  const queueSet = new Set(step.queue.map(p => `${p[0]},${p[1]}`));
+  const currentNode = step.node ? `${step.node[0]},${step.node[1]}` : null;
+  
+  boardEl.style.gridTemplateColumns = `repeat(${m}, 36px)`;
+  boardEl.innerHTML = '';
+  
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      const cell = document.createElement('div');
+      const key = `${i},${j}`;
+      
+      if (i === startX && j === startY && d[i][j] === 0) {
+        cell.className = 'cell start';
+        cell.textContent = '0';
+      } else if (key === currentNode) {
+        cell.className = 'cell current';
+        cell.textContent = d[i][j] === -1 ? '-' : d[i][j];
+      } else if (queueSet.has(key)) {
+        cell.className = 'cell queued';
+        cell.textContent = d[i][j] === -1 ? '-' : d[i][j];
+      } else if (d[i][j] !== -1) {
+        cell.className = 'cell visited';
+        cell.textContent = d[i][j];
+      } else {
+        cell.className = 'cell unvisited';
+        cell.textContent = '-';
+      }
+      
+      if (step.type === 'done' && d[i][j] === -1 && !(i === startX && j === startY)) {
+        cell.className = 'cell unreachable';
+        cell.textContent = '-1';
+      }
+      
+      cell.title = `(${i}, ${j}) 步数: ${d[i][j]}`;
+      boardEl.appendChild(cell);
+    }
+  }
+}
+
+function renderQueue(step) {
+  const display = document.getElementById('queueDisplay');
+  const sizeEl = document.getElementById('queueSize');
+  if (!step || step.queue.length === 0) {
+    display.textContent = '队列为空';
+    sizeEl.textContent = '0';
+  } else {
+    const str = step.queue.map(p => `(${p[0]},${p[1]})`).join(' → ');
+    display.textContent = '队列: ' + str;
+    sizeEl.textContent = step.queue.length;
+  }
+}
+
+function renderStatus(stepIndex) {
+  const step = stepIndex >= 0 ? bfsSteps[stepIndex] : null;
+  
+  document.getElementById('stepNum').textContent = stepIndex >= 0 ? stepIndex + 1 : 0;
+  document.getElementById('stepTotal').textContent = bfsSteps.length;
+  document.getElementById('curNode').textContent = step && step.node ? `(${step.node[0]}, ${step.node[1]})` : '—';
+  document.getElementById('visitedCount').textContent = step ? 
+    step.dist.flat().filter(v => v !== -1).length - 1 : 0; // -1 是因为第0行
+  
+  if (step) {
+    document.getElementById('queueSize').textContent = step.queue.length;
+  }
+  
+  renderQueue(step);
+}
+
+function renderStepList() {
+  const list = document.getElementById('stepList');
+  list.innerHTML = '';
+  
+  bfsSteps.forEach((step, idx) => {
+    const div = document.createElement('div');
+    div.className = 'step' + (idx === currentStep ? ' active' : '');
+    div.innerHTML = `<span class="step-num">#${idx + 1}</span> ${step.desc}`;
+    div.onclick = () => jumpToStep(idx);
+    list.appendChild(div);
+  });
+  
+  // 滚动到当前步骤
+  if (currentStep >= 0) {
+    const active = list.querySelector('.step.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function jumpToStep(idx) {
+  if (idx < 0 || idx >= bfsSteps.length) return;
+  currentStep = idx;
+  renderBoard(idx);
+  renderStatus(idx);
+  renderStepList();
+  
+  document.getElementById('btnStep').disabled = (idx >= bfsSteps.length - 1);
+}
+
+function renderAll() {
+  if (bfsSteps.length === 0) {
+    renderBoard(-1);
+    document.getElementById('stepNum').textContent = '0';
+    document.getElementById('stepTotal').textContent = '0';
+    document.getElementById('curNode').textContent = '—';
+    document.getElementById('queueSize').textContent = '0';
+    document.getElementById('visitedCount').textContent = '0';
+    document.getElementById('queueDisplay').textContent = '队列为空';
+    document.getElementById('stepList').innerHTML = '<div style="color:#a0aec0;">点击"单步执行"或"自动演示"开始</div>';
+    return;
+  }
+  jumpToStep(currentStep >= 0 ? currentStep : 0);
+}
+
+// ============ 操作 ============
+function resetBoard() {
+  stopAuto();
+  const nn = parseInt(document.getElementById('inputN').value) || 8;
+  const mm = parseInt(document.getElementById('inputM').value) || 8;
+  const sx = parseInt(document.getElementById('inputX').value) || 1;
+  const sy = parseInt(document.getElementById('inputY').value) || 1;
+  
+  // 边界检查
+  const nVal = Math.max(3, Math.min(15, nn));
+  const mVal = Math.max(3, Math.min(15, mm));
+  const xVal = Math.max(1, Math.min(nVal, sx));
+  const yVal = Math.max(1, Math.min(mVal, sy));
+  
+  document.getElementById('inputN').value = nVal;
+  document.getElementById('inputM').value = mVal;
+  document.getElementById('inputX').value = xVal;
+  document.getElementById('inputY').value = yVal;
+  
+  initData(nVal, mVal, xVal, yVal);
+  runBFS();
+  currentStep = -1;
+  renderAll();
+  document.getElementById('btnStep').disabled = false;
+  document.getElementById('btnReset').disabled = false;
+}
+
+function stepForward() {
+  stopAuto();
+  if (bfsSteps.length === 0) {
+    resetBoard();
+    currentStep = 0;
+    renderAll();
+    return;
+  }
+  if (currentStep < bfsSteps.length - 1) {
+    currentStep++;
+    renderAll();
+  }
+  if (currentStep >= bfsSteps.length - 1) {
+    document.getElementById('btnStep').disabled = true;
+    document.getElementById('btnAuto').disabled = true;
+  }
+}
+
+function resetBFS() {
+  stopAuto();
+  currentStep = -1;
+  renderAll();
+  document.getElementById('btnStep').disabled = false;
+  document.getElementById('btnAuto').disabled = false;
+}
+
+function autoPlay() {
+  if (autoTimer) { stopAuto(); return; }
+  
+  if (bfsSteps.length === 0 || currentStep >= bfsSteps.length - 1) {
+    resetBoard();
+    currentStep = -1;
+  }
+  
+  const speed = parseInt(document.getElementById('speedSlider').value) || 600;
+  document.getElementById('btnAuto').textContent = '⏸ 暂停';
+  document.getElementById('btnStep').disabled = true;
+  
+  function tick() {
+    if (currentStep < bfsSteps.length - 1) {
+      currentStep++;
+      renderAll();
+      if (currentStep < bfsSteps.length - 1) {
+        autoTimer = setTimeout(tick, speed);
+      } else {
+        stopAuto();
+        document.getElementById('btnStep').disabled = true;
+      }
+    }
+  }
+  
+  autoTimer = setTimeout(tick, speed);
+}
+
+function stopAuto() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  document.getElementById('btnAuto').textContent = '▶️ 自动演示';
+  document.getElementById('btnStep').disabled = (currentStep >= bfsSteps.length - 1 && bfsSteps.length > 0);
+}
+
+// 速度滑块
+document.getElementById('speedSlider').addEventListener('input', function() {
+  document.getElementById('speedLabel').textContent = this.value + 'ms';
+});
+
+// 键盘控制
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight') { stepForward(); }
+  else if (e.key === 'ArrowLeft' && currentStep > 0) { jumpToStep(currentStep - 1); }
+  else if (e.key === ' ') { e.preventDefault(); autoTimer ? stopAuto() : autoPlay(); }
+  else if (e.key === 'r' || e.key === 'R') { resetBFS(); }
+});
+
+// ============ 8方向推导棋盘 ============
+const DIR_DX = [1, 2, 2, 1, -1, -2, -2, -1];
+const DIR_DY = [2, 1, -1, -2, -2, -1, 1, 2];
+const DIR_COLORS = [
+  '#e53e3e','#dd6b20','#d69e2e','#38a169',
+  '#319795','#3182ce','#5a67d8','#b83280'
+];
+const DIR_NAMES = [
+  '↗右前上', '↗右上前', '↗右前下', '↘右下前',
+  '↙左前下', '↙左后下', '↖左后上', '↖左上后'
+];
+
+function renderDirectionBoard() {
+  // 棋盘：7x7，中心 (4,4) 是马的位置
+  const SIZE = 7;
+  const CX = 3, CY = 3; // 0-indexed center
+  
+  const container = document.getElementById('dirBoardContainer');
+  const board = document.createElement('div');
+  board.className = 'dir-board';
+  board.style.gridTemplateColumns = `repeat(${SIZE}, 52px)`;
+  
+  // 计算目标格
+  const targets = {};
+  for (let d = 0; d < 8; d++) {
+    const tx = CX + DIR_DX[d];
+    const ty = CY + DIR_DY[d];
+    if (tx >= 0 && tx < SIZE && ty >= 0 && ty < SIZE) {
+      targets[`${tx},${ty}`] = d;
+    }
+  }
+  
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      const cell = document.createElement('div');
+      const key = `${r},${c}`;
+      
+      if (r === CX && c === CY) {
+        cell.className = 'dir-cell center';
+        cell.textContent = '🐴';
+        cell.title = '马的位置 (当前节点)';
+      } else if (targets[key] !== undefined) {
+        const d = targets[key];
+        cell.className = 'dir-cell target';
+        const dr = r - CX, dc = c - CY;
+        cell.innerHTML = `🏁<span class="dir-num" style="background:${DIR_COLORS[d]}">${d+1}</span><span class="dir-delta">(Δ${dr>=0?'+':''}${dr}, Δ${dc>=0?'+':''}${dc})</span>`;
+        cell.title = `方向${d+1}: dx=${DIR_DX[d]}, dy=${DIR_DY[d]} — ${DIR_NAMES[d]}`;
+      } else {
+        cell.className = 'dir-cell empty';
+        cell.textContent = '';
+      }
+      
+      board.appendChild(cell);
+    }
+  }
+  
+  container.innerHTML = '';
+  container.appendChild(board);
+  
+  // 画箭头
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const cellSize = 54; // 52 + 2 gap
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('class', 'dir-arrow-svg');
+  svg.setAttribute('width', cellSize * SIZE + 4);
+  svg.setAttribute('height', cellSize * SIZE + 4);
+  
+  for (let d = 0; d < 8; d++) {
+    const tx = CX + DIR_DX[d];
+    const ty = CY + DIR_DY[d];
+    if (tx < 0 || tx >= SIZE || ty < 0 || ty >= SIZE) continue;
+    
+    // 起点：中心格子中心
+    const x1 = (CY + 0.5) * cellSize + 2;
+    const y1 = (CX + 0.5) * cellSize + 2;
+    // 终点：目标格子边缘（缩短一点）
+    const x2 = (ty + 0.5) * cellSize + 2;
+    const y2 = (tx + 0.5) * cellSize + 2;
+    
+    // 缩短箭头，不碰到格子内容
+    const dx = x2 - x1, dy = y2 - y1;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const shorten = 18;
+    const ex = x2 - (dx/len) * shorten;
+    const ey = y2 - (dy/len) * shorten;
+    
+    const line = document.createElementNS(svgNS, 'line');
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', ex);
+    line.setAttribute('y2', ey);
+    line.setAttribute('stroke', DIR_COLORS[d]);
+    line.setAttribute('stroke-width', '2');
+    line.setAttribute('stroke-dasharray', '5,3');
+    line.setAttribute('opacity', '0.7');
+    svg.appendChild(line);
+    
+    // 箭头头部
+    const angle = Math.atan2(ey - y1, ex - x1);
+    const arrowLen = 8;
+    const arrowAngle = Math.PI / 6;
+    const ax1 = ex - arrowLen * Math.cos(angle - arrowAngle);
+    const ay1 = ey - arrowLen * Math.sin(angle - arrowAngle);
+    const ax2 = ex - arrowLen * Math.cos(angle + arrowAngle);
+    const ay2 = ey - arrowLen * Math.sin(angle + arrowAngle);
+    
+    const arrow = document.createElementNS(svgNS, 'polygon');
+    arrow.setAttribute('points', `${ex},${ey} ${ax1},${ay1} ${ax2},${ay2}`);
+    arrow.setAttribute('fill', DIR_COLORS[d]);
+    arrow.setAttribute('opacity', '0.7');
+    svg.appendChild(arrow);
+  }
+  
+  container.appendChild(svg);
+  
+  // 右侧方向列表
+  const legend = document.getElementById('dirLegend');
+  let html = `<table>
+    <tr><th>#</th><th>Δx</th><th>Δy</th><th>方向</th><th>代码索引</th></tr>`;
+  for (let d = 0; d < 8; d++) {
+    html += `<tr>
+      <td><span class="dir-dot" style="background:${DIR_COLORS[d]}"></span>${d+1}</td>
+      <td style="font-family:monospace;font-weight:700;">${DIR_DX[d]>=0?'+':''}${DIR_DX[d]}</td>
+      <td style="font-family:monospace;font-weight:700;">${DIR_DY[d]>=0?'+':''}${DIR_DY[d]}</td>
+      <td>${DIR_NAMES[d]}</td>
+      <td style="font-family:monospace;color:#718096;">dx[${d}], dy[${d}]</td>
+    </tr>`;
+  }
+  html += '</table>';
+  legend.innerHTML = html;
+}
+
+// ============ 初始化 ============
+renderDirectionBoard();
+initData(8, 8, 1, 1);
+runBFS();
+renderAll();
+document.getElementById('btnStep').disabled = false;
+document.getElementById('btnReset').disabled = false;
+</script>
+
+</body>
+</html>

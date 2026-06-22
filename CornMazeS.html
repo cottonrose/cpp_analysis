@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P1825 Corn Maze S — BFS 传送门迷宫</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8; color: #2d3748; min-height: 100vh;
+}
+header {
+  background: linear-gradient(135deg, #1a365d, #2a5298);
+  color: #fff; padding: 16px 28px;
+  display: flex; align-items: center; gap: 12px;
+}
+header h1 { font-size: 1.35rem; font-weight: 700; }
+header .badge { background: #ed8936; padding: 3px 10px; border-radius: 4px; font-size: 0.72rem; }
+.container { max-width: 1200px; margin: 0 auto; padding: 14px 20px; }
+.card {
+  background: #fff; border-radius: 12px; padding: 16px 20px;
+  margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card h2 { font-size: 1rem; margin-bottom: 7px; color: #1a365d; }
+.card p { line-height: 1.6; font-size: 0.88rem; color: #4a5568; }
+
+.controls {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px;
+}
+.controls label { font-size: 0.8rem; font-weight: 600; color: #4a5568; }
+.controls input, .controls select {
+  padding: 5px 7px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 0.82rem;
+}
+.controls textarea {
+  padding: 5px 7px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 0.8rem;
+  font-family: monospace;
+}
+.btn {
+  padding: 6px 13px; border: none; border-radius: 6px; font-size: 0.8rem;
+  font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { background: #2b6cb0; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #2c5282; }
+.btn-success { background: #38a169; color: #fff; }
+.btn-success:hover:not(:disabled) { background: #2f855a; }
+.btn-gray { background: #a0aec0; color: #fff; }
+.btn-gray:hover:not(:disabled) { background: #718096; }
+.btn-warning { background: #dd6b20; color: #fff; }
+.btn-warning:hover:not(:disabled) { background: #c05621; }
+
+/* 主布局 */
+.main-layout { display: grid; grid-template-columns: 1fr 330px; gap: 12px; }
+@media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
+
+/* 网格 */
+.grid-wrapper { overflow: auto; max-height: 560px; }
+.grid {
+  display: inline-grid; gap: 1px; background: #2d3748; border: 3px solid #2d3748;
+  border-radius: 4px; padding: 1px;
+}
+.gcell {
+  /* 大小由 JS 根据地图自动计算 */ width: 48px; height: 48px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; border-radius: 2px;
+  position: relative; cursor: pointer; transition: all 0.12s;
+  font-size: 0.72rem; font-weight: 800; line-height: 1.1;
+}
+.gcell:hover { transform: scale(1.08); z-index: 3; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+
+/* 格子类型 */
+.gc-wall { background: #2d3748; color: #4a5568; }
+.gc-grass { background: #fefcbf; color: #744210; }
+.gc-start { background: #f687b3; color: #702459; }
+.gc-end { background: #68d391; color: #22543d; }
+.gc-current { background: #f6e05e; color: #744210; animation: pulse 0.7s infinite; }
+.gc-queued { background: #bee3f8; color: #2b6cb0; }
+.gc-visited { background: #e9d8fd; color: #553c9a; }
+.gc-teleporting { background: #fed7e2; color: #97266d; animation: teleport-flash 0.4s; }
+
+/* 传送门字母颜色 */
+.portal-A { background: #f687b3; color: #702459; }
+.portal-B { background: #68d391; color: #22543d; }
+.portal-C { background: #63b3ed; color: #2c5282; }
+.portal-D { background: #fbd38d; color: #744210; }
+.portal-E { background: #fbb6ce; color: #97266d; }
+.portal-F { background: #76e4f7; color: #2c5282; }
+.portal-G { background: #faf089; color: #744210; }
+.portal-H { background: #9ae6b4; color: #22543d; }
+.portal-I { background: #c3dafe; color: #2c5282; }
+.portal-J { background: #fecaca; color: #9b2c2c; }
+.portal-K { background: #feb2b2; color: #9b2c2c; }
+.portal-L { background: #c6f6d5; color: #22543d; }
+.portal-M { background: #d6bcfa; color: #553c9a; }
+.portal-N { background: #b2f5ea; color: #234e52; }
+.portal-O { background: #fbd38d; color: #975a16; }
+.portal-P { background: #c6f6d5; color: #276749; }
+.portal-Q { background: #bee3f8; color: #2b6cb0; }
+.portal-R { background: #fed7e2; color: #702459; }
+.portal-S { background: #e9d8fd; color: #553c9a; }
+.portal-T { background: #fefcbf; color: #975a16; }
+.portal-U { background: #90cdf4; color: #2b6cb0; }
+.portal-V { background: #9ae6b4; color: #276749; }
+.portal-W { background: #fbb6ce; color: #702459; }
+.portal-X { background: #fecaca; color: #9b2c2c; }
+.portal-Y { background: #c3dafe; color: #2b6cb0; }
+.portal-Z { background: #f6e05e; color: #744210; }
+
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(246,224,94,0.7); }
+  50% { box-shadow: 0 0 0 7px rgba(246,224,94,0); }
+}
+@keyframes teleport-flash {
+  0% { transform: scale(1.3); box-shadow: 0 0 20px rgba(246,105,179,0.8); }
+  100% { transform: scale(1); box-shadow: none; }
+}
+
+/* 传送门连线指示 */
+.portal-arrow {
+  position: absolute; font-size: 0.65rem; bottom: 1px; right: 2px;
+  opacity: 0.7; line-height: 1;
+}
+
+/* 图例 */
+.legend { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.74rem; margin-bottom: 8px; }
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-swatch { width: 14px; height: 14px; border-radius: 3px; }
+
+/* 格子状态栏信息增强 */
+.status-bar { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; padding: 8px 14px; background: #edf2f7; border-radius: 8px; margin: 10px 0; }
+.status-item strong { color: #1a365d; }
+.status-item .maze-size { background: #ebf8ff; color: #2b6cb0; padding: 1px 7px; border-radius: 4px; font-weight: 700; font-size: 0.72rem; }
+
+/* 队列 */
+.queue-display {
+  font-family: "SF Mono", "Fira Code", monospace; font-size: 0.92rem;
+  background: #1a202c; color: #68d391; padding: 12px 16px; border-radius: 10px;
+  max-height: 160px; overflow-y: auto; word-break: break-all;
+  border: 2px solid #68d391; box-shadow: 0 0 14px rgba(104,211,145,0.3);
+  line-height: 1.8; margin-top: 8px;
+}
+.queue-display .queue-label {
+  color: #a0aec0; font-size: 0.72rem; display: block; margin-bottom: 8px;
+  text-transform: uppercase; letter-spacing: 2px; font-weight: 700;
+}
+.queue-display .queue-node {
+  display: inline-block; background: #2d3748; color: #68d391;
+  padding: 2px 10px; border-radius: 4px; margin: 2px 4px;
+  font-weight: 700; border: 1px solid #4a5568;
+}
+.queue-display .queue-node.current {
+  background: #f6e05e; color: #744210; border-color: #d69e2e;
+}
+.queue-display .queue-empty { color: #718096; font-size: 0.8rem; }
+
+/* 传送门表 */
+.portal-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-top: 6px; }
+.portal-table th { background: #ebf8ff; color: #2b6cb0; padding: 4px 8px; text-align: center; }
+.portal-table td { padding: 3px 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
+.portal-table td .portal-dot {
+  display: inline-block; width: 18px; height: 18px; border-radius: 3px;
+  font-size: 0.7rem; font-weight: 800; line-height: 18px;
+}
+.portal-table td .portal-coord { font-family: monospace; color: #4a5568; }
+
+/* 侧栏 */
+.side-panel { display: flex; flex-direction: column; gap: 12px; }
+.step-list { max-height: 220px; overflow-y: auto; font-size: 0.76rem; }
+.step-list .step {
+  padding: 4px 10px; border-left: 3px solid transparent; margin-bottom: 2px;
+  cursor: pointer; border-radius: 4px; transition: all 0.15s; line-height: 1.4;
+}
+.step-list .step:hover { background: #ebf8ff; border-left-color: #90cdf4; }
+.step-list .step.active { background: #ebf8ff; border-left-color: #3182ce; font-weight: 600; }
+.step-list .step .step-num { font-weight: 700; color: #2b6cb0; margin-right: 5px; }
+.step-list .step .step-badge {
+  display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 0.65rem;
+  font-weight: 700; margin-left: 3px;
+}
+.badge-start { background: #f687b3; color: #fff; }
+.badge-expand { background: #68d391; color: #fff; }
+.badge-portal { background: #9f7aea; color: #fff; }
+.badge-deadend { background: #fc8181; color: #fff; }
+.badge-found { background: #f6e05e; color: #744210; }
+.badge-done { background: #2b6cb0; color: #fff; }
+
+/* 代码块 */
+.code-block {
+  background: #1a202c; color: #e2e8f0; padding: 12px; border-radius: 8px;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 0.67rem;
+  line-height: 1.5; overflow-x: auto; white-space: pre; max-height: 380px; overflow-y: auto;
+}
+.code-block .kw { color: #9f7aea; }
+.code-block .type { color: #68d391; }
+.code-block .num { color: #fbd38d; }
+.code-block .str { color: #fc8181; }
+.code-block .cmt { color: #718096; font-style: italic; }
+.code-block .fn { color: #63b3ed; }
+.code-block .op { color: #f6ad55; }
+
+/* 传送门说明 */
+.teleport-explain {
+  background: #faf5ff; border: 1px solid #d6bcfa; border-radius: 8px;
+  padding: 10px 14px; margin-top: 8px; font-size: 0.8rem; color: #553c9a; line-height: 1.7;
+}
+.teleport-explain strong { color: #6b46c1; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌽 P1825 Corn Maze S</h1>
+  <span class="badge">BFS + 传送门</span>
+</header>
+
+<div class="container">
+
+  <!-- 题目说明 -->
+  <div class="card">
+    <h2>📋 题目描述</h2>
+    <p>玉米迷宫中，奶牛从 <strong>@</strong> 出发到达 <strong>=</strong>。<br>
+    <strong>.</strong> = 草地（可走，耗时 1）<br>
+    <strong>#</strong> = 玉米墙（不可走）<br>
+    <strong>A~Z</strong> = 传送门，<strong>成对出现</strong>，走到一端时<strong>必须立刻传送到另一端</strong>（不增加额外步数）。</p>
+    <div class="teleport-explain">
+      <strong>⚡ 传送门规则：</strong>走进传送门算 1 步，传送到另一端<strong>不再额外计步</strong>。<br>
+      例如：从 @ 走到 A → 直接跳到另一个 A 处，计 1 步。不可以选择停在传送门处不走。
+    </div>
+  </div>
+
+  <!-- 控制栏 -->
+  <div class="card">
+    <div class="controls">
+      <label>预设迷宫:</label>
+      <select id="presetSelect" onchange="loadPreset()">
+        <option value="sample">样例 (有传送门)</option>
+        <option value="simple">简单版 (1个传送门)</option>
+        <option value="multi">多传送门</option>
+        <option value="custom">自定义</option>
+      </select>
+      <button class="btn btn-primary" onclick="resetAll()">🔄 重置</button>
+    </div>
+    <div class="controls">
+      <button class="btn btn-success" id="btnStep" onclick="stepForward()">▶️ 单步执行</button>
+      <button class="btn btn-success" id="btnAuto" onclick="autoPlay()">▶️ 自动演示</button>
+      <button class="btn btn-gray" id="btnBack" onclick="stepBack()" disabled>◀️ 后退</button>
+      <label style="margin-left:8px;">速度:</label>
+      <input type="range" id="speedSlider" min="200" max="1500" value="700" style="width:100px;">
+      <span style="font-size:0.75rem;color:#718096;">快← →慢</span>
+      <span style="margin-left:12px;font-size:0.72rem;color:#a0aec0;">键盘: →单步  ←后退  空格播放/暂停  R重置</span>
+    </div>
+    <div class="controls" style="font-size:0.78rem;color:#4a5568;">
+      自定义地图（每行一个字符串，@起点 =终点 #墙 .草地 A-Z传送门。可直接粘贴洛谷格式，会自动跳过首行的"行列数"）：
+    </div>
+    <div class="controls">
+      <textarea id="mazeInput" rows="5" style="flex:1;min-width:300px;min-height:80px;" placeholder="#######&#10;#@..A.#&#10;#..#..#&#10;#.....#&#10;#..=..#&#10;#######"></textarea>
+      <button class="btn btn-warning" onclick="applyCustom()">✔ 应用地图</button>
+    </div>
+  </div>
+
+  <!-- 主区域 -->
+  <div class="main-layout">
+    <!-- 左侧 -->
+    <div class="card">
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch" style="background:#f687b3;"></span> @ 起点</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#68d391;"></span> = 终点</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#2d3748;"></span> # 墙</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#fefcbf;"></span> . 草地</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#9f7aea;color:#fff;"></span> A-Z 传送门</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#f6e05e;"></span> 当前处理</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#bee3f8;"></span> 队列中</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#e9d8fd;"></span> 已访问</div>
+      </div>
+      <div class="grid-wrapper"><div class="grid" id="grid"></div></div>
+      <div class="status-bar">
+        <div class="status-item"><strong>地图:</strong><span class="maze-size" id="mazeSize">—</span></div>
+        <div class="status-item"><strong>步骤：</strong><span id="stepNum">0</span>/<span id="stepTotal">0</span></div>
+        <div class="status-item"><strong>当前坐标：</strong><span id="curNode">—</span></div>
+        <div class="status-item"><strong>已走步数：</strong><span id="curStep">—</span></div>
+        <div class="status-item"><strong>队列大小：</strong><span id="queueSize">0</span></div>
+        <div class="status-item"><strong>已访问：</strong><span id="visitedCount">0</span></div>
+      </div>
+      <div class="queue-display" id="queueDisplay">
+        <span class="queue-label">📦 队 列</span>
+        <span class="queue-empty">点击"单步执行"开始</span>
+      </div>
+    </div>
+
+    <!-- 右侧 -->
+    <div class="side-panel">
+      <div class="card">
+        <h2>🚪 传送门配对表</h2>
+        <div id="portalTableArea">
+          <div style="color:#a0aec0;font-size:0.78rem;">加载预设后显示</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>📜 步骤历史</h2>
+        <div class="step-list" id="stepList">
+          <div style="color:#a0aec0;font-size:0.78rem;">点击"单步执行"或"自动演示"开始</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>💻 参考代码</h2>
+        <div class="code-block"><span class="cmt">// P1825 Corn Maze S — BFS + 传送门预处理</span>
+<span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="kw">struct</span> <span class="type">pos</span> { <span class="type">int</span> x, y, step; };
+<span class="kw">struct</span> <span class="type">spt</span> { <span class="type">int</span> x1,y1, x2,y2; }; <span class="cmt">// 传送门两端</span>
+
+<span class="kw">int</span> n, m;
+<span class="type">char</span> a[<span class="num">305</span>][<span class="num">305</span>];
+<span class="type">bool</span> v[<span class="num">305</span>][<span class="num">305</span>];
+<span class="type">int</span> dx[]={<span class="num">0,1,0,-1</span>}, dy[]={<span class="num">1,0,-1,0</span>};
+<span class="type">spt</span> spts[<span class="num">26</span>]; <span class="cmt">// 传送门</span>
+<span class="type">queue</span>&lt;<span class="type">pos</span>&gt; q;
+
+<span class="type">bool</span> <span class="fn">check</span>(<span class="type">int</span> x,<span class="type">int</span> y){
+    <span class="kw">if</span>(x<<span class="num">0</span>||x>=n||y<<span class="num">0</span>||y>=m||<span class="op">a[x][y]</span>==<span class="str">'#'</span>||<span class="op">v[x][y]</span>) <span class="kw">return false</span>;
+    <span class="kw">return true</span>;
+}
+
+<span class="type">void</span> <span class="fn">bfs</span>(<span class="type">pos</span> s, <span class="type">pos</span> f){
+    v[s.x][s.y]=<span class="num">1</span>; q.<span class="fn">push</span>({s.x,s.y,<span class="num">0</span>});
+    <span class="kw">while</span>(<span class="op">!</span>q.<span class="fn">empty</span>()){
+        <span class="kw">auto</span> [x,y,step]=q.<span class="fn">front</span>(); q.<span class="fn">pop</span>();
+        <span class="kw">if</span>(x==f.x&&y==f.y){ cout&lt;&lt;step&lt;&lt;endl;<span class="kw">return</span>; }
+        <span class="kw">for</span>(<span class="type">int</span> i=<span class="num">0</span>;i<<span class="num">4</span>;i<span class="op">++</span>){
+            <span class="type">int</span> nx=x+dx[i], ny=y+dy[i];
+            <span class="kw">if</span>(<span class="op">!</span><span class="fn">check</span>(nx,ny)) <span class="kw">continue</span>;
+            <span class="kw">if</span>(a[nx][ny]>=<span class="str">'A'</span>&&a[nx][ny]<=<span class="str">'Z'</span>){
+                <span class="cmt">// 传送门：跳到另一端，步数+1</span>
+                <span class="type">int</span> t=a[nx][ny]-<span class="str">'A'</span>;
+                <span class="type">int</span> tx=nx==spts[t].x1?<span class="op">spts[t].x2</span>:<span class="op">spts[t].x1</span>;
+                <span class="type">int</span> ty=ny==spts[t].y1?<span class="op">spts[t].y2</span>:<span class="op">spts[t].y1</span>;
+                <span class="kw">if</span>(<span class="op">v[tx][ty]</span>) <span class="kw">continue</span>;
+                v[tx][ty]=<span class="num">1</span>;
+                q.<span class="fn">push</span>({tx,ty,step+<span class="num">1</span>});
+            }<span class="kw">else</span>{
+                v[nx][ny]=<span class="num">1</span>;
+                q.<span class="fn">push</span>({nx,ny,step+<span class="num">1</span>});
+            }
+        }
+    }
+}
+
+<span class="type">int</span> <span class="fn">main</span>(){
+    cin&gt;&gt;n&gt;&gt;m;
+    <span class="type">pos</span> s,f;
+    <span class="kw">for</span>(<span class="type">int</span> i=<span class="num">0</span>;i&lt;n;i<span class="op">++</span>)
+    <span class="kw">for</span>(<span class="type">int</span> j=<span class="num">0</span>;j&lt;m;j<span class="op">++</span>){
+        cin&gt;&gt;a[i][j];
+        <span class="kw">if</span>(a[i][j]==<span class="str">'@'</span>) s={i,j,<span class="num">0</span>};
+        <span class="kw">if</span>(a[i][j]==<span class="str">'='</span>) f={i,j,<span class="num">0</span>};
+        <span class="kw">if</span>(a[i][j]>=<span class="str">'A'</span>&&a[i][j]<=<span class="str">'Z'</span>){
+            <span class="type">int</span> t=a[i][j]-<span class="str">'A'</span>;
+            <span class="kw">if</span>(spts[t].x1==-<span class="num">1</span>) spts[t].x1=i,spts[t].y1=j;
+            <span class="kw">else</span> spts[t].x2=i,spts[t].y2=j;
+        }
+    }
+    <span class="fn">bfs</span>(s,f);
+}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 思路 -->
+  <div class="card">
+    <h2>🧠 解题思路</h2>
+    <p>
+      <strong>① 预处理传送门</strong>：遍历地图，把每个字母 A~Z 的两个坐标存入 spts[26]。<br>
+      <strong>② BFS 队列</strong>：记录 (x, y, step)，step 是到达该格的最少步数。<br>
+      <strong>③ 四方向扩展</strong>：每步向四个方向扩展（上下左右）。<br>
+      <strong>④ 传送门处理</strong>：如果下一个格子是字母，走到后立刻传送到另一端（仍是 step+1，不再额外计步）。<br>
+      <strong>⑤ 访问标记</strong>：草地/终点入队时标记 visited；传送门的目标点也标记 visited，避免重复入队。<br>
+      <strong>⑥ 终止</strong>：队首坐标等于终点 → 输出 step。
+    </p>
+  </div>
+
+</div>
+
+<script>
+// ============ 数据 ============
+const DX = [0, 1, 0, -1];
+const DY = [1, 0, -1, 0];
+
+let maze = [];          // 2D char array
+let rows = 0, cols = 0;
+let startPos = {x:0, y:0};
+let endPos = {x:0, y:0};
+let portals = {};       // letter -> [{x,y}, {x,y}]
+let bfsSteps = [];
+let currentStep = -1;
+let autoTimer = null;
+
+// 预设迷宫
+const PRESETS = {
+  sample: [
+    "##########",
+    "#@...#...#",
+    "#.##.#.#.#",
+    "#.A...#B.#",
+    "#.##.##.##",
+    "#...C....#",
+    "#####D####",
+    "#.E.......#",
+    "#...#F#.#G#",
+    "#=..H...I.#",
+    "##########"
+  ],
+  simple: [
+    "#######",
+    "#@..A.#",
+    "#..#..#",
+    "#..B..#",
+    "#.....#",
+    "#..#..#",
+    "#..=..#",
+    "#######"
+  ],
+  multi: [
+    "##########",
+    "#@A.....B#",
+    "#..###..##",
+    "#.C#.#.#.#",
+    "#..#.D.#.#",
+    "#.###.###.#",
+    "#E........#",
+    "##.###.F##",
+    "#G.......H#",
+    "#....=....#",
+    "##########"
+  ]
+};
+
+const PORTAL_COLORS = {
+  A:'#f687b3',B:'#68d391',C:'#63b3ed',D:'#fbd38d',E:'#fbb6ce',
+  F:'#76e4f7',G:'#faf089',H:'#9ae6b4',I:'#c3dafe',J:'#fecaca',
+  K:'#feb2b2',L:'#c6f6d5',M:'#d6bcfa',N:'#b2f5ea',O:'#fbd38d',
+  P:'#c6f6d5',Q:'#bee3f8',R:'#fed7e2',S:'#e9d8fd',T:'#fefcbf',
+  U:'#90cdf4',V:'#9ae6b4',W:'#fbb6ce',X:'#fecaca',Y:'#c3dafe',Z:'#f6e05e'
+};
+
+function initMaze(mazeLines) {
+  maze = mazeLines.map(l => l.split(''));
+  rows = maze.length;
+  cols = Math.max(...maze.map(r => r.length)); // 取最长一行的长度
+  // 统一每行长度，不足的补空格（空格渲染为草地）
+  for (let i = 0; i < rows; i++) {
+    while (maze[i].length < cols) maze[i].push(' ');
+  }
+  portals = {};
+
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const ch = maze[i][j];
+      if (ch === '@') { startPos = {x:i, y:j}; }
+      if (ch === '=') { endPos = {x:i, y:j}; }
+      if (ch >= 'A' && ch <= 'Z') {
+        if (!portals[ch]) portals[ch] = [];
+        portals[ch].push({x:i, y:j});
+      }
+    }
+  }
+  bfsSteps = [];
+  currentStep = -1;
+}
+
+function runBFS() {
+  bfsSteps = [];
+  const vis = Array.from({length: rows}, () => new Array(cols).fill(false));
+  const q = [{x: startPos.x, y: startPos.y, step: 0}];
+  vis[startPos.x][startPos.y] = true;
+
+  bfsSteps.push({
+    type: 'start', node: {x:startPos.x,y:startPos.y,step:0},
+    queue: q.map(n=>({...n})), vis: vis.map(r=>[...r]),
+    desc: `起点 (${startPos.x},${startPos.y}) 入队，步数=0`
+  });
+
+  let head = 0;
+  while (head < q.length) {
+    const {x, y, step} = q[head];
+    head++;
+
+    // 找到终点
+    if (x === endPos.x && y === endPos.y) {
+      bfsSteps.push({
+        type: 'found', node: {x,y,step},
+        queue: q.slice(head).map(n=>({...n})), vis: vis.map(r=>[...r]),
+        desc: `🎉 到达终点 (${x},${y})！最短步数 = ${step}`
+      });
+      return;
+    }
+
+    bfsSteps.push({
+      type: 'pop', node: {x,y,step},
+      queue: q.slice(head).map(n=>({...n})), vis: vis.map(r=>[...r]),
+      desc: `取出 (${x},${y})，步数=${step}，尝试 4 方向`
+    });
+
+    let expanded = [];
+    for (let d = 0; d < 4; d++) {
+      const nx = x + DX[d];
+      const ny = y + DY[d];
+      if (nx < 0 || nx >= rows || ny < 0 || ny >= cols) continue;
+      if (maze[nx][ny] === '#' || vis[nx][ny]) continue;
+
+      const ch = maze[nx][ny];
+      if (ch >= 'A' && ch <= 'Z') {
+        // 传送门：跳到另一端
+        const pair = portals[ch].find(p => !(p.x === nx && p.y === ny)) || portals[ch][0];
+        const tx = pair.x, ty = pair.y;
+        if (vis[tx][ty]) continue;
+        vis[tx][ty] = true;
+        q.push({x:tx, y:ty, step: step+1});
+        expanded.push({x:tx, y:ty, step:step+1, portal: ch, fromX:nx, fromY:ny});
+      } else {
+        // 普通格子
+        vis[nx][ny] = true;
+        q.push({x:nx, y:ny, step: step+1});
+        expanded.push({x:nx, y:ny, step:step+1});
+      }
+    }
+
+    if (expanded.length > 0) {
+      const parts = expanded.map(e => {
+        if (e.portal) return `(${e.x},${e.y})[经${e.portal}]`;
+        return `(${e.x},${e.y})`;
+      });
+      bfsSteps.push({
+        type: 'expand', node: {x,y,step}, expanded,
+        queue: q.slice(head).map(n=>({...n})), vis: vis.map(r=>[...r]),
+        desc: `从 (${x},${y}) 扩展 → ${parts.join('、')}，步数=${step+1}`
+      });
+    } else {
+      const reasons = [];
+      for (let d = 0; d < 4; d++) {
+        const nx2=x+DX[d], ny2=DY[d];
+        if (nx2<0||nx2>=rows||ny2<0||ny2>=cols) reasons.push('出界');
+        else if (maze[nx2][ny2]==='#') reasons.push('墙');
+        else if (vis[nx2][ny2]) reasons.push('已访问');
+      }
+      bfsSteps.push({
+        type: 'deadend', node: {x,y,step},
+        queue: q.slice(head).map(n=>({...n})), vis: vis.map(r=>[...r]),
+        desc: `从 (${x},${y}) 无法扩展（四周都被阻挡）`
+      });
+    }
+  }
+
+  bfsSteps.push({
+    type: 'done', node: null,
+    queue: [], vis: vis.map(r=>[...r]),
+    desc: 'BFS 完成！无法到达终点。'
+  });
+}
+
+// ============ 渲染 ============
+function getCellContent(x, y, ch) {
+  if (ch === '@') return '🐄';
+  if (ch === '=') return '🏠';
+  return ch;
+}
+
+function renderGrid(stepIndex) {
+  const gridEl = document.getElementById('grid');
+  const step = stepIndex >= 0 ? bfsSteps[stepIndex] : null;
+  // 根据地图尺寸自动调整格子大小
+  const maxCell = 56;
+  const minCell = 28;
+  const cellSize = Math.max(minCell, Math.min(maxCell, Math.floor(520 / Math.max(rows, cols))));
+  gridEl.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
+  gridEl.innerHTML = '';
+
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const ch = maze[i][j];
+      const cell = document.createElement('div');
+      cell.className = 'gcell';
+      cell.title = `(${i},${j})`;
+
+      let cls = '';
+      if (ch === '#') cls = 'gc-wall';
+      else if (ch === '@') cls = 'gc-start';
+      else if (ch === '=') cls = 'gc-end';
+      else if (ch >= 'A' && ch <= 'Z') cls = `portal-${ch}`;
+      else cls = 'gc-grass';
+
+      const isCur = step && step.node && step.node.x === i && step.node.y === j;
+      const isVisited = step && step.vis && step.vis[i] && step.vis[i][j];
+      const queueSet = new Set((step ? step.queue : []).map(n => `${n.x},${n.y}`));
+      const isQueued = queueSet.has(`${i},${j}`);
+
+      if (isCur && step.type !== 'start') {
+        cls = 'gc-current';
+      } else if (isQueued && ch !== '@' && ch !== '=' && !(ch >= 'A' && ch <= 'Z')) {
+        cls = 'gc-queued';
+      } else if (isVisited && !isCur && ch !== '#') {
+        cls = 'gc-visited';
+      }
+
+      cell.className = 'gcell ' + cls;
+      cell.innerHTML = `<span>${getCellContent(i,j,ch)}</span>`;
+      gridEl.appendChild(cell);
+    }
+  }
+}
+
+function renderQueue(step) {
+  const display = document.getElementById('queueDisplay');
+  const sizeEl = document.getElementById('queueSize');
+  if (!step || step.queue.length === 0) {
+    display.innerHTML = '<span class="queue-label">📦 队 列</span><span class="queue-empty">队列为空</span>';
+    sizeEl.textContent = '0';
+  } else {
+    const cur = step.node;
+    const nodes = step.queue.map(n => {
+      const cls = cur && cur.x===n.x && cur.y===n.y ? 'current' : '';
+      return `<span class="queue-node ${cls}">(${n.x},${n.y}) s=${n.step}</span>`;
+    }).join(' → ');
+    display.innerHTML = `<span class="queue-label">📦 队 列（${step.queue.length}个节点）</span>${nodes}`;
+    sizeEl.textContent = step.queue.length;
+  }
+}
+
+function renderStatus(stepIndex) {
+  const step = stepIndex >= 0 ? bfsSteps[stepIndex] : null;
+  document.getElementById('stepNum').textContent = stepIndex >= 0 ? stepIndex + 1 : 0;
+  document.getElementById('stepTotal').textContent = bfsSteps.length;
+  document.getElementById('curNode').textContent = step && step.node ? `(${step.node.x}, ${step.node.y})` : '—';
+  document.getElementById('curStep').textContent = step && step.node ? step.node.step : '—';
+
+  let visCount = 0;
+  if (step && step.vis) {
+    for (let i = 0; i < rows; i++)
+      for (let j = 0; j < cols; j++)
+        if (step.vis[i] && step.vis[i][j]) visCount++;
+  }
+  document.getElementById('visitedCount').textContent = visCount;
+  document.getElementById('queueSize').textContent = step ? step.queue.length : 0;
+  renderQueue(step);
+}
+
+function renderStepList() {
+  const list = document.getElementById('stepList');
+  list.innerHTML = '';
+  bfsSteps.forEach((step, idx) => {
+    const div = document.createElement('div');
+    const badgeMap = {start:'badge-start', expand:'badge-expand', portal:'badge-portal', deadend:'badge-deadend', found:'badge-found', done:'badge-done', pop:'badge-expand'};
+    const badge = badgeMap[step.type] || 'badge-expand';
+    const badgeLabel = {start:'起', expand:'扩', portal:'传', deadend:'死', found:'终', done:'完', pop:'取'}[step.type] || '步';
+    div.className = 'step' + (idx === currentStep ? ' active' : '');
+    div.innerHTML = `<span class="step-num">#${idx+1}</span><span class="step-badge ${badge}">${badgeLabel}</span>${step.desc}`;
+    div.onclick = () => jumpToStep(idx);
+    list.appendChild(div);
+  });
+  if (currentStep >= 0) {
+    const active = list.querySelector('.step.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function renderPortalTable() {
+  const area = document.getElementById('portalTableArea');
+  const letters = Object.keys(portals).sort();
+  if (letters.length === 0) {
+    area.innerHTML = '<div style="color:#a0aec0;font-size:0.78rem;">无传送门</div>';
+    return;
+  }
+  let html = '<table class="portal-table"><tr><th>传送门</th><th>位置 1</th><th>位置 2</th></tr>';
+  for (const ch of letters) {
+    const p = portals[ch];
+    const color = PORTAL_COLORS[ch] || '#9f7aea';
+    const dot = `<span class="portal-dot" style="background:${color};color:#fff;">${ch}</span>`;
+    html += `<tr><td>${dot}</td><td class="portal-coord">(${p[0].x},${p[0].y})</td><td class="portal-coord">(${p[1].x},${p[1].y})</td></tr>`;
+  }
+  html += '</table>';
+  area.innerHTML = html;
+}
+
+function jumpToStep(idx) {
+  if (idx < 0 || idx >= bfsSteps.length) return;
+  currentStep = idx;
+  renderGrid(idx);
+  renderStatus(idx);
+  renderStepList();
+  document.getElementById('btnStep').disabled = (idx >= bfsSteps.length - 1);
+  document.getElementById('btnBack').disabled = (idx <= 0);
+  document.getElementById('btnAuto').disabled = false;
+}
+
+function renderAll() {
+  if (bfsSteps.length === 0) {
+    renderGrid(-1);
+    document.getElementById('mazeSize').textContent = `${rows}×${cols}`;
+    document.getElementById('stepNum').textContent = '0';
+    document.getElementById('stepTotal').textContent = '0';
+    document.getElementById('curNode').textContent = '—';
+    document.getElementById('curStep').textContent = '—';
+    document.getElementById('queueSize').textContent = '0';
+    document.getElementById('visitedCount').textContent = '0';
+    document.getElementById('queueDisplay').innerHTML = '<span class="queue-label">📦 队 列</span><span class="queue-empty">点击"单步执行"开始</span>';
+    document.getElementById('stepList').innerHTML = '<div style="color:#a0aec0;font-size:0.78rem;">点击"单步执行"或"自动演示"开始</div>';
+    return;
+  }
+  document.getElementById('mazeSize').textContent = `${rows}×${cols}`;
+  jumpToStep(currentStep >= 0 ? currentStep : 0);
+}
+
+// ============ 操作 ============
+function loadPreset() {
+  const preset = document.getElementById('presetSelect').value;
+  if (preset === 'custom') return;
+  document.getElementById('mazeInput').value = PRESETS[preset].join('\n');
+  applyMaze(PRESETS[preset]);
+}
+
+function applyMaze(lines) {
+  if (!lines || lines.length === 0) { alert('地图不能为空！'); return; }
+  initMaze(lines);
+  runBFS();
+  renderPortalTable();
+  renderAll();
+  document.getElementById('btnStep').disabled = false;
+  document.getElementById('btnBack').disabled = true;
+}
+
+function applyCustom() {
+  stopAuto();
+  const text = document.getElementById('mazeInput').value.trim();
+  if (!text) { alert('请输入地图内容！'); return; }
+  let lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+  // 如果第一行是两个数字（尺寸说明），跳过它
+  if (lines.length > 0 && /^\d+\s+\d+$/.test(lines[0])) {
+    lines.shift();
+  }
+
+  if (lines.length === 0) { alert('地图不能为空！'); return; }
+
+  applyMaze(lines);
+  document.getElementById('presetSelect').value = 'custom';
+}
+
+function resetAll() {
+  stopAuto();
+  const preset = document.getElementById('presetSelect').value;
+  if (preset === 'custom') {
+    applyCustom();
+  } else {
+    loadPreset();
+  }
+}
+
+function stepForward() {
+  stopAuto();
+  if (bfsSteps.length === 0) { resetAll(); currentStep = 0; renderAll(); return; }
+  if (currentStep < bfsSteps.length - 1) {
+    currentStep++;
+    renderAll();
+  }
+  if (currentStep >= bfsSteps.length - 1) {
+    document.getElementById('btnStep').disabled = true;
+    document.getElementById('btnAuto').disabled = true;
+  }
+}
+
+function stepBack() {
+  stopAuto();
+  if (currentStep <= 0) {
+    currentStep = -1;
+    jumpToStep(0);
+    document.getElementById('btnStep').disabled = false;
+    document.getElementById('btnAuto').disabled = false;
+    document.getElementById('btnBack').disabled = true;
+    return;
+  }
+  currentStep--;
+  jumpToStep(currentStep);
+  document.getElementById('btnStep').disabled = false;
+  document.getElementById('btnAuto').disabled = false;
+  document.getElementById('btnBack').disabled = (currentStep <= 0);
+}
+
+function autoPlay() {
+  if (autoTimer) { stopAuto(); return; }
+  if (bfsSteps.length === 0 || currentStep >= bfsSteps.length - 1) {
+    currentStep = -1;
+  }
+  const speed = parseInt(document.getElementById('speedSlider').value) || 700;
+  document.getElementById('btnAuto').textContent = '⏸ 暂停';
+  document.getElementById('btnStep').disabled = true;
+  function tick() {
+    if (currentStep < bfsSteps.length - 1) {
+      currentStep++;
+      renderAll();
+      if (currentStep < bfsSteps.length - 1) {
+        autoTimer = setTimeout(tick, speed);
+      } else {
+        stopAuto();
+        document.getElementById('btnStep').disabled = true;
+      }
+    }
+  }
+  autoTimer = setTimeout(tick, speed);
+}
+
+function stopAuto() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  document.getElementById('btnAuto').textContent = '▶️ 自动演示';
+}
+
+// 键盘
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight') { stepForward(); }
+  else if (e.key === 'ArrowLeft') { stepBack(); }
+  else if (e.key === ' ') { e.preventDefault(); autoTimer ? stopAuto() : autoPlay(); }
+  else if (e.key === 'r' || e.key === 'R') { resetAll(); }
+});
+
+// ============ 初始化 ============
+applyMaze(PRESETS.sample);
+</script>
+</body>
+</html>

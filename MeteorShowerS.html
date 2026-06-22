@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P2895 Meteor Shower S — BFS 过程演示</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8; color: #2d3748; min-height: 100vh;
+}
+header {
+  background: linear-gradient(135deg, #1a365d, #2a5298);
+  color: #fff; padding: 16px 28px;
+  display: flex; align-items: center; gap: 12px;
+}
+header h1 { font-size: 1.35rem; font-weight: 700; }
+header .badge { background: #ed8936; padding: 3px 10px; border-radius: 4px; font-size: 0.72rem; }
+.container { max-width: 1200px; margin: 0 auto; padding: 14px 20px; }
+.card {
+  background: #fff; border-radius: 12px; padding: 16px 20px;
+  margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card h2 { font-size: 1rem; margin-bottom: 7px; color: #1a365d; }
+.card p { line-height: 1.6; font-size: 0.88rem; color: #4a5568; }
+
+.controls {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px;
+}
+.controls label { font-size: 0.8rem; font-weight: 600; color: #4a5568; }
+.controls input, .controls select {
+  padding: 5px 7px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 0.82rem;
+}
+.controls input[type=number] { width: 54px; text-align: center; }
+.btn {
+  padding: 6px 13px; border: none; border-radius: 6px; font-size: 0.8rem;
+  font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: #2b6cb0; color: #fff; }
+.btn-primary:hover { background: #2c5282; }
+.btn-success { background: #38a169; color: #fff; }
+.btn-success:hover { background: #2f855a; }
+.btn-warning { background: #dd6b20; color: #fff; }
+.btn-warning:hover { background: #c05621; }
+.btn-gray { background: #a0aec0; color: #fff; }
+.btn-gray:hover { background: #718096; }
+.btn-red { background: #e53e3e; color: #fff; }
+.btn-red:hover { background: #c53030; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 主布局 */
+.main-layout { display: grid; grid-template-columns: 1fr 340px; gap: 12px; }
+@media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
+
+/* 网格 */
+.grid-wrapper { overflow: auto; max-height: 600px; }
+.grid {
+  display: inline-grid; gap: 1px; background: #2d3748; border: 3px solid #2d3748;
+  border-radius: 4px; padding: 1px;
+}
+.gcell {
+  width: 44px; height: 44px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; border-radius: 2px;
+  position: relative; cursor: pointer; transition: transform 0.1s;
+  font-size: 0.62rem; font-weight: 700; line-height: 1.2;
+}
+.gcell:hover { transform: scale(1.1); z-index: 3; }
+.gcell .gc-time { font-size: 0.68rem; }
+.gcell .gc-step { font-size: 0.55rem; color: #718096; }
+.gcell .gc-badge {
+  position: absolute; top: -7px; right: -7px;
+  width: 16px; height: 16px; border-radius: 50%;
+  font-size: 0.5rem; display: flex; align-items: center; justify-content: center;
+  font-weight: 900; color: #fff; border: 1px solid #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* 格子状态 */
+.gc-safe { background: #c6f6d5; color: #22543d; }
+.gc-safe .gc-time { color: #38a169; }
+.gc-start { background: #f687b3; color: #702459; }
+.gc-current { background: #f6e05e; color: #744210; animation: pulse 0.8s infinite; }
+.gc-queued { background: #bee3f8; color: #2b6cb0; }
+.gc-visited { background: #e9d8fd; color: #553c9a; }
+.gc-destroyed { background: #fed7d7; color: #c53030; }
+.gc-destroyed-future { background: #fff5f5; color: #e53e3e; border: 1px dashed #fc8181; }
+.gc-bessie-now { background: #f6e05e; color: #744210; }
+
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(246,224,94,0.6); }
+  50% { box-shadow: 0 0 0 5px rgba(246,224,94,0); }
+}
+
+/* 图例 */
+.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.74rem; margin-bottom: 6px; }
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-swatch { width: 14px; height: 14px; border-radius: 3px; }
+
+/* 流星列表 */
+.meteor-list {
+  font-family: "SF Mono", monospace; font-size: 0.76rem;
+  max-height: 140px; overflow-y: auto;
+}
+.meteor-row {
+  display: flex; gap: 12px; padding: 2px 6px; border-bottom: 1px solid #e2e8f0;
+}
+.meteor-row span { min-width: 40px; }
+.meteor-row .m-num { color: #a0aec0; min-width: 24px; }
+
+/* 状态信息 */
+.status-bar {
+  display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.8rem;
+  padding: 8px 14px; background: #edf2f7; border-radius: 8px; margin: 10px 0;
+}
+.status-item strong { color: #1a365d; }
+.queue-display {
+  font-family: "SF Mono", "Fira Code", monospace; font-size: 0.9rem;
+  background: #1a202c; color: #68d391; padding: 12px 16px; border-radius: 10px;
+  max-height: 120px; overflow-y: auto; word-break: break-all;
+  border: 2px solid #68d391; box-shadow: 0 0 12px rgba(104,211,145,0.25);
+  line-height: 1.7;
+}
+.queue-display .queue-label {
+  color: #a0aec0; font-size: 0.72rem; display: block; margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: 2px;
+}
+.queue-display .queue-node {
+  display: inline-block; background: #2d3748; color: #68d391;
+  padding: 2px 8px; border-radius: 4px; margin: 1px 3px;
+  font-weight: 700; border: 1px solid #4a5568;
+}
+
+/* 侧栏 */
+.side-panel { display: flex; flex-direction: column; gap: 12px; }
+.step-list { max-height: 220px; overflow-y: auto; font-size: 0.76rem; }
+.step-list .step {
+  padding: 4px 10px; border-left: 3px solid transparent; margin-bottom: 2px; cursor: pointer;
+  border-radius: 4px; transition: all 0.15s;
+}
+.step-list .step:hover { background: #ebf8ff; border-left-color: #90cdf4; }
+.step-list .step.active { background: #ebf8ff; border-left-color: #3182ce; font-weight: 600; }
+.step-list .step .step-num { font-weight: 700; color: #2b6cb0; margin-right: 5px; }
+
+.code-block {
+  background: #1a202c; color: #e2e8f0; padding: 12px; border-radius: 8px;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 0.68rem;
+  line-height: 1.5; overflow-x: auto; white-space: pre; max-height: 350px; overflow-y: auto;
+}
+.code-block .kw { color: #9f7aea; }
+.code-block .type { color: #68d391; }
+.code-block .num { color: #fbd38d; }
+.code-block .str { color: #fc8181; }
+.code-block .cmt { color: #718096; font-style: italic; }
+.code-block .fn { color: #63b3ed; }
+.code-block .op { color: #f6ad55; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>☄️ P2895 Meteor Shower S</h1>
+  <span class="badge">BFS + 时间预处理</span>
+</header>
+
+<div class="container">
+
+  <!-- 题目说明 -->
+  <div class="card">
+    <h2>📋 题目描述</h2>
+    <p>贝茜从 <strong>(0,0)</strong> 出发躲避流星雨。共 <strong>M</strong> 颗流星，第 i 颗在时刻 <strong>T<sub>i</sub></strong> 砸在 <strong>(X<sub>i</sub>, Y<sub>i</sub>)</strong>，会<strong>烧焦该格及上下左右 4 格</strong>。<br>
+    贝茜每单位时间可向上下左右移动一格，只能在一个格子<strong>被烧焦前</strong>经过。<br>
+    求到达<strong>安全格子</strong>（永不被烧焦）的最短时间，无法到达输出 <strong>-1</strong>。</p>
+    <p style="margin-top:4px;font-size:0.78rem;color:#718096;">
+      ⚠️ 流星坐标 ≤ 300，但贝茜<strong>可以走到 &gt;300</strong> 的位置！范围要开大。
+    </p>
+  </div>
+
+  <!-- 参数输入 -->
+  <div class="card">
+    <div class="controls">
+      <label>网格大小:</label><input id="inputSize" type="number" value="10" min="6" max="14" title="显示范围">
+      <label style="margin-left:6px;">预设数据:</label>
+      <select id="presetSelect" onchange="loadPreset()">
+        <option value="sample">样例 (4颗流星)</option>
+        <option value="simple">简单 (2颗流星)</option>
+        <option value="trap">困局 (全图覆盖)</option>
+        <option value="custom">自定义</option>
+      </select>
+      <button class="btn btn-primary" onclick="resetAll()">🔄 重置</button>
+    </div>
+    <div class="controls">
+      <button class="btn btn-success" id="btnStep" onclick="stepForward()">▶️ 单步执行</button>
+      <button class="btn btn-success" id="btnAuto" onclick="autoPlay()">▶️ 自动演示</button>
+      <button class="btn btn-gray" id="btnBack" onclick="stepBack()">◀️ 后退</button>
+      <label style="margin-left:8px;">速度:</label>
+      <input type="range" id="speedSlider" min="200" max="1500" value="700" style="width:100px;">
+      <span style="font-size:0.75rem;color:#718096;">快← →慢</span>
+      <span style="margin-left:12px;font-size:0.72rem;color:#a0aec0;">键盘: →单步  ←后退  空格播放/暂停  R重置</span>
+    </div>
+    <div class="controls" style="font-size:0.78rem;color:#4a5568;">
+      手动编辑流星（格式: X Y T，每行一颗）：
+    </div>
+    <div class="controls">
+      <textarea id="meteorInput" rows="4" style="flex:1;font-family:monospace;font-size:0.78rem;padding:6px;border:1px solid #cbd5e0;border-radius:6px;min-width:300px;"></textarea>
+      <button class="btn btn-gray" onclick="applyCustomMeteors()">✔ 应用</button>
+    </div>
+  </div>
+
+  <!-- 主区域 -->
+  <div class="main-layout">
+    <!-- 左侧：网格 -->
+    <div class="card">
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch" style="background:#f687b3;"></span> 起点(0,0)</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#c6f6d5;"></span> 安全格子</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#fed7d7;"></span> 已烧焦</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#fff5f5;border:1px dashed #fc8181;"></span> 将被烧焦</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#f6e05e;"></span> 当前处理</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#bee3f8;"></span> 队列中</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#e9d8fd;"></span> 已访问</div>
+      </div>
+      <div class="grid-wrapper"><div class="grid" id="grid"></div></div>
+      <div class="status-bar">
+        <div class="status-item"><strong>步骤：</strong><span id="stepNum">0</span>/<span id="stepTotal">0</span></div>
+        <div class="status-item"><strong>当前坐标：</strong><span id="curNode">—</span></div>
+        <div class="status-item"><strong>当前时间：</strong><span id="curTime">—</span></div>
+        <div class="status-item"><strong>队列大小：</strong><span id="queueSize">0</span></div>
+        <div class="status-item"><strong>已访问：</strong><span id="visitedCount">0</span></div>
+      </div>
+      <div class="queue-display" id="queueDisplay"></div>
+    </div>
+
+    <!-- 右侧 -->
+    <div class="side-panel">
+      <div class="card">
+        <h2>☄️ 流星列表</h2>
+        <div class="meteor-list" id="meteorList"></div>
+      </div>
+      <div class="card">
+        <h2>📜 步骤历史</h2>
+        <div class="step-list" id="stepList">
+          <div style="color:#a0aec0;">点击"单步执行"或"自动演示"开始</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>💻 参考代码</h2>
+        <div class="code-block">
+<span class="cmt">// P2895 Meteor Shower S — BFS + 时间预处理</span>
+<span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="kw">const int</span> <span class="type">N</span> = <span class="num">605</span>, INF = <span class="num">0x3f3f3f3f</span>;
+<span class="type">int</span> des[N][N];  <span class="cmt">// 每个格子最早被烧焦的时间</span>
+<span class="type">bool</span> vis[N][N];
+<span class="type">int</span> dx[] = {<span class="num">0,0,1,-1</span>};
+<span class="type">int</span> dy[] = {<span class="num">1,-1,0,0</span>};
+
+<span class="kw">struct</span> <span class="type">Node</span> { <span class="type">int</span> x, y, t; };
+
+<span class="type">int</span> <span class="fn">bfs</span>() {
+    queue&lt;Node&gt; q;
+    q.<span class="fn">push</span>({<span class="num">0,0,0</span>});
+    vis[<span class="num">0</span>][<span class="num">0</span>] <span class="op">=</span> <span class="num">true</span>;
+
+    <span class="kw">while</span> (<span class="op">!</span>q.<span class="fn">empty</span>()) {
+        <span class="kw">auto</span> [x, y, t] <span class="op">=</span> q.<span class="fn">front</span>();
+        q.<span class="fn">pop</span>();
+
+        <span class="kw">if</span> (des[x][y] <span class="op">==</span> INF)
+            <span class="kw">return</span> t;   <span class="cmt">// 到达安全格子！</span>
+
+        <span class="kw">for</span> (<span class="type">int</span> d <span class="op">=</span> <span class="num">0</span>; d <span class="op">&lt;</span> <span class="num">4</span>; d<span class="op">++</span>) {
+            <span class="type">int</span> nx <span class="op">=</span> x <span class="op">+</span> dx[d], ny <span class="op">=</span> y <span class="op">+</span> dy[d];
+            <span class="kw">if</span> (nx <span class="op">&lt;</span> <span class="num">0</span> <span class="op">||</span> ny <span class="op">&lt;</span> <span class="num">0</span>) <span class="kw">continue</span>;
+            <span class="kw">if</span> (vis[nx][ny]) <span class="kw">continue</span>;
+            <span class="kw">if</span> (t <span class="op">+</span> <span class="num">1</span> <span class="op">&lt;</span> des[nx][ny]) {
+                vis[nx][ny] <span class="op">=</span> <span class="num">true</span>;
+                q.<span class="fn">push</span>({nx, ny, t <span class="op">+</span> <span class="num">1</span>});
+            }
+        }
+    }
+    <span class="kw">return</span> <span class="num">-1</span>;
+}
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="type">int</span> M; cin <span class="op">&gt;&gt;</span> M;
+    <span class="fn">memset</span>(des, <span class="num">0x3f</span>, <span class="kw">sizeof</span>(des));
+    <span class="kw">for</span> (<span class="type">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op">&lt;</span> M; i<span class="op">++</span>) {
+        <span class="type">int</span> x, y, t;
+        cin <span class="op">&gt;&gt;</span> x <span class="op">&gt;&gt;</span> y <span class="op">&gt;&gt;</span> t;
+        des[x][y] <span class="op">=</span> <span class="fn">min</span>(des[x][y], t);
+        <span class="kw">for</span> (<span class="type">int</span> d <span class="op">=</span> <span class="num">0</span>; d <span class="op">&lt;</span> <span class="num">4</span>; d<span class="op">++</span>) {
+            <span class="type">int</span> nx <span class="op">=</span> x <span class="op">+</span> dx[d], ny <span class="op">=</span> y <span class="op">+</span> dy[d];
+            <span class="kw">if</span> (nx <span class="op">&gt;=</span> <span class="num">0</span> <span class="op">&amp;&amp;</span> ny <span class="op">&gt;=</span> <span class="num">0</span>)
+                des[nx][ny] <span class="op">=</span> <span class="fn">min</span>(des[nx][ny], t);
+        }
+    }
+    cout <span class="op">&lt;&lt;</span> <span class="fn">bfs</span>() <span class="op">&lt;&lt;</span> endl;
+}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 思路 -->
+  <div class="card">
+    <h2>🧠 解题思路</h2>
+    <p>
+      <strong>① 预处理时间数组</strong>：des[x][y] 记录格子 (x,y) <strong>最早被烧焦的时间</strong>，初始 INF（安全）。<br>
+      <strong>② 读入每颗流星</strong>：更新落点 + 四周 4 格的 des 值（取 min，因为可能被多颗流星覆盖）。<br>
+      <strong>③ BFS</strong>：从 (0,0, t=0) 开始，扩展时判断 <strong>t+1 &lt; des[nx][ny]</strong> 才能走。<br>
+      <strong>④ 终止条件</strong>：遇到 des[x][y] == INF 的格子 → 安全！返回当前时间 t。<br>
+      <strong>⑤ 易错点</strong>：流星 ≤ 300，但贝茜可走到 &gt;300；数组要开大（≥605）。
+    </p>
+  </div>
+
+</div>
+
+<script>
+// ============ 数据 ============
+const INF = 0x3f3f3f3f;
+const DX = [0, 0, 1, -1];
+const DY = [1, -1, 0, 0];
+const MAX_GRID = 605;
+
+let gridSize = 10;
+let meteors = [];      // [{x, y, t}]
+let desTime = [];      // 2D: earliest destruction time
+let bfsSteps = [];
+let currentStep = -1;
+let autoTimer = null;
+let answer = -1;
+
+const PRESETS = {
+  sample: [
+    {x:0,y:0,t:2}, {x:2,y:1,t:2}, {x:1,y:1,t:2}, {x:0,y:3,t:5}
+  ],
+  simple: [
+    {x:3,y:3,t:2}, {x:5,y:5,t:3}
+  ],
+  trap: [
+    {x:0,y:1,t:0},{x:1,y:0,t:0},{x:0,y:2,t:1},{x:1,y:1,t:1},{x:2,y:0,t:1},
+    {x:0,y:3,t:2},{x:1,y:2,t:2},{x:2,y:1,t:2},{x:3,y:0,t:2},
+    {x:1,y:3,t:3},{x:2,y:2,t:3},{x:3,y:1,t:3},{x:4,y:0,t:3},
+  ]
+};
+
+function initData(meteorList) {
+  meteors = meteorList;
+  // 初始化 desTime
+  desTime = Array.from({length: MAX_GRID}, () => new Array(MAX_GRID).fill(INF));
+  
+  for (const m of meteors) {
+    desTime[m.x][m.y] = Math.min(desTime[m.x][m.y], m.t);
+    for (let d = 0; d < 4; d++) {
+      const nx = m.x + DX[d];
+      const ny = m.y + DY[d];
+      if (nx >= 0 && ny >= 0) {
+        desTime[nx][ny] = Math.min(desTime[nx][ny], m.t);
+      }
+    }
+  }
+  
+  bfsSteps = [];
+  currentStep = -1;
+  answer = -1;
+}
+
+function runBFS() {
+  bfsSteps = [];
+  const vis = Array.from({length: MAX_GRID}, () => new Array(MAX_GRID).fill(false));
+  const q = [];
+  
+  vis[0][0] = true;
+  q.push({x:0, y:0, t:0});
+  
+  bfsSteps.push({
+    type: 'start',
+    node: {x:0,y:0,t:0},
+    queue: q.map(n => ({...n})),
+    vis: vis.map(r => [...r]),
+    desc: '起点 (0,0) 入队，时间 t=0'
+  });
+  
+  let head = 0;
+  while (head < q.length) {
+    const {x, y, t} = q[head];
+    head++;
+    
+    // 检查当前格子是否安全
+    if (desTime[x][y] === INF) {
+      bfsSteps.push({
+        type: 'found',
+        node: {x, y, t},
+        queue: q.slice(head).map(n => ({...n})),
+        vis: vis.map(r => [...r]),
+        desc: `🎯 到达安全格子 (${x},${y})！最短时间 = ${t}`
+      });
+      answer = t;
+      return;
+    }
+    
+    bfsSteps.push({
+      type: 'pop',
+      node: {x, y, t},
+      queue: q.slice(head).map(n => ({...n})),
+      vis: vis.map(r => [...r]),
+      desc: `取出 (${x},${y})，t=${t}，格子将在 T=${desTime[x][y]===INF?'永不':desTime[x][y]} 被烧焦，尝试 4 方向`
+    });
+    
+    let expanded = [];
+    for (let d = 0; d < 4; d++) {
+      const nx = x + DX[d];
+      const ny = y + DY[d];
+      if (nx < 0 || ny < 0) continue;
+      if (vis[nx][ny]) continue;
+      if (t + 1 < desTime[nx][ny]) {
+        vis[nx][ny] = true;
+        q.push({x: nx, y: ny, t: t + 1});
+        expanded.push({x: nx, y: ny, t: t + 1});
+      }
+    }
+    
+    if (expanded.length > 0) {
+      const parts = expanded.map(e => `(${e.x},${e.y})`);
+      bfsSteps.push({
+        type: 'expand',
+        node: {x, y, t},
+        expanded,
+        queue: q.slice(head).map(n => ({...n})),
+        vis: vis.map(r => [...r]),
+        desc: `从 (${x},${y}) 扩展 → ${parts.join('、')}，时间 t=${t+1}`
+      });
+    } else {
+      const reasons = [];
+      for (let d = 0; d < 4; d++) {
+        const nx = x + DX[d], ny = y + DY[d];
+        if (nx < 0 || ny < 0) reasons.push('出界');
+        else if (vis[nx][ny]) reasons.push('已访问');
+        else reasons.push(`到达时间${t+1}≥烧焦时间${desTime[nx][ny]}`);
+      }
+      bfsSteps.push({
+        type: 'deadend',
+        node: {x, y, t},
+        queue: q.slice(head).map(n => ({...n})),
+        vis: vis.map(r => [...r]),
+        desc: `从 (${x},${y}) 无法扩展：${reasons.join('、')}`
+      });
+    }
+  }
+  
+  bfsSteps.push({
+    type: 'done',
+    node: null,
+    queue: [],
+    vis: vis.map(r => [...r]),
+    desc: 'BFS 完成！队列已空，无法到达安全格子。答案 = -1'
+  });
+  answer = -1;
+}
+
+// ============ 渲染 ============
+function getCellClass(x, y, step) {
+  if (!step) return 'gc-safe';
+  
+  const d = step.dis || desTime;
+  const vis = step.vis;
+  const node = step.node;
+  const queueSet = new Set((step.queue || []).map(n => `${n.x},${n.y}`));
+  const key = `${x},${y}`;
+  const isStart = (x === 0 && y === 0);
+  const isCur = node && node.x === x && node.y === y;
+  const isQueued = queueSet.has(key);
+  const isVisited = vis && vis[x] && vis[x][y];
+  
+  if (isStart && isCur && step.type !== 'done') return 'gc-current';
+  if (isStart) return 'gc-start';
+  if (isCur) return 'gc-current';
+  if (isQueued) return 'gc-queued';
+  if (isVisited) return 'gc-visited';
+  
+  // 检查是否被流星影响
+  if (d && d[x] && d[x][y] !== undefined) {
+    const dt = d[x][y];
+    if (dt !== INF) {
+      // 检查当前步骤的时间
+      if (step.type === 'pop' && node && node.t >= dt) return 'gc-destroyed';
+      if (step.type === 'done') return 'gc-destroyed';
+      return 'gc-destroyed-future';
+    }
+    return 'gc-safe';
+  }
+  
+  return 'gc-safe';
+}
+
+function renderGrid(stepIndex) {
+  const gridEl = document.getElementById('grid');
+  const step = stepIndex >= 0 ? bfsSteps[stepIndex] : null;
+  
+  gridEl.style.gridTemplateColumns = `repeat(${gridSize}, 44px)`;
+  gridEl.innerHTML = '';
+  
+  for (let y = gridSize - 1; y >= 0; y--) {
+    for (let x = 0; x < gridSize; x++) {
+      const cell = document.createElement('div');
+      cell.className = 'gcell ' + getCellClass(x, y, step);
+      
+      const dt = desTime[x][y];
+      const timeStr = dt === INF ? '∞' : `T${dt}`;
+      const isStart = (x === 0 && y === 0);
+      
+      let innerHTML = '';
+      if (isStart && (!step || step.type === 'start')) {
+        innerHTML = `<span class="gc-time">🐄</span><span class="gc-step">(0,0)</span>`;
+      } else {
+        innerHTML = `<span class="gc-time">${timeStr}</span><span class="gc-step">(${x},${y})</span>`;
+      }
+      
+      // 如果是当前节点，显示时间
+      if (step && step.node && step.node.x === x && step.node.y === y) {
+        innerHTML = `<span class="gc-time">🐄 t=${step.node.t}</span><span class="gc-step">(${x},${y})</span>`;
+      }
+      
+      cell.innerHTML = innerHTML;
+      cell.title = `(${x},${y}) 烧焦时间: ${dt===INF?'安全':dt}`;
+      gridEl.appendChild(cell);
+    }
+  }
+}
+
+function renderQueue(step) {
+  const display = document.getElementById('queueDisplay');
+  const sizeEl = document.getElementById('queueSize');
+  if (!step || step.queue.length === 0) {
+    display.innerHTML = '<span class="queue-label">📦 队 列</span>队列为空';
+    sizeEl.textContent = '0';
+  } else {
+    const nodes = step.queue.map(n => `<span class="queue-node">(${n.x},${n.y}) t=${n.t}</span>`).join(' → ');
+    display.innerHTML = `<span class="queue-label">📦 队 列（${step.queue.length}个节点）</span>${nodes}`;
+    sizeEl.textContent = step.queue.length;
+  }
+}
+
+function renderStatus(stepIndex) {
+  const step = stepIndex >= 0 ? bfsSteps[stepIndex] : null;
+  document.getElementById('stepNum').textContent = stepIndex >= 0 ? stepIndex + 1 : 0;
+  document.getElementById('stepTotal').textContent = bfsSteps.length;
+  document.getElementById('curNode').textContent = step && step.node ? `(${step.node.x}, ${step.node.y})` : '—';
+  document.getElementById('curTime').textContent = step && step.node ? step.node.t : '—';
+  
+  let visCount = 0;
+  if (step && step.vis) {
+    for (let x = 0; x < MAX_GRID; x++)
+      for (let y = 0; y < MAX_GRID; y++)
+        if (step.vis[x][y]) visCount++;
+  }
+  document.getElementById('visitedCount').textContent = visCount;
+  document.getElementById('queueSize').textContent = step ? step.queue.length : 0;
+  renderQueue(step);
+}
+
+function renderStepList() {
+  const list = document.getElementById('stepList');
+  list.innerHTML = '';
+  bfsSteps.forEach((step, idx) => {
+    const div = document.createElement('div');
+    div.className = 'step' + (idx === currentStep ? ' active' : '');
+    div.innerHTML = `<span class="step-num">#${idx + 1}</span> ${step.desc}`;
+    div.onclick = () => jumpToStep(idx);
+    list.appendChild(div);
+  });
+  if (currentStep >= 0) {
+    const active = list.querySelector('.step.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function renderMeteorList() {
+  const list = document.getElementById('meteorList');
+  list.innerHTML = '';
+  meteors.forEach((m, i) => {
+    const row = document.createElement('div');
+    row.className = 'meteor-row';
+    row.innerHTML = `<span class="m-num">#${i+1}</span><span>T=${m.t}</span><span>(${m.x}, ${m.y})</span><span style="color:#e53e3e;">🔥+4邻格</span>`;
+    list.appendChild(row);
+  });
+}
+
+function jumpToStep(idx) {
+  if (idx < 0 || idx >= bfsSteps.length) return;
+  currentStep = idx;
+  renderGrid(idx);
+  renderStatus(idx);
+  renderStepList();
+  document.getElementById('btnStep').disabled = (idx >= bfsSteps.length - 1);
+  document.getElementById('btnBack').disabled = (idx <= 0);
+  document.getElementById('btnAuto').disabled = false;
+}
+
+function renderAll() {
+  if (bfsSteps.length === 0) {
+    renderGrid(-1);
+    document.getElementById('stepNum').textContent = '0';
+    document.getElementById('stepTotal').textContent = '0';
+    document.getElementById('curNode').textContent = '—';
+    document.getElementById('curTime').textContent = '—';
+    document.getElementById('queueSize').textContent = '0';
+    document.getElementById('visitedCount').textContent = '0';
+    document.getElementById('queueDisplay').innerHTML = '<span class="queue-label">📦 队 列</span>队列为空';
+    document.getElementById('stepList').innerHTML = '<div style="color:#a0aec0;">点击"单步执行"或"自动演示"开始</div>';
+    return;
+  }
+  jumpToStep(currentStep >= 0 ? currentStep : 0);
+}
+
+// ============ 操作 ============
+function loadPreset() {
+  const preset = document.getElementById('presetSelect').value;
+  if (preset === 'custom') return;
+  
+  const m = PRESETS[preset];
+  document.getElementById('meteorInput').value = m.map(p => `${p.x} ${p.y} ${p.t}`).join('\n');
+  
+  // 自动调整网格大小
+  let maxCoord = 5;
+  for (const p of m) { maxCoord = Math.max(maxCoord, p.x + 2, p.y + 2); }
+  gridSize = Math.max(6, Math.min(14, maxCoord + 1));
+  document.getElementById('inputSize').value = gridSize;
+  
+  initData(m);
+  runBFS();
+  currentStep = -1;
+  renderAll();
+  renderMeteorList();
+  document.getElementById('btnStep').disabled = false;
+}
+
+function applyCustomMeteors() {
+  stopAuto();
+  const text = document.getElementById('meteorInput').value.trim();
+  if (!text) return;
+  
+  const lines = text.split('\n').filter(l => l.trim());
+  const m = [];
+  for (const line of lines) {
+    const parts = line.trim().split(/\s+/);
+    if (parts.length >= 3) {
+      m.push({x: parseInt(parts[0]), y: parseInt(parts[1]), t: parseInt(parts[2])});
+    }
+  }
+  
+  if (m.length === 0) return;
+  
+  let maxCoord = 5;
+  for (const p of m) { maxCoord = Math.max(maxCoord, p.x + 2, p.y + 2); }
+  gridSize = Math.max(6, Math.min(14, maxCoord + 1));
+  document.getElementById('inputSize').value = gridSize;
+  
+  initData(m);
+  runBFS();
+  currentStep = -1;
+  renderAll();
+  renderMeteorList();
+  document.getElementById('btnStep').disabled = false;
+  document.getElementById('presetSelect').value = 'custom';
+}
+
+function resetAll() {
+  stopAuto();
+  gridSize = Math.max(6, Math.min(14, parseInt(document.getElementById('inputSize').value) || 10));
+  document.getElementById('inputSize').value = gridSize;
+  
+  const preset = document.getElementById('presetSelect').value;
+  if (preset === 'custom') {
+    applyCustomMeteors();
+  } else {
+    loadPreset();
+  }
+}
+
+function stepForward() {
+  stopAuto();
+  if (bfsSteps.length === 0) {
+    resetAll();
+    currentStep = 0;
+    renderAll();
+    return;
+  }
+  if (currentStep < bfsSteps.length - 1) {
+    currentStep++;
+    renderAll();
+  }
+  if (currentStep >= bfsSteps.length - 1) {
+    document.getElementById('btnStep').disabled = true;
+    document.getElementById('btnAuto').disabled = true;
+  }
+}
+
+function autoPlay() {
+  if (autoTimer) { stopAuto(); return; }
+  if (bfsSteps.length === 0 || currentStep >= bfsSteps.length - 1) {
+    resetAll();
+    currentStep = -1;
+  }
+  const speed = parseInt(document.getElementById('speedSlider')?.value) || 600;
+  document.getElementById('btnAuto').textContent = '⏸ 暂停';
+  document.getElementById('btnStep').disabled = true;
+  function tick() {
+    if (currentStep < bfsSteps.length - 1) {
+      currentStep++;
+      renderAll();
+      if (currentStep < bfsSteps.length - 1) {
+        autoTimer = setTimeout(tick, speed);
+      } else {
+        stopAuto();
+        document.getElementById('btnStep').disabled = true;
+      }
+    }
+  }
+  autoTimer = setTimeout(tick, speed);
+}
+
+function stopAuto() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  document.getElementById('btnAuto').textContent = '▶️ 自动演示';
+}
+
+// 键盘
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight') { stepForward(); }
+  else if (e.key === 'ArrowLeft') { stepBack(); }
+  else if (e.key === ' ') { e.preventDefault(); autoTimer ? stopAuto() : autoPlay(); }
+  else if (e.key === 'r' || e.key === 'R') { resetAll(); }
+});
+
+function stepBack() {
+  stopAuto();
+  if (currentStep <= 0) {
+    // 已经在最开头，停留在初始状态
+    currentStep = -1;
+    jumpToStep(0);
+    document.getElementById('btnStep').disabled = false;
+    document.getElementById('btnAuto').disabled = false;
+    document.getElementById('btnBack').disabled = true;
+    return;
+  }
+  currentStep--;
+  jumpToStep(currentStep);
+  document.getElementById('btnStep').disabled = false;
+  document.getElementById('btnAuto').disabled = false;
+  document.getElementById('btnBack').disabled = false;
+}
+
+// ============ 初始化 ============
+document.getElementById('meteorInput').value = PRESETS.sample.map(p => `${p.x} ${p.y} ${p.t}`).join('\n');
+initData(PRESETS.sample);
+runBFS();
+renderAll();
+renderMeteorList();
+document.getElementById('btnStep').disabled = false;
+document.getElementById('btnBack').disabled = true;
+</script>
+</body>
+</html>

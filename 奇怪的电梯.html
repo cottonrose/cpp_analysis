@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P1135 奇怪的电梯 — BFS 过程演示</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8; color: #2d3748; min-height: 100vh;
+}
+header {
+  background: linear-gradient(135deg, #1a365d, #2a5298);
+  color: #fff; padding: 18px 32px;
+  display: flex; align-items: center; gap: 12px;
+}
+header h1 { font-size: 1.4rem; font-weight: 700; }
+header .badge { background: #ed8936; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; }
+.container { max-width: 1100px; margin: 0 auto; padding: 16px 20px; }
+.card {
+  background: #fff; border-radius: 12px; padding: 18px 22px;
+  margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card h2 { font-size: 1.05rem; margin-bottom: 8px; color: #1a365d; }
+.card p { line-height: 1.65; font-size: 0.9rem; color: #4a5568; }
+
+/* 控制栏 */
+.controls {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px;
+}
+.controls label { font-size: 0.82rem; font-weight: 600; color: #4a5568; }
+.controls input {
+  width: 56px; padding: 5px 6px; border: 1px solid #cbd5e0; border-radius: 6px;
+  font-size: 0.85rem; text-align: center;
+}
+.controls .k-inputs { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.controls .k-inputs input { width: 36px; }
+.btn {
+  padding: 6px 14px; border: none; border-radius: 6px; font-size: 0.82rem;
+  font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: #2b6cb0; color: #fff; }
+.btn-primary:hover { background: #2c5282; }
+.btn-success { background: #38a169; color: #fff; }
+.btn-success:hover { background: #2f855a; }
+.btn-warning { background: #dd6b20; color: #fff; }
+.btn-warning:hover { background: #c05621; }
+.btn-gray { background: #a0aec0; color: #fff; }
+.btn-gray:hover { background: #718096; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 主布局 */
+.main-layout { display: grid; grid-template-columns: 1fr 320px; gap: 14px; }
+@media (max-width: 860px) { .main-layout { grid-template-columns: 1fr; } }
+
+/* 电梯大楼 */
+.building {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  position: relative;
+}
+.floor-row {
+  display: flex; align-items: center; gap: 10px;
+  position: relative;
+}
+.floor-num {
+  width: 32px; height: 32px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.75rem;
+  flex-shrink: 0; position: relative;
+}
+.floor-bar {
+  flex: 1; height: 44px; border-radius: 8px;
+  display: flex; align-items: center; padding: 0 12px;
+  gap: 8px; position: relative; min-width: 300px;
+  transition: all 0.3s;
+}
+.floor-label {
+  font-size: 0.78rem; font-weight: 600; white-space: nowrap;
+}
+.floor-k {
+  font-size: 0.72rem; font-family: "SF Mono", monospace;
+  background: rgba(255,255,255,0.85); padding: 2px 8px; border-radius: 4px;
+}
+.floor-arrows {
+  display: flex; gap: 12px; margin-left: auto; font-size: 0.72rem; font-weight: 600;
+}
+.floor-arrow-up { color: #38a169; }
+.floor-arrow-down { color: #e53e3e; }
+.floor-arrow-invalid { color: #a0aec0; text-decoration: line-through; }
+
+/* 楼层状态色 */
+.fn-unvisited { background: #e2e8f0; color: #a0aec0; }
+.fn-start { background: #f687b3; color: #702459; }
+.fn-current { background: #f6e05e; color: #744210; animation: pulse 0.8s infinite; }
+.fn-queued { background: #bee3f8; color: #2b6cb0; }
+.fn-visited { background: #c6f6d5; color: #22543d; }
+.fn-target { background: #d6bcfa; color: #44337a; }
+.fn-unreachable { background: #fed7d7; color: #c53030; }
+
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(246,224,94,0.6); }
+  50% { box-shadow: 0 0 0 5px rgba(246,224,94,0); }
+}
+
+/* BFS 连接线 */
+.bfs-connectors { position: relative; margin: 2px 0; }
+.bfs-connector {
+  display: flex; align-items: center; justify-content: center; font-size: 0.65rem;
+  color: #718096; height: 16px;
+}
+
+/* 图例 */
+.legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.76rem; margin-bottom: 8px; }
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-swatch { width: 14px; height: 14px; border-radius: 3px; }
+
+/* 状态信息 */
+.status-bar {
+  display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.82rem;
+  padding: 8px 14px; background: #edf2f7; border-radius: 8px; margin-bottom: 10px;
+}
+.status-item strong { color: #1a365d; }
+.queue-display {
+  font-family: "SF Mono", "Fira Code", monospace; font-size: 0.92rem;
+  background: #1a202c; color: #68d391; padding: 14px 18px; border-radius: 10px;
+  max-height: 140px; overflow-y: auto; word-break: break-all;
+  border: 2px solid #68d391; box-shadow: 0 0 12px rgba(104,211,145,0.25);
+  line-height: 1.8;
+}
+.queue-display .queue-label {
+  color: #a0aec0; font-size: 0.75rem; display: block; margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: 2px;
+}
+.queue-display .queue-node {
+  display: inline-block; background: #2d3748; color: #68d391;
+  padding: 3px 10px; border-radius: 4px; margin: 2px 4px;
+  font-weight: 700; border: 1px solid #4a5568;
+}
+
+/* 侧栏 */
+.side-panel { display: flex; flex-direction: column; gap: 14px; }
+
+/* 步骤历史 */
+.step-list { max-height: 240px; overflow-y: auto; font-size: 0.78rem; }
+.step-list .step {
+  padding: 4px 8px; border-left: 3px solid transparent; margin-bottom: 2px; cursor: pointer;
+}
+.step-list .step.active { background: #ebf8ff; border-left-color: #3182ce; }
+.step-list .step .step-num { font-weight: 700; color: #2b6cb0; margin-right: 6px; }
+
+/* 代码块 */
+.code-block {
+  background: #1a202c; color: #e2e8f0; padding: 14px; border-radius: 8px;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 0.73rem;
+  line-height: 1.55; overflow-x: auto; white-space: pre; max-height: 380px; overflow-y: auto;
+}
+.code-block .kw { color: #9f7aea; }
+.code-block .type { color: #68d391; }
+.code-block .num { color: #fbd38d; }
+.code-block .str { color: #fc8181; }
+.code-block .cmt { color: #718096; font-style: italic; }
+.code-block .fn { color: #63b3ed; }
+.code-block .op { color: #f6ad55; }
+
+/* 方向指示 */
+.dir-indicator {
+  position: absolute; font-size: 0.6rem; font-weight: 900;
+  pointer-events: none; z-index: 5;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🛗 P1135 奇怪的电梯</h1>
+  <span class="badge">BFS 过程演示</span>
+</header>
+
+<div class="container">
+
+  <!-- 题目说明 -->
+  <div class="card">
+    <h2>📋 题目描述</h2>
+    <p>大楼有 <strong>N</strong> 层，第 <strong>i</strong> 层有一个数字 <strong>K<sub>i</sub></strong>。
+    电梯只有四个按钮：开、关、<strong>上</strong>、<strong>下</strong>。<br>
+    按"上"则上升 K<sub>i</sub> 层，按"下"则下降 K<sub>i</sub> 层（超出 1~N 范围则按钮失灵）。<br>
+    求从 <strong>A</strong> 楼到 <strong>B</strong> 楼<strong>最少按键次数</strong>，无法到达输出 <strong>-1</strong>。</p>
+    <p style="margin-top:4px;font-size:0.8rem;color:#718096;">
+      样例：N=5, A=1, B=5, K=[3,3,1,2,5] → 答案 3（1→4→2→5）
+    </p>
+  </div>
+
+  <!-- 参数输入 -->
+  <div class="card">
+    <div class="controls">
+      <label>N:</label><input id="inputN" type="number" value="5" min="2" max="12" title="总楼层数">
+      <label style="margin-left:8px;">起点:</label><input id="inputA" type="number" value="1" min="1" max="12">
+      <label style="margin-left:8px;">终点:</label><input id="inputB" type="number" value="5" min="1" max="12">
+      <label style="margin-left:8px;">K:</label>
+      <span class="k-inputs" id="kInputs"></span>
+      <button class="btn btn-primary" onclick="resetAll()">🔄 重置</button>
+    </div>
+    <div class="controls">
+      <button class="btn btn-warning" id="btnStep" onclick="stepForward()">⏭ 单步执行</button>
+      <button class="btn btn-success" id="btnAuto" onclick="autoPlay()">▶️ 自动演示</button>
+      <button class="btn btn-gray" id="btnReset" onclick="resetBFS()" disabled>↺ 重置 BFS</button>
+      <span style="font-size:0.8rem;color:#718096;margin-left:6px;">
+        速度: <input id="speedSlider" type="range" min="200" max="2000" value="700" step="50" style="width:90px;vertical-align:middle;">
+        <span id="speedLabel">700ms</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- 主区域：大楼 + 侧栏 -->
+  <div class="main-layout">
+    <!-- 左侧：大楼可视化 -->
+    <div class="card">
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch" style="background:#f687b3;"></span> 起点A</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#d6bcfa;"></span> 终点B</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#f6e05e;"></span> 当前处理</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#bee3f8;"></span> 队列中</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#c6f6d5;"></span> 已访问</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#e2e8f0;"></span> 未访问</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:#fed7d7;"></span> 不可达</div>
+      </div>
+      <div class="building" id="building"></div>
+      <div class="status-bar" style="margin-top:12px;">
+        <div class="status-item"><strong>步骤：</strong><span id="stepNum">0</span>/<span id="stepTotal">0</span></div>
+        <div class="status-item"><strong>当前楼层：</strong><span id="curNode">—</span></div>
+        <div class="status-item"><strong>当前步数：</strong><span id="curStep">—</span></div>
+        <div class="status-item"><strong>队列大小：</strong><span id="queueSize">0</span></div>
+        <div class="status-item"><strong>已访问：</strong><span id="visitedCount">0</span></div>
+      </div>
+      <div class="queue-display" id="queueDisplay">队列为空</div>
+    </div>
+
+    <!-- 右侧：步骤历史 + 代码 -->
+    <div class="side-panel">
+      <div class="card">
+        <h2>📜 步骤历史</h2>
+        <div class="step-list" id="stepList">
+          <div style="color:#a0aec0;">点击"单步执行"或"自动演示"开始</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>💻 参考代码 (C++)</h2>
+        <div class="code-block">
+<span class="cmt">// P1135 奇怪的电梯 — BFS</span>
+<span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="kw">const int</span> <span class="type">N</span> = <span class="num">205</span>;
+<span class="type">int</span> n, a, b, k[N];
+<span class="type">int</span> dis[N];   <span class="cmt">// dis[i] = 从起点到i的最少步数</span>
+
+<span class="type">int</span> <span class="fn">bfs</span>() {
+    <span class="fn">memset</span>(dis, <span class="num">-1</span>, <span class="kw">sizeof</span>(dis));
+    queue&lt;<span class="type">int</span>&gt; q;
+    dis[a] <span class="op">=</span> <span class="num">0</span>;
+    q.<span class="fn">push</span>(a);
+
+    <span class="kw">while</span> (<span class="op">!</span>q.<span class="fn">empty</span>()) {
+        <span class="type">int</span> u <span class="op">=</span> q.<span class="fn">front</span>();
+        q.<span class="fn">pop</span>();
+        <span class="kw">if</span> (u <span class="op">==</span> b) <span class="kw">return</span> dis[u];
+
+        <span class="cmt">// 尝试上楼</span>
+        <span class="type">int</span> up <span class="op">=</span> u <span class="op">+</span> k[u];
+        <span class="kw">if</span> (up <span class="op">&lt;=</span> n <span class="op">&amp;&amp;</span> dis[up] <span class="op">==</span> <span class="num">-1</span>) {
+            dis[up] <span class="op">=</span> dis[u] <span class="op">+</span> <span class="num">1</span>;
+            q.<span class="fn">push</span>(up);
+        }
+        <span class="cmt">// 尝试下楼</span>
+        <span class="type">int</span> dn <span class="op">=</span> u <span class="op">-</span> k[u];
+        <span class="kw">if</span> (dn <span class="op">&gt;=</span> <span class="num">1</span> <span class="op">&amp;&amp;</span> dis[dn] <span class="op">==</span> <span class="num">-1</span>) {
+            dis[dn] <span class="op">=</span> dis[u] <span class="op">+</span> <span class="num">1</span>;
+            q.<span class="fn">push</span>(dn);
+        }
+    }
+    <span class="kw">return</span> <span class="num">-1</span>;
+}
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    cin <span class="op">&gt;&gt;</span> n <span class="op">&gt;&gt;</span> a <span class="op">&gt;&gt;</span> b;
+    <span class="kw">for</span> (<span class="type">int</span> i <span class="op">=</span> <span class="num">1</span>; i <span class="op">&lt;=</span> n; i<span class="op">++</span>) cin <span class="op">&gt;&gt;</span> k[i];
+    cout <span class="op">&lt;&lt;</span> <span class="fn">bfs</span>() <span class="op">&lt;&lt;</span> endl;
+}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 思路说明 -->
+  <div class="card">
+    <h2>🧠 解题思路</h2>
+    <p>
+      <strong>①</strong> 把<strong>当前楼层编号</strong>看作一个<strong>状态</strong>。<br>
+      <strong>②</strong> 若楼层 i 可通过一次按钮到达楼层 j，则 i → j。<br>
+      <strong>③</strong> 题目要求<strong>最少按钮次数</strong> → 等价于从 A 到 B 的<strong>最短路径</strong>。<br>
+      <strong>④</strong> 每层恰好有<strong>两个方向</strong>（上 K<sub>i</sub> 层 / 下 K<sub>i</sub> 层），边权均为 1。<br>
+      <strong>⑤</strong> 边权为 1 的最短路 → <strong>BFS</strong>。
+    </p>
+    <p style="margin-top:6px;font-size:0.82rem;color:#718096;">
+      💡 与 P1443「马的遍历」类似，但这里是<strong>一维</strong> BFS：每个节点只有 2 个扩展方向而非 8 个。
+      BFS 第一次到达某楼层时的步数就是最短步数。
+    </p>
+  </div>
+
+</div>
+
+<script>
+// ============ BFS 引擎 ============
+let n, a, b, k;
+let dis = [];
+let bfsSteps = [];
+let currentStep = -1;
+let autoTimer = null;
+let bfsCompleted = false;
+let answer = -1;
+
+function initData(nn, aa, bb, kk) {
+  n = nn; a = aa; b = bb; k = kk;
+  dis = new Array(n + 1).fill(-1);
+  bfsSteps = [];
+  currentStep = -1;
+  bfsCompleted = false;
+  answer = -1;
+}
+
+function runBFS() {
+  bfsSteps = [];
+  dis.fill(-1);
+  const q = [];
+  
+  dis[a] = 0;
+  q.push(a);
+  
+  bfsSteps.push({
+    type: 'start',
+    node: a,
+    queue: [...q],
+    dis: [...dis],
+    desc: `起点 ${a} 楼入队，步数 = 0`
+  });
+  
+  let head = 0;
+  while (head < q.length) {
+    const u = q[head];
+    head++;
+    
+    if (u === b) {
+      bfsSteps.push({
+        type: 'found',
+        node: u,
+        queue: q.slice(head),
+        dis: [...dis],
+        desc: `🎯 到达终点 ${b} 楼！最少按键次数 = ${dis[u]}`
+      });
+      answer = dis[u];
+      bfsCompleted = true;
+      return;
+    }
+    
+    bfsSteps.push({
+      type: 'pop',
+      node: u,
+      queue: q.slice(head),
+      dis: [...dis],
+      desc: `从队列取出 ${u} 楼（当前步数 = ${dis[u]}），尝试上/下 ${k[u]} 层`
+    });
+    
+    const up = u + k[u];
+    const dn = u - k[u];
+    let expanded = [];
+    
+    // 上楼
+    if (up <= n && dis[up] === -1) {
+      dis[up] = dis[u] + 1;
+      q.push(up);
+      expanded.push({floor: up, dir: 'up'});
+    }
+    // 下楼
+    if (dn >= 1 && dis[dn] === -1) {
+      dis[dn] = dis[u] + 1;
+      q.push(dn);
+      expanded.push({floor: dn, dir: 'down'});
+    }
+    
+    if (expanded.length > 0) {
+      const parts = expanded.map(e => `${e.floor}楼(${e.dir==='up'?'上':'下'}${k[u]}层)`);
+      bfsSteps.push({
+        type: 'expand',
+        node: u,
+        expanded: expanded,
+        queue: q.slice(head),
+        dis: [...dis],
+        desc: `从 ${u} 楼扩展 → ${parts.join('、')}，步数 = ${dis[u] + 1}`
+      });
+    } else {
+      bfsSteps.push({
+        type: 'deadend',
+        node: u,
+        expanded: [],
+        queue: q.slice(head),
+        dis: [...dis],
+        desc: `从 ${u} 楼：上${up>n?'超出范围':'已访问'}、下${dn<1?'超出范围':'已访问'}，无新节点`
+      });
+    }
+  }
+  
+  bfsSteps.push({
+    type: 'done',
+    node: null,
+    queue: [],
+    dis: [...dis],
+    desc: 'BFS 完成！队列已空，终点不可达。答案 = -1'
+  });
+  answer = -1;
+  bfsCompleted = true;
+}
+
+// ============ 渲染大楼 ============
+function renderBuilding(stepIndex) {
+  const building = document.getElementById('building');
+  building.innerHTML = '';
+  
+  if (stepIndex < 0) {
+    // 初始状态
+    for (let i = n; i >= 1; i--) {
+      const row = document.createElement('div');
+      row.className = 'floor-row';
+      
+      const num = document.createElement('div');
+      num.className = `floor-num fn-unvisited`;
+      if (i === a) { num.className = 'floor-num fn-start'; num.textContent = 'A'; }
+      else if (i === b) { num.className = 'floor-num fn-target'; num.textContent = 'B'; }
+      else { num.textContent = i; }
+      row.appendChild(num);
+      
+      const bar = document.createElement('div');
+      bar.className = 'floor-bar';
+      bar.style.background = '#f7fafc';
+      if (i === a) bar.style.background = '#fbb6ce';
+      if (i === b) bar.style.background = '#e9d8fd';
+      
+      const upOk = i + k[i] <= n;
+      const dnOk = i - k[i] >= 1;
+      
+      bar.innerHTML = `
+        <span class="floor-label">${i}楼</span>
+        <span class="floor-k">K=${k[i]}</span>
+        <span class="floor-arrows">
+          <span class="${upOk?'floor-arrow-up':'floor-arrow-invalid'}">↑${k[i]}→${upOk?i+k[i]:'×'}</span>
+          <span class="${dnOk?'floor-arrow-down':'floor-arrow-invalid'}">↓${k[i]}→${dnOk?i-k[i]:'×'}</span>
+        </span>
+      `;
+      row.appendChild(bar);
+      building.appendChild(row);
+    }
+    return;
+  }
+  
+  const step = bfsSteps[stepIndex];
+  const d = step.dis;
+  const queueSet = new Set(step.queue);
+  const curNode = step.node;
+  
+  for (let i = n; i >= 1; i--) {
+    const row = document.createElement('div');
+    row.className = 'floor-row';
+    
+    const num = document.createElement('div');
+    let cls = 'fn-unvisited';
+    if (i === a && d[i] === 0) cls = 'fn-start';
+    else if (i === b && step.type === 'done' && d[i] === -1) cls = 'fn-unreachable';
+    else if (i === b && d[i] !== -1) cls = 'fn-target';
+    else if (i === curNode) cls = 'fn-current';
+    else if (queueSet.has(i)) cls = 'fn-queued';
+    else if (d[i] !== -1) cls = 'fn-visited';
+    else if (step.type === 'done') cls = 'fn-unreachable';
+    
+    num.className = `floor-num ${cls}`;
+    if (i === a && d[i] === 0) num.textContent = 'A';
+    else if (i === b) num.textContent = 'B';
+    else num.textContent = i;
+    row.appendChild(num);
+    
+    const bar = document.createElement('div');
+    bar.className = 'floor-bar';
+    let bg = '#f7fafc';
+    if (cls.includes('start')) bg = '#fbb6ce';
+    else if (cls.includes('target')) bg = '#e9d8fd';
+    else if (cls.includes('current')) bg = '#fefcbf';
+    else if (cls.includes('queued')) bg = '#bee3f8';
+    else if (cls.includes('visited')) bg = '#c6f6d5';
+    else if (cls.includes('unreachable')) bg = '#fed7d7';
+    bar.style.background = bg;
+    
+    const upOk = i + k[i] <= n;
+    const dnOk = i - k[i] >= 1;
+    const stepLabel = d[i] !== -1 ? `步数=${d[i]}` : '—';
+    
+    bar.innerHTML = `
+      <span class="floor-label">${i}楼</span>
+      <span class="floor-k">K=${k[i]} | ${stepLabel}</span>
+      <span class="floor-arrows">
+        <span class="${upOk?'floor-arrow-up':'floor-arrow-invalid'}">↑${k[i]}→${upOk?i+k[i]:'×'}</span>
+        <span class="${dnOk?'floor-arrow-down':'floor-arrow-invalid'}">↓${k[i]}→${dnOk?i-k[i]:'×'}</span>
+      </span>
+    `;
+    row.appendChild(bar);
+    building.appendChild(row);
+  }
+}
+
+function renderQueue(step) {
+  const display = document.getElementById('queueDisplay');
+  const sizeEl = document.getElementById('queueSize');
+  if (!step || step.queue.length === 0) {
+    display.innerHTML = '<span class="queue-label">📦 队 列</span>队列为空';
+    sizeEl.textContent = '0';
+  } else {
+    const nodes = step.queue.map(f => `<span class="queue-node">${f}楼</span>`).join(' → ');
+    display.innerHTML = `<span class="queue-label">📦 队 列（${step.queue.length}个节点）</span>${nodes}`;
+    sizeEl.textContent = step.queue.length;
+  }
+}
+
+function renderStatus(stepIndex) {
+  const step = stepIndex >= 0 ? bfsSteps[stepIndex] : null;
+  document.getElementById('stepNum').textContent = stepIndex >= 0 ? stepIndex + 1 : 0;
+  document.getElementById('stepTotal').textContent = bfsSteps.length;
+  document.getElementById('curNode').textContent = step && step.node ? `${step.node}楼` : '—';
+  document.getElementById('curStep').textContent = step && step.node && step.dis[step.node] !== -1 ? step.dis[step.node] : '—';
+  document.getElementById('visitedCount').textContent = step ? step.dis.filter(v => v !== -1).length : 0;
+  document.getElementById('queueSize').textContent = step ? step.queue.length : 0;
+  renderQueue(step);
+}
+
+function renderStepList() {
+  const list = document.getElementById('stepList');
+  list.innerHTML = '';
+  bfsSteps.forEach((step, idx) => {
+    const div = document.createElement('div');
+    div.className = 'step' + (idx === currentStep ? ' active' : '');
+    div.innerHTML = `<span class="step-num">#${idx + 1}</span> ${step.desc}`;
+    div.onclick = () => jumpToStep(idx);
+    list.appendChild(div);
+  });
+  if (currentStep >= 0) {
+    const active = list.querySelector('.step.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function jumpToStep(idx) {
+  if (idx < 0 || idx >= bfsSteps.length) return;
+  currentStep = idx;
+  renderBuilding(idx);
+  renderStatus(idx);
+  renderStepList();
+  document.getElementById('btnStep').disabled = (idx >= bfsSteps.length - 1);
+}
+
+function renderAll() {
+  if (bfsSteps.length === 0) {
+    renderBuilding(-1);
+    document.getElementById('stepNum').textContent = '0';
+    document.getElementById('stepTotal').textContent = '0';
+    document.getElementById('curNode').textContent = '—';
+    document.getElementById('curStep').textContent = '—';
+    document.getElementById('queueSize').textContent = '0';
+    document.getElementById('visitedCount').textContent = '0';
+    document.getElementById('queueDisplay').innerHTML = '<span class="queue-label">📦 队 列</span>队列为空';
+    document.getElementById('stepList').innerHTML = '<div style="color:#a0aec0;">点击"单步执行"或"自动演示"开始</div>';
+    return;
+  }
+  jumpToStep(currentStep >= 0 ? currentStep : 0);
+}
+
+// ============ K值输入 ============
+function renderKInputs() {
+  const container = document.getElementById('kInputs');
+  container.innerHTML = '';
+  for (let i = 1; i <= n; i++) {
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.id = `k${i}`;
+    inp.min = 0;
+    inp.max = 99;
+    inp.value = k[i] || 0;
+    inp.title = `K${i}`;
+    container.appendChild(inp);
+  }
+}
+
+function readKValues() {
+  const vals = [0];
+  for (let i = 1; i <= n; i++) {
+    const el = document.getElementById(`k${i}`);
+    vals[i] = el ? (parseInt(el.value) || 0) : (k[i] || 0);
+  }
+  return vals;
+}
+
+// ============ 操作 ============
+function resetAll() {
+  stopAuto();
+  const nn = Math.max(2, Math.min(12, parseInt(document.getElementById('inputN').value) || 5));
+  const aa = Math.max(1, Math.min(nn, parseInt(document.getElementById('inputA').value) || 1));
+  const bb = Math.max(1, Math.min(nn, parseInt(document.getElementById('inputB').value) || nn));
+  
+  document.getElementById('inputN').value = nn;
+  document.getElementById('inputA').value = aa;
+  document.getElementById('inputB').value = bb;
+  
+  // 先设置 n，再读 K 值
+  n = nn; a = aa; b = bb;
+  renderKInputs();
+  
+  // 用默认或已有 K 值
+  const defaultK = [0, 3, 3, 1, 2, 5];
+  k = [0];
+  for (let i = 1; i <= n; i++) {
+    k[i] = defaultK[i] || 0;
+  }
+  renderKInputs(); // 重新渲染填好默认值
+  k = readKValues();
+  
+  initData(n, a, b, k);
+  runBFS();
+  currentStep = -1;
+  renderAll();
+  document.getElementById('btnStep').disabled = false;
+  document.getElementById('btnReset').disabled = false;
+  document.getElementById('btnAuto').disabled = false;
+}
+
+function stepForward() {
+  stopAuto();
+  if (bfsSteps.length === 0) {
+    k = readKValues();
+    initData(n, a, b, k);
+    runBFS();
+    currentStep = 0;
+    renderAll();
+    return;
+  }
+  if (currentStep < bfsSteps.length - 1) {
+    currentStep++;
+    renderAll();
+  }
+  if (currentStep >= bfsSteps.length - 1) {
+    document.getElementById('btnStep').disabled = true;
+    document.getElementById('btnAuto').disabled = true;
+  }
+}
+
+function resetBFS() {
+  stopAuto();
+  k = readKValues();
+  initData(n, a, b, k);
+  runBFS();
+  currentStep = -1;
+  renderAll();
+  document.getElementById('btnStep').disabled = false;
+  document.getElementById('btnAuto').disabled = false;
+}
+
+function autoPlay() {
+  if (autoTimer) { stopAuto(); return; }
+  
+  if (bfsSteps.length === 0 || currentStep >= bfsSteps.length - 1) {
+    k = readKValues();
+    initData(n, a, b, k);
+    runBFS();
+    currentStep = -1;
+  }
+  
+  const speed = parseInt(document.getElementById('speedSlider').value) || 700;
+  document.getElementById('btnAuto').textContent = '⏸ 暂停';
+  document.getElementById('btnStep').disabled = true;
+  
+  function tick() {
+    if (currentStep < bfsSteps.length - 1) {
+      currentStep++;
+      renderAll();
+      if (currentStep < bfsSteps.length - 1) {
+        autoTimer = setTimeout(tick, speed);
+      } else {
+        stopAuto();
+        document.getElementById('btnStep').disabled = true;
+      }
+    }
+  }
+  autoTimer = setTimeout(tick, speed);
+}
+
+function stopAuto() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  document.getElementById('btnAuto').textContent = '▶️ 自动演示';
+  document.getElementById('btnStep').disabled = (bfsSteps.length > 0 && currentStep >= bfsSteps.length - 1);
+}
+
+// N 变化时重建 K 输入
+document.getElementById('inputN').addEventListener('change', function() {
+  const nn = Math.max(2, Math.min(12, parseInt(this.value) || 5));
+  this.value = nn;
+  n = nn;
+  renderKInputs();
+});
+
+document.getElementById('speedSlider').addEventListener('input', function() {
+  document.getElementById('speedLabel').textContent = this.value + 'ms';
+});
+
+// 键盘
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight') { stepForward(); }
+  else if (e.key === 'ArrowLeft' && currentStep > 0) { jumpToStep(currentStep - 1); }
+  else if (e.key === ' ') { e.preventDefault(); autoTimer ? stopAuto() : autoPlay(); }
+  else if (e.key === 'r' || e.key === 'R') { resetBFS(); }
+});
+
+// ============ 初始化 ============
+n = 5; a = 1; b = 5;
+k = [0, 3, 3, 1, 2, 5];
+initData(n, a, b, k);
+renderKInputs();
+runBFS();
+renderAll();
+document.getElementById('btnStep').disabled = false;
+document.getElementById('btnReset').disabled = false;
+</script>
+
+</body>
+</html>
