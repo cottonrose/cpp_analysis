@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>逆元之和 — 交互演示</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8; color: #2d3748;
+  min-height: 100vh;
+}
+header {
+  background: linear-gradient(135deg, #1a365d, #2a5298);
+  color: #fff; padding: 20px 32px;
+  display: flex; align-items: center; gap: 16px;
+}
+header h1 { font-size: 1.5rem; font-weight: 700; }
+header .badge { background: #ed8936; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; }
+.container { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
+.card {
+  background: #fff; border-radius: 12px; padding: 20px 24px;
+  margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card h2 { font-size: 1.1rem; margin-bottom: 10px; color: #1a365d; }
+.card p { line-height: 1.7; font-size: 0.92rem; color: #4a5568; }
+
+.controls {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px;
+}
+.controls label { font-size: 0.85rem; font-weight: 600; color: #4a5568; }
+.controls input[type="text"], .controls input[type="number"] {
+  padding: 7px 10px; border: 1px solid #cbd5e0; border-radius: 6px;
+  font-size: 0.9rem; font-family: "SF Mono", "Fira Code", monospace;
+}
+.controls input:focus { border-color: #5a67d8; outline: none; box-shadow: 0 0 0 3px rgba(90,103,216,0.15); }
+.controls input[type="range"] { width: 100px; vertical-align: middle; }
+.btn {
+  padding: 7px 16px; border: none; border-radius: 6px; font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: #2b6cb0; color: #fff; }
+.btn-primary:hover { background: #2c5282; }
+.btn-success { background: #38a169; color: #fff; }
+.btn-success:hover { background: #2f855a; }
+.btn-warning { background: #dd6b20; color: #fff; }
+.btn-warning:hover { background: #c05621; }
+.btn-gray { background: #a0aec0; color: #fff; }
+.btn-gray:hover { background: #718096; }
+.btn-purple { background: #5a67d8; color: #fff; }
+.btn-purple:hover { background: #4c51bf; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-sm { padding: 4px 10px; font-size: 0.78rem; }
+
+.demo-area {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 16px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;
+  min-height: 200px;
+}
+
+.status-bar {
+  display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem;
+  padding: 10px 16px; background: #edf2f7; border-radius: 8px; margin-top: 8px;
+}
+.status-item strong { color: #1a365d; }
+
+.step-list {
+  max-height: 220px; overflow-y: auto; font-size: 0.8rem;
+}
+.step-list .step {
+  padding: 5px 8px; border-left: 3px solid transparent; margin-bottom: 2px; cursor: pointer;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.step-list .step.active { background: #ebf8ff; border-left-color: #3182ce; }
+.step-list .step .step-num { font-weight: 700; color: #2b6cb0; flex-shrink: 0; min-width: 28px; }
+.step-list .step .step-desc { color: #4a5568; }
+
+.code-block {
+  background: #1a202c; color: #e2e8f0; padding: 16px; border-radius: 8px;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 0.8rem;
+  line-height: 1.6; overflow-x: auto; white-space: pre;
+}
+.code-block .kw { color: #9f7aea; }
+.code-block .type { color: #68d391; }
+.code-block .num { color: #fbd38d; }
+.code-block .str { color: #fc8181; }
+.code-block .cmt { color: #718096; font-style: italic; }
+.code-block .fn { color: #63b3ed; }
+.code-block .op { color: #f6ad55; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+.table-wrap { overflow-x: auto; }
+.table-wrap table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.table-wrap th, .table-wrap td {
+  padding: 6px 10px; text-align: center; border-bottom: 1px solid #e2e8f0;
+}
+.table-wrap th { background: #2a5298; color: #fff; font-weight: 600; }
+.table-wrap tr:nth-child(even) { background: #f7fafc; }
+.table-wrap tr.highlight { background: #fefcbf !important; font-weight: 700; }
+.table-wrap td.num { font-family: "SF Mono", "Fira Code", monospace; }
+
+.formula-box {
+  background: linear-gradient(135deg, #ebf4ff, #f0e6ff);
+  border: 2px solid #5a67d8; border-radius: 10px; padding: 16px 20px;
+  text-align: center; font-size: 1.1rem; font-family: "SF Mono", "Fira Code", monospace;
+}
+.formula-box .highlight-num { color: #dd6b20; font-weight: 700; }
+.formula-box .highlight-result { color: #38a169; font-weight: 700; }
+.formula-box .highlight-formula { color: #5a67d8; font-weight: 700; }
+
+.step-detail {
+  padding: 10px 14px; background: #fff; border-radius: 8px;
+  border: 1px solid #e2e8f0; font-size: 0.9rem; line-height: 1.8;
+}
+.step-detail .var { color: #2b6cb0; font-weight: 600; }
+.step-detail .val { color: #dd6b20; font-weight: 700; font-family: "SF Mono", "Fira Code", monospace; }
+.step-detail .res { color: #38a169; font-weight: 700; font-family: "SF Mono", "Fira Code", monospace; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>逆元之和 — 线性逆元递推演示</h1>
+  <span class="badge">数论 · 乘法逆元</span>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>📋 题目描述</h2>
+    <p>给定素数 $p$ 和正整数 $n$（$n < p$），计算 $S = \sum_{i=1}^{n} i^{-1} \pmod p$。</p>
+    <p style="margin-top:6px;">使用线性递推公式 $\text{inv}[i] = p - \lfloor p/i \rfloor \times \text{inv}[p \bmod i] \bmod p$ 在 $O(n)$ 时间内求出所有逆元。该公式不要求 $p$ 为素数，只要 $p \bmod i$ 的逆元存在即可。</p>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <label>素数 p：</label>
+      <input id="inputP" type="number" value="19" min="3" max="1000000007" style="width:120px;">
+      <label>正整数 n：</label>
+      <input id="inputN" type="number" value="10" min="1" max="100" style="width:100px;">
+      <button class="btn btn-primary" onclick="startDemo()">🚀 逐步演示</button>
+      <button class="btn btn-success" id="btnAuto" onclick="autoPlay()">▶️ 自动演示</button>
+      <button class="btn btn-gray" onclick="resetDemo()">↺ 重置</button>
+    </div>
+    <div class="controls" style="margin-bottom:0;">
+      <span style="font-size:0.82rem;color:#718096;">
+        速度：<input id="speedSlider" type="range" min="300" max="2500" value="800" step="100">
+        <span id="speedLabel">800ms</span>
+      </span>
+      <span class="hint" style="margin-left:12px;font-size:0.82rem;color:#718096;">
+        💡 <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">→</kbd>
+        <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">←</kbd>
+        <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">Space</kbd>
+      </span>
+      <span style="margin-left:12px;font-size:0.82rem;color:#718096;">
+        💡 n 较小时体验最佳（建议 n ≤ 30）
+      </span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧮 逆元计算过程</h2>
+    <div style="margin-bottom:10px;">
+      <button class="btn btn-warning btn-sm" id="btnStep" onclick="stepForward()" disabled>⏭ 下一步</button>
+      <button class="btn btn-gray btn-sm" id="btnReset" onclick="resetSteps()" disabled>↺ 重置步骤</button>
+      <span style="margin-left:10px;font-size:0.85rem;font-weight:600;">
+        步骤 <span id="stepNum">0</span> / <span id="stepTotal">0</span>
+      </span>
+    </div>
+
+    <div class="formula-box" id="formulaBox">
+      输入 p 和 n，点击「逐步演示」开始
+    </div>
+
+    <div class="demo-area" id="demoArea">
+      <div style="text-align:center;color:#a0aec0;padding:40px 0;">
+        点击「🚀 逐步演示」或「▶️ 自动演示」开始
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-item"><strong>当前 i：</strong><span id="statusI">—</span></div>
+      <div class="status-item"><strong>⌊p/i⌋：</strong><span id="statusK">—</span></div>
+      <div class="status-item"><strong>p % i：</strong><span id="statusR">—</span></div>
+      <div class="status-item"><strong>inv[i]：</strong><span id="statusInv">—</span></div>
+      <div class="status-item"><strong>累计和 S：</strong><span id="statusSum">—</span></div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h2>📜 步骤历史</h2>
+      <div class="step-list" id="stepList">
+        <div style="color:#a0aec0;">等待开始...</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>💻 参考代码 (C++)</h2>
+      <div class="code-block" id="codeBlock"><span class="cmt">// 线性逆元模板 — 逆元之和</span>
+<span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
+<span class="kw">using</span> <span class="kw">namespace</span> std;
+<span class="kw">using</span> ll = <span class="type">long</span> <span class="type">long</span>;
+
+<span class="type">const</span> <span class="type">int</span> MAXN = <span class="num">5e6</span> + <span class="num">5</span>;
+ll inv[MAXN];
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    ios::<span class="fn">sync_with_stdio</span>(<span class="kw">false</span>);
+    cin.<span class="fn">tie</span>(<span class="kw">nullptr</span>);
+
+    <span class="type">int</span> n; ll p; cin &gt;&gt; n &gt;&gt; p;
+
+    inv[<span class="num">1</span>] = <span class="num">1</span>;
+    ll sum = <span class="num">1</span>;
+
+    <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">2</span>; i &lt;= n; ++i) {
+        inv[i] = p - (p / i) * inv[p % i] % p;
+        sum = (sum + inv[i]) % p;
+    }
+
+    cout &lt;&lt; sum &lt;&lt; <span class="str">'\n'</span>;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧠 解题思路</h2>
+    <p><strong>核心公式</strong>：$\text{inv}[i] = p - \lfloor p/i \rfloor \times \text{inv}[p \bmod i] \bmod p$</p>
+    <p style="margin-top:6px;"><strong>推导</strong>：设 $p = k \cdot i + r$，其中 $k = \lfloor p/i \rfloor$, $r = p \bmod i$。在模 $p$ 意义下 $k \cdot i + r \equiv 0$，两边同乘 $i^{-1} \cdot r^{-1}$ 得 $k \cdot r^{-1} + i^{-1} \equiv 0$，移项即得公式。</p>
+    <p style="margin-top:6px;"><strong>三种方法对比</strong>：扩展欧几里得 $O(n \log p)$ → 50 分（$n$ 较小时可用）；费马小定理 + 快速幂 $O(n \log p)$ → 80 分（⚠️ 仅在 $p$ 为素数时正确）；<strong>线性逆元 $O(n)$ → 100 分</strong>（不依赖 $p$ 是否为素数）。</p>
+  </div>
+
+</div>
+
+<script>
+let steps = [];
+let currentStep = -1;
+let autoTimer = null;
+let inv = [];
+let sum = 0;
+let p = 0;
+
+function generateSteps(inputP, inputN) {
+  p = parseInt(inputP);
+  const n = parseInt(inputN);
+  if (n >= p) { alert('n 必须小于 p！'); return []; }
+  if (n < 1 || p < 3) { alert('请输入有效的 p 和 n'); return []; }
+
+  const s = [];
+  inv = [0];
+  inv[1] = 1;
+  sum = 1;
+
+  s.push({
+    type: 'init',
+    desc: `初始化：inv[1] = 1，S = 1（i=1 的逆元为 1）`,
+    i: 1, k: 0, r: 0,
+    invVal: 1, sumVal: 1,
+    table: [{ i: 1, k: '-', r: '-', inv: 1 }]
+  });
+
+  for (let i = 2; i <= n; i++) {
+    const k = Math.floor(p / i);
+    const r = p % i;
+    const invPrev = inv[r];
+    const term = (k * invPrev) % p;
+    const invI = (p - term) % p;
+    inv[i] = invI;
+    sum = (sum + invI) % p;
+
+    s.push({
+      type: 'step',
+      desc: `inv[${i}] = ${p} - ${k} × inv[${r}] = ${p} - ${k}×${invPrev} = ${p} - ${term} = ${invI}，S = ${sum}`,
+      i, k, r,
+      invPrev,
+      invVal: invI, sumVal: sum,
+      highlightRow: i
+    });
+  }
+
+  s.push({
+    type: 'done',
+    desc: `计算完成！S = Σ i⁻¹ mod ${p} = ${sum}`,
+    i: '-', k: '-', r: '-',
+    invVal: '-', sumVal: sum,
+    highlightRow: -1
+  });
+
+  return s;
+}
+
+function renderStep(stepIndex) {
+  const area = document.getElementById('demoArea');
+  const step = steps[stepIndex];
+  if (!step) {
+    area.innerHTML = '<div style="text-align:center;color:#a0aec0;padding:40px 0;">等待开始...</div>';
+    return;
+  }
+
+  const iVal = step.i;
+  const kVal = step.k;
+  const rVal = step.r;
+  const invVal = step.invVal;
+  const sumVal = step.sumVal;
+
+  document.getElementById('statusI').textContent = iVal;
+  document.getElementById('statusK').textContent = kVal;
+  document.getElementById('statusR').textContent = rVal;
+  document.getElementById('statusInv').textContent = invVal;
+  document.getElementById('statusSum').textContent = sumVal;
+
+  const formulaBox = document.getElementById('formulaBox');
+  if (step.type === 'init') {
+    formulaBox.innerHTML = `<strong>初始化：</strong>inv[1] = 1，S = 1`;
+  } else if (step.type === 'step') {
+    formulaBox.innerHTML = `
+      <div>inv[<span class="highlight-num">${iVal}</span>] = ${p} − <span class="highlight-formula">⌊${p}/${iVal}⌋</span> × inv[<span class="highlight-num">${p} mod ${iVal}</span>] mod ${p}</div>
+      <div style="margin-top:6px;">= ${p} − <span class="highlight-formula">${kVal}</span> × inv[<span class="highlight-num">${rVal}</span>] mod ${p}</div>
+      <div style="margin-top:6px;">= ${p} − <span class="highlight-formula">${kVal}</span> × <span class="highlight-num">${step.invPrev}</span> mod ${p}</div>
+      <div style="margin-top:6px;">= ${p} − <span class="highlight-num">${(kVal * step.invPrev) % p}</span> mod ${p} = <span class="highlight-result">${invVal}</span></div>
+      <div style="margin-top:6px;">累计和 S = <span class="highlight-result">${sumVal}</span></div>
+    `;
+  } else if (step.type === 'done') {
+    formulaBox.innerHTML = `<strong>✅ 计算完成！</strong> S = Σ i⁻¹ mod ${p} = <span class="highlight-result">${sumVal}</span>`;
+  }
+
+  const nVal = steps.length - 1;
+  const tableRows = [];
+  for (let i = 1; i <= nVal; i++) {
+    const st = steps[i];
+    if (!st) continue;
+    const k = st.type === 'init' ? '-' : st.k;
+    const r = st.type === 'init' ? '-' : st.r;
+    const invV = st.type === 'init' ? 1 : st.invVal;
+    const highlight = i === step.i;
+    tableRows.push(`<tr${highlight ? ' class="highlight"' : ''}>
+      <td class="num">${i}</td>
+      <td class="num">${k}</td>
+      <td class="num">${r}</td>
+      <td class="num">${invV}</td>
+    </tr>`);
+  }
+
+  area.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>i</th><th>⌊p/i⌋</th><th>p % i</th><th>inv[i]</th>
+        </tr></thead>
+        <tbody>${tableRows.join('')}</tbody>
+      </table>
+    </div>
+    <div class="step-detail">
+      ${step.type === 'init' ? '🟢 ' : step.type === 'done' ? '✅ ' : '🔵 '}
+      <strong>步骤 ${stepIndex + 1}：</strong>${step.desc}
+    </div>
+  `;
+}
+
+function renderStepList() {
+  const list = document.getElementById('stepList');
+  list.innerHTML = '';
+  steps.forEach((step, idx) => {
+    const div = document.createElement('div');
+    div.className = 'step' + (idx === currentStep ? ' active' : '');
+    const label = idx === 0 ? '初始化' : idx === steps.length - 1 ? '完成' : `i=${step.i}`;
+    div.innerHTML = `<span class="step-num">#${idx+1}</span><span class="step-desc">${label} — ${step.desc.substring(0, 50)}${step.desc.length > 50 ? '…' : ''}</span>`;
+    div.onclick = () => jumpToStep(idx);
+    list.appendChild(div);
+  });
+  if (currentStep >= 0) {
+    const active = list.querySelector('.step.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function renderAll() {
+  const total = steps.length;
+  document.getElementById('stepNum').textContent = total > 0 ? currentStep + 1 : 0;
+  document.getElementById('stepTotal').textContent = total;
+  document.getElementById('btnStep').disabled = (currentStep >= total - 1);
+  document.getElementById('btnReset').disabled = (total === 0);
+  renderStep(currentStep);
+  renderStepList();
+}
+
+function startDemo() {
+  stopAuto();
+  const pVal = document.getElementById('inputP').value.trim();
+  const nVal = document.getElementById('inputN').value.trim();
+  if (!pVal || !nVal) { alert('请输入 p 和 n！'); return; }
+  steps = generateSteps(pVal, nVal);
+  if (steps.length === 0) return;
+  currentStep = 0;
+  renderAll();
+}
+
+function stepForward() {
+  if (steps.length === 0) { startDemo(); return; }
+  if (currentStep < steps.length - 1) { currentStep++; renderAll(); }
+}
+
+function prevStep() {
+  if (currentStep > 0) { currentStep--; renderAll(); }
+}
+
+function jumpToStep(idx) {
+  if (idx < 0 || idx >= steps.length) return;
+  currentStep = idx;
+  renderAll();
+}
+
+function resetSteps() { stopAuto(); currentStep = 0; renderAll(); }
+
+function resetDemo() {
+  stopAuto();
+  steps = []; currentStep = -1; renderAll();
+  document.getElementById('demoArea').innerHTML =
+    '<div style="text-align:center;color:#a0aec0;padding:40px 0;">点击「🚀 逐步演示」或「▶️ 自动演示」开始</div>';
+  document.getElementById('stepList').innerHTML = '<div style="color:#a0aec0;">等待开始...</div>';
+  document.getElementById('formulaBox').innerHTML = '输入 p 和 n，点击「逐步演示」开始';
+  document.getElementById('stepNum').textContent = '0';
+  document.getElementById('stepTotal').textContent = '0';
+  document.getElementById('statusI').textContent = '—';
+  document.getElementById('statusK').textContent = '—';
+  document.getElementById('statusR').textContent = '—';
+  document.getElementById('statusInv').textContent = '—';
+  document.getElementById('statusSum').textContent = '—';
+}
+
+function autoPlay() {
+  if (autoTimer) { stopAuto(); return; }
+  if (steps.length === 0 || currentStep >= steps.length - 1) { startDemo(); if (steps.length === 0) return; currentStep = -1; }
+  const speed = parseInt(document.getElementById('speedSlider').value) || 800;
+  document.getElementById('btnAuto').textContent = '⏸ 暂停';
+  document.getElementById('btnStep').disabled = true;
+  function tick() {
+    if (currentStep < steps.length - 1) {
+      currentStep++; renderAll();
+      if (currentStep < steps.length - 1) { autoTimer = setTimeout(tick, speed); } else { stopAuto(); }
+    }
+  }
+  autoTimer = setTimeout(tick, speed);
+}
+
+function stopAuto() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  document.getElementById('btnAuto').textContent = '▶️ 自动演示';
+  document.getElementById('btnStep').disabled = (currentStep >= steps.length - 1 && steps.length > 0);
+}
+
+document.getElementById('speedSlider').addEventListener('input', function () {
+  document.getElementById('speedLabel').textContent = this.value + 'ms';
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'ArrowRight') { e.preventDefault(); stepForward(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
+  else if (e.key === ' ') { e.preventDefault(); autoTimer ? stopAuto() : autoPlay(); }
+});
+
+document.getElementById('inputN').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') startDemo();
+});
+document.getElementById('inputP').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') startDemo();
+});
+</script>
+</body>
+</html>

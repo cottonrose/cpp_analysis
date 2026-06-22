@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>和式求和 — 双重求和推导 交互演示</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8; color: #2d3748;
+  min-height: 100vh;
+}
+header {
+  background: linear-gradient(135deg, #1a365d, #2a5298);
+  color: #fff; padding: 20px 32px;
+  display: flex; align-items: center; gap: 16px;
+}
+header h1 { font-size: 1.5rem; font-weight: 700; }
+header .badge { background: #38a169; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; }
+.container { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
+.card {
+  background: #fff; border-radius: 12px; padding: 20px 24px;
+  margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card h2 { font-size: 1.1rem; margin-bottom: 10px; color: #1a365d; }
+.card p { line-height: 1.7; font-size: 0.92rem; color: #4a5568; }
+
+.controls {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px;
+}
+.controls label { font-size: 0.85rem; font-weight: 600; color: #4a5568; }
+.controls input[type="text"] {
+  padding: 7px 10px; border: 1px solid #cbd5e0; border-radius: 6px;
+  font-size: 0.9rem; font-family: "SF Mono", "Fira Code", monospace;
+}
+.controls input:focus { border-color: #5a67d8; outline: none; box-shadow: 0 0 0 3px rgba(90,103,216,0.15); }
+.controls input[type="range"] { width: 100px; vertical-align: middle; }
+.btn {
+  padding: 7px 16px; border: none; border-radius: 6px; font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: #2b6cb0; color: #fff; }
+.btn-primary:hover { background: #2c5282; }
+.btn-success { background: #38a169; color: #fff; }
+.btn-success:hover { background: #2f855a; }
+.btn-warning { background: #dd6b20; color: #fff; }
+.btn-warning:hover { background: #c05621; }
+.btn-gray { background: #a0aec0; color: #fff; }
+.btn-gray:hover { background: #718096; }
+.btn-purple { background: #5a67d8; color: #fff; }
+.btn-purple:hover { background: #4c51bf; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-sm { padding: 4px 10px; font-size: 0.78rem; }
+
+.demo-area {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 16px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;
+  min-height: 200px;
+}
+
+/* Formula display */
+.formula-display {
+  text-align: center; font-size: 1.1rem; padding: 10px;
+  background: #1a202c; color: #fbd38d; border-radius: 8px;
+  font-family: "SF Mono", "Fira Code", monospace; line-height: 1.8;
+}
+
+/* Array boxes */
+.array-display {
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+  align-items: center; padding: 8px 0;
+}
+.array-box {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 56px; height: 56px; background: #e2e8f0; border-radius: 8px;
+  font-family: "SF Mono", monospace; font-size: 1rem; font-weight: 700;
+  color: #2d3748; border: 2px solid #cbd5e0; transition: all 0.25s;
+  flex-direction: column; gap: 2px;
+}
+.array-box .a-label {
+  font-size: 0.55rem; color: #a0aec0; font-weight: 600;
+}
+.array-box.highlight-a {
+  background: #f6e05e; border-color: #d69e2e; transform: scale(1.12);
+  box-shadow: 0 0 12px rgba(214,158,46,0.4);
+}
+.array-box.highlight-b {
+  background: #feb2b2; border-color: #e53e3e; transform: scale(1.12);
+  box-shadow: 0 0 12px rgba(229,62,62,0.3);
+}
+.array-box.counted {
+  background: #c6f6d5; border-color: #48bb78;
+}
+.array-box.counted .a-label { color: #22543d; }
+.array-plus { font-size: 1.3rem; color: #a0aec0; padding: 0 2px; }
+
+/* Pair info */
+.pair-info {
+  text-align: center; padding: 8px 16px; background: #edf2f7; border-radius: 8px;
+  font-size: 0.95rem;
+}
+.pair-info .contrib {
+  display: inline-block; background: #bee3f8; padding: 3px 12px;
+  border-radius: 6px; font-weight: 700; font-family: "SF Mono", monospace;
+  margin: 0 6px;
+}
+
+/* Running total */
+.total-bar {
+  display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
+  padding: 8px; font-size: 1rem;
+}
+.total-bar .total-item { text-align: center; }
+.total-bar .total-item .label { font-size: 0.75rem; color: #718096; }
+.total-bar .total-item .value {
+  font-size: 1.3rem; font-weight: 800; font-family: "SF Mono", monospace;
+}
+.total-bar .total-item .value.cur-total { color: #2b6cb0; }
+.total-bar .total-item .value.formula-val { color: #38a169; }
+
+.status-bar {
+  display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem;
+  padding: 10px 16px; background: #edf2f7; border-radius: 8px; margin-top: 8px;
+}
+.status-item strong { color: #1a365d; }
+
+.step-list {
+  max-height: 240px; overflow-y: auto; font-size: 0.8rem;
+}
+.step-list .step {
+  padding: 5px 8px; border-left: 3px solid transparent; margin-bottom: 2px; cursor: pointer;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.step-list .step.active { background: #ebf8ff; border-left-color: #3182ce; }
+.step-list .step .step-num { font-weight: 700; color: #2b6cb0; flex-shrink: 0; min-width: 28px; }
+.step-list .step .step-desc { color: #4a5568; }
+
+.code-block {
+  background: #1a202c; color: #e2e8f0; padding: 16px; border-radius: 8px;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 0.8rem;
+  line-height: 1.6; overflow-x: auto; white-space: pre;
+}
+.code-block .kw { color: #9f7aea; }
+.code-block .type { color: #68d391; }
+.code-block .num { color: #fbd38d; }
+.code-block .str { color: #fc8181; }
+.code-block .cmt { color: #718096; font-style: italic; }
+.code-block .fn { color: #63b3ed; }
+.code-block .op { color: #f6ad55; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+.formula-box {
+  padding: 10px 14px; background: #1a202c; color: #e2e8f0;
+  border-radius: 8px; font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.85rem; line-height: 1.7;
+}
+.formula-box .hl { color: #fbd38d; font-weight: 700; }
+.formula-box .op { color: #68d391; }
+.formula-box .eq { color: #fc8181; }
+
+.result-box {
+  text-align: center; padding: 12px; background: #c6f6d5; border: 2px solid #48bb78;
+  border-radius: 8px; font-size: 1.1rem; color: #22543d; margin-top: 8px;
+}
+.result-box .big { font-size: 1.8rem; font-weight: 900; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>和式求和 — ΣᵢΣⱼ (aᵢ + aⱼ)</h1>
+  <span class="badge">和式化简</span>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>📋 题目描述</h2>
+    <p>给定数组 $a_1, a_2, \dots, a_n$，计算 $S = \displaystyle\sum_{i=1}^{n}\sum_{j=i+1}^{n} (a_i + a_j)$，输出 $S \bmod (10^9+7)$。</p>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <label>输入数组（逗号或空格分隔）：</label>
+      <input id="inputArr" type="text" value="5, 1, 3, 2" placeholder="如: 1, 2, 3, 4" style="width:260px;">
+      <button class="btn btn-primary" onclick="startDemo()">🚀 逐步演示</button>
+      <button class="btn btn-success" id="btnAuto" onclick="autoPlay()">▶️ 自动演示</button>
+      <button class="btn btn-gray" onclick="resetDemo()">↺ 重置</button>
+    </div>
+    <div class="controls" style="margin-bottom:0;">
+      <span style="font-size:0.82rem;color:#718096;">
+        速度：<input id="speedSlider" type="range" min="300" max="2000" value="800" step="100">
+        <span id="speedLabel">800ms</span>
+      </span>
+      <span style="margin-left:12px;font-size:0.82rem;color:#718096;">
+        💡 <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">→</kbd>
+        <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">←</kbd>
+        <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">Space</kbd>
+        <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">Enter</kbd>
+      </span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧮 求和推导过程</h2>
+    <div style="margin-bottom:10px;">
+      <button class="btn btn-warning btn-sm" id="btnStep" onclick="stepForward()" disabled>⏭ 下一对</button>
+      <button class="btn btn-gray btn-sm" id="btnReset" onclick="resetSteps()" disabled>↺ 重置</button>
+      <span style="margin-left:10px;font-size:0.85rem;font-weight:600;">
+        步骤 <span id="stepNum">0</span> / <span id="stepTotal">0</span>
+      </span>
+    </div>
+
+    <div class="demo-area" id="demoArea">
+      <div style="text-align:center;color:#a0aec0;padding:40px 0;">
+        输入数组后点击「🚀 逐步演示」
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-item"><strong>当前对 (i,j)：</strong><span id="curPair">—</span></div>
+      <div class="status-item"><strong>贡献值：</strong><span id="curContrib">—</span></div>
+      <div class="status-item"><strong>已处理对数：</strong><span id="pairCount">0</span></div>
+      <div class="status-item"><strong>公式验证：</strong><span id="formulaCheck">—</span></div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h2>📜 步骤历史</h2>
+      <div class="step-list" id="stepList">
+        <div style="color:#a0aec0;">等待开始...</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>📐 公式验证</h2>
+      <div id="formulaPanel">
+        <div style="color:#a0aec0;font-size:0.85rem;">等待开始...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💻 参考代码 (C++)</h2>
+    <div class="code-block">
+<span class="cmt">// 和式求和 — O(n) 公式解法</span>
+<span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="kw">const</span> <span class="type">long</span> <span class="type">long</span> <span class="type">MOD</span> = <span class="num">1e9</span> + <span class="num">7</span>;
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="fn">ios::sync_with_stdio</span>(<span class="kw">false</span>);
+    <span class="fn">cin.tie</span>(<span class="kw">nullptr</span>);
+
+    <span class="type">int</span> T;
+    cin <span class="op">&gt;&gt;</span> T;
+    <span class="kw">while</span> (T<span class="op">--</span>) {
+        <span class="type">int</span> n;
+        cin <span class="op">&gt;&gt;</span> n;
+        <span class="type">long</span> <span class="type">long</span> sum = <span class="num">0</span>;
+        <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i <span class="op">&lt;</span> n; i<span class="op">++</span>) {
+            <span class="type">int</span> x; cin <span class="op">&gt;&gt;</span> x;
+            sum = (sum <span class="op">+</span> x) <span class="op">%</span> MOD;
+        }
+        <span class="type">long</span> <span class="type">long</span> ans = ((n <span class="op">-</span> <span class="num">1</span>) <span class="op">%</span> MOD) <span class="op">*</span> sum <span class="op">%</span> MOD;
+        cout <span class="op">&lt;&lt;</span> ans <span class="op">&lt;&lt;</span> <span class="str">'\n'</span>;
+    }
+    <span class="kw">return</span> <span class="num">0</span>;
+}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧠 解题思路</h2>
+    <p>
+      <strong>①</strong> 直接双重循环 $O(n^2)$ 在大数据下会超时。<br>
+      <strong>②</strong> 考察每个 $a_k$ 在总和中出现的次数：
+        &emsp;作为 $a_i$（$i=k$）出现 $(n-k)$ 次，
+        &emsp;作为 $a_j$（$j=k$）出现 $(k-1)$ 次。<br>
+      <strong>③</strong> 每个 $a_k$ 共出现 $(n-k)+(k-1) = n-1$ 次。<br>
+      <strong>④</strong> $S = (n-1) \times \sum_{i=1}^{n} a_i$，$O(n)$ 一次遍历即可。
+    </p>
+  </div>
+
+</div>
+
+<script>
+// ============ Data ============
+let arr = [];
+let steps = [];
+let currentStep = -1;
+let autoTimer = null;
+const MOD = 1000000007;
+
+// ============ Generate Steps ============
+function generateSteps(inputStr) {
+  const nums = inputStr.split(/[,\s]+/).map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+  if (nums.length < 2) return [];
+  arr = nums;
+  const n = arr.length;
+  const s = [];
+
+  // Step 0: init
+  s.push({ type: 'init', desc: `初始化：数组 a = [${arr.join(', ')}]，n = ${n}` });
+
+  let pairIdx = 0;
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const contrib = arr[i] + arr[j];
+      pairIdx++;
+      s.push({
+        type: 'pair',
+        i, j,
+        contrib,
+        pairIdx,
+        totalPairs: n * (n - 1) / 2,
+        desc: `对 (${i+1},${j+1})：a${i+1}(=${arr[i]}) + a${j+1}(=${arr[j]}) = ${contrib}`
+      });
+    }
+  }
+
+  // Done: show formula
+  const totalSum = arr.reduce((a, b) => a + b, 0);
+  const naiveTotal = s.filter(st => st.type === 'pair').reduce((sum, st) => sum + st.contrib, 0);
+  const formulaTotal = (n - 1) * totalSum;
+
+  s.push({
+    type: 'done',
+    totalSum,
+    naiveTotal,
+    formulaTotal,
+    desc: `遍历完毕！暴力求和 = ${naiveTotal}，公式 (n-1)×sum = ${formulaTotal}，两者相等！`
+  });
+
+  // Formula verification
+  s.push({
+    type: 'verify',
+    totalSum, n,
+    desc: `公式验证：每个 a_k 出现 (n-1) = ${n-1} 次，S = ${n-1} × ${totalSum} = ${(n-1)*totalSum}`
+  });
+
+  return s;
+}
+
+// ============ Render ============
+function renderStep(stepIndex) {
+  const area = document.getElementById('demoArea');
+  if (stepIndex < 0 || stepIndex >= steps.length) {
+    area.innerHTML = '<div style="text-align:center;color:#a0aec0;padding:40px 0;">等待开始...</div>';
+    return;
+  }
+
+  const step = steps[stepIndex];
+  const n = arr.length;
+  let html = '';
+
+  // Always show array
+  html += '<div class="array-display">';
+  for (let k = 0; k < n; k++) {
+    let cls = 'array-box';
+    if (step.type === 'pair') {
+      if (k === step.i) cls += ' highlight-a';
+      else if (k === step.j) cls += ' highlight-b';
+    } else if (step.type === 'done' || step.type === 'verify') {
+      cls += ' counted';
+    }
+    html += `<div class="${cls}"><span class="a-label">a${k+1}</span>${arr[k]}</div>`;
+    if (k < n - 1) html += '<span class="array-plus">,</span>';
+  }
+  html += '</div>';
+
+  // Pair info
+  if (step.type === 'pair') {
+    html += `<div class="pair-info">
+      (i, j) = (<strong>${step.i+1}</strong>, <strong>${step.j+1}</strong>)
+      &emsp; a<sub>i</sub> = ${arr[step.i]}, a<sub>j</sub> = ${arr[step.j]}
+      &emsp; 贡献 = <span class="contrib">${step.contrib}</span>
+      &emsp; 已处理 <strong>${step.pairIdx}</strong> / ${step.totalPairs} 对
+    </div>`;
+
+    // Running sum from all previous pairs
+    let runningSum = 0;
+    for (let s = 0; s <= stepIndex; s++) {
+      if (steps[s].type === 'pair') runningSum += steps[s].contrib;
+    }
+    html += `<div class="total-bar">
+      <div class="total-item">
+        <div class="label">当前累计和</div>
+        <div class="value cur-total">${runningSum}</div>
+      </div>
+      <div class="total-item">
+        <div class="label">公式验证 (n-1)×sum</div>
+        <div class="value formula-val">${(n-1) * arr.reduce((a,b)=>a+b, 0)}</div>
+      </div>
+    </div>`;
+  }
+
+  if (step.type === 'done') {
+    const match = step.naiveTotal === step.formulaTotal;
+    html += `<div class="result-box">
+      暴力求和结果：<span class="big">${step.naiveTotal}</span>
+      &emsp; 公式结果：<span class="big">${step.formulaTotal}</span>
+      <br>${match ? '✅ 两者相等，公式正确！' : '❌ 不一致，请检查计算'}
+      <br><small style="color:#276749;">S = (n-1) × sum = ${step.formulaTotal}</small>
+    </div>`;
+  }
+
+  if (step.type === 'verify') {
+    const each = step.totalSum;
+    html += `<div class="formula-box">
+      <span class="op">S</span> = ΣᵢΣⱼ(aᵢ + aⱼ)<br>
+      <span class="op">每个 aₖ 的出现次数</span> = (n−k) + (k−1) = <span class="hl">n−1</span><br>
+      <span class="op">→</span> S = (n−1) × Σᵢ aᵢ<br>
+      <span class="op">→</span> S = ${step.n-1} × ${each} = <span class="hl">${(step.n-1)*each}</span>
+    </div>`;
+  }
+
+  if (step.type === 'init') {
+    html += `<div style="text-align:center;padding:16px;font-size:1rem;color:#4a5568;">
+      数组长度为 <strong>${n}</strong>，共 <strong>${n*(n-1)/2}</strong> 对需要求和。点击「⏭ 下一对」开始遍历。
+    </div>`;
+  }
+
+  area.innerHTML = html;
+
+  // Update status bar
+  if (step.type === 'pair') {
+    document.getElementById('curPair').textContent = `(${step.i+1}, ${step.j+1})`;
+    document.getElementById('curContrib').textContent = step.contrib;
+    document.getElementById('pairCount').textContent = `${step.pairIdx} / ${step.totalPairs}`;
+  } else if (step.type === 'done' || step.type === 'verify') {
+    document.getElementById('curPair').textContent = '—';
+    document.getElementById('curContrib').textContent = '—';
+    document.getElementById('pairCount').textContent = `${steps.filter(s => s.type === 'pair').length}`;
+  } else {
+    document.getElementById('curPair').textContent = '—';
+    document.getElementById('curContrib').textContent = '—';
+    document.getElementById('pairCount').textContent = '0';
+  }
+
+  // Formula check
+  const totalSum = arr.reduce((a, b) => a + b, 0);
+  const formulaVal = (n - 1) * totalSum;
+  let runningSum = 0;
+  for (let s = 0; s <= stepIndex; s++) {
+    if (steps[s].type === 'pair') runningSum += steps[s].contrib;
+  }
+  if (step.type === 'pair') {
+    document.getElementById('formulaCheck').textContent = `当前 ${runningSum}，公式 ${formulaVal}`;
+  } else if (step.type === 'done' || step.type === 'verify') {
+    document.getElementById('formulaCheck').textContent = `✅ ${runningSum} = ${formulaVal}`;
+  } else {
+    document.getElementById('formulaCheck').textContent = '—';
+  }
+}
+
+function renderStepList() {
+  const list = document.getElementById('stepList');
+  list.innerHTML = '';
+  const icons = { init: '📥', pair: '🔗', done: '✅', verify: '📐' };
+  steps.forEach((step, idx) => {
+    const div = document.createElement('div');
+    div.className = 'step' + (idx === currentStep ? ' active' : '');
+    div.innerHTML = `<span class="step-num">#${idx+1}</span><span class="step-icon">${icons[step.type]||'•'}</span><span class="step-desc">${step.desc}</span>`;
+    div.onclick = () => jumpToStep(idx);
+    list.appendChild(div);
+  });
+  if (currentStep >= 0) {
+    const active = list.querySelector('.step.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function renderFormulaPanel() {
+  const panel = document.getElementById('formulaPanel');
+  const n = arr.length;
+  const sum = arr.reduce((a, b) => a + b, 0);
+  if (n < 2) {
+    panel.innerHTML = '<div style="color:#a0aec0;font-size:0.85rem;">等待开始...</div>';
+    return;
+  }
+  panel.innerHTML = `<div class="formula-box">
+    <span class="op">S</span> = Σᵢ₌₁ⁿ Σⱼ₌ᵢ₊₁ⁿ (aᵢ + aⱼ)<br><br>
+    <span class="op">每个 aₖ 的出现次数</span><br>
+    &emsp;作为 aᵢ（$i=k$）：j = k+1 … n → <span class="hl">n−k</span> 次<br>
+    &emsp;作为 aⱼ（$j=k$）：i = 1 … k−1 → <span class="hl">k−1</span> 次<br>
+    &emsp;合计：<span class="hl">(n−k)+(k−1) = n−1 = ${n-1}</span> 次<br><br>
+    <span class="op">→</span> S = (n−1) × Σᵢ aᵢ<br>
+    <span class="op">→</span> S = ${n-1} × ${sum} = <span class="hl">${(n-1)*sum}</span>
+  </div>`;
+}
+
+function renderAll() {
+  const total = steps.length;
+  document.getElementById('stepNum').textContent = total > 0 ? currentStep + 1 : 0;
+  document.getElementById('stepTotal').textContent = total;
+  document.getElementById('btnStep').disabled = (currentStep >= total - 1);
+  document.getElementById('btnReset').disabled = (total === 0);
+  renderStep(currentStep);
+  renderStepList();
+  renderFormulaPanel();
+}
+
+// ============ Controls ============
+function startDemo() {
+  stopAuto();
+  const val = document.getElementById('inputArr').value.trim();
+  if (!val) { alert('请输入数组！'); return; }
+  steps = generateSteps(val);
+  if (steps.length === 0) { alert('至少需要 2 个数字！'); return; }
+  currentStep = 1; // skip init, start at first pair
+  renderAll();
+}
+
+function stepForward() {
+  if (steps.length === 0) { startDemo(); return; }
+  if (currentStep < steps.length - 1) { currentStep++; renderAll(); }
+}
+
+function prevStep() {
+  if (currentStep > 0) { currentStep--; renderAll(); }
+}
+
+function jumpToStep(idx) {
+  if (idx < 0 || idx >= steps.length) return;
+  currentStep = idx;
+  renderAll();
+}
+
+function resetSteps() { stopAuto(); currentStep = 0; renderAll(); }
+
+function resetDemo() {
+  stopAuto();
+  steps = []; currentStep = -1; renderAll();
+  document.getElementById('demoArea').innerHTML = '<div style="text-align:center;color:#a0aec0;padding:40px 0;">输入数组后点击「🚀 逐步演示」</div>';
+  document.getElementById('stepList').innerHTML = '<div style="color:#a0aec0;">等待开始...</div>';
+  document.getElementById('formulaPanel').innerHTML = '<div style="color:#a0aec0;font-size:0.85rem;">等待开始...</div>';
+  document.getElementById('stepNum').textContent = '0';
+  document.getElementById('stepTotal').textContent = '0';
+  document.getElementById('curPair').textContent = '—';
+  document.getElementById('curContrib').textContent = '—';
+  document.getElementById('pairCount').textContent = '0';
+  document.getElementById('formulaCheck').textContent = '—';
+}
+
+function autoPlay() {
+  if (autoTimer) { stopAuto(); return; }
+  if (steps.length === 0 || currentStep >= steps.length - 1) { startDemo(); if (steps.length === 0) return; if (currentStep <= 0) currentStep = 1; }
+  const speed = parseInt(document.getElementById('speedSlider').value) || 800;
+  document.getElementById('btnAuto').textContent = '⏸ 暂停';
+  document.getElementById('btnStep').disabled = true;
+  function tick() {
+    if (currentStep < steps.length - 1) { currentStep++; renderAll(); if (currentStep < steps.length - 1) autoTimer = setTimeout(tick, speed); else stopAuto(); }
+  }
+  autoTimer = setTimeout(tick, speed);
+}
+
+function stopAuto() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  document.getElementById('btnAuto').textContent = '▶️ 自动演示';
+  document.getElementById('btnStep').disabled = (currentStep >= steps.length - 1 && steps.length > 0);
+}
+
+document.getElementById('speedSlider').addEventListener('input', function() {
+  document.getElementById('speedLabel').textContent = this.value + 'ms';
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight') { e.preventDefault(); stepForward(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
+  else if (e.key === ' ') { e.preventDefault(); autoTimer ? stopAuto() : autoPlay(); }
+});
+
+document.getElementById('inputArr').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') startDemo();
+});
+</script>
+</body>
+</html>

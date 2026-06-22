@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>九九归一 — 数字根 · 模9性质 交互演示</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8; color: #2d3748;
+  min-height: 100vh;
+}
+header {
+  background: linear-gradient(135deg, #1a365d, #553c9a);
+  color: #fff; padding: 20px 32px;
+  display: flex; align-items: center; gap: 16px;
+}
+header h1 { font-size: 1.5rem; font-weight: 700; }
+header .badge { background: #38a169; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; }
+.container { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
+.card {
+  background: #fff; border-radius: 12px; padding: 20px 24px;
+  margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card h2 { font-size: 1.1rem; margin-bottom: 10px; color: #1a365d; }
+.card h3 { font-size: 0.95rem; margin: 12px 0 6px; color: #2d3748; }
+.card p { line-height: 1.7; font-size: 0.92rem; color: #4a5568; }
+
+/* 控制栏 */
+.controls {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px;
+}
+.controls label { font-size: 0.85rem; font-weight: 600; color: #4a5568; }
+.controls input[type="text"] {
+  width: 240px; padding: 7px 10px; border: 1px solid #cbd5e0; border-radius: 6px;
+  font-size: 0.9rem; font-family: "SF Mono", "Fira Code", monospace;
+}
+.controls input[type="text"]:focus { border-color: #5a67d8; outline: none; box-shadow: 0 0 0 3px rgba(90,103,216,0.15); }
+.controls input[type="range"] { width: 100px; vertical-align: middle; }
+.btn {
+  padding: 7px 16px; border: none; border-radius: 6px; font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: #2b6cb0; color: #fff; }
+.btn-primary:hover { background: #2c5282; }
+.btn-success { background: #38a169; color: #fff; }
+.btn-success:hover { background: #2f855a; }
+.btn-warning { background: #dd6b20; color: #fff; }
+.btn-warning:hover { background: #c05621; }
+.btn-gray { background: #a0aec0; color: #fff; }
+.btn-gray:hover { background: #718096; }
+.btn-purple { background: #5a67d8; color: #fff; }
+.btn-purple:hover { background: #4c51bf; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-sm { padding: 4px 10px; font-size: 0.78rem; }
+
+/* 主演示区 */
+.demo-area {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 16px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;
+  min-height: 240px;
+}
+
+/* 数字显示 */
+.number-display {
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 1.6rem; font-weight: 700; text-align: center;
+  padding: 12px; background: #1a202c; color: #fbd38d;
+  border-radius: 8px; letter-spacing: 3px; word-break: break-all;
+  line-height: 1.4;
+}
+
+/* 各位数字盒子 */
+.digit-row {
+  display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+  justify-content: center; padding: 8px 0;
+}
+.digit-box {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; background: #e2e8f0; border-radius: 6px;
+  font-family: "SF Mono", monospace; font-size: 1.2rem; font-weight: 700;
+  color: #2d3748; border: 2px solid #cbd5e0; transition: all 0.2s;
+}
+.digit-box.active {
+  background: #f6e05e; border-color: #d69e2e; transform: scale(1.1);
+}
+.digit-box.done {
+  background: #c6f6d5; border-color: #48bb78;
+}
+.digit-op {
+  font-size: 1.1rem; font-weight: 700; color: #718096; padding: 0 2px;
+}
+
+/* 求和结果 */
+.sum-result {
+  font-size: 1.1rem; text-align: center; padding: 6px;
+  font-weight: 600;
+}
+.sum-result .sum-num {
+  display: inline-block; background: #bee3f8; padding: 4px 14px;
+  border-radius: 6px; border: 2px solid #3182ce; font-family: "SF Mono", monospace;
+  font-size: 1.3rem;
+}
+.sum-result .arrow { color: #a0aec0; font-size: 1.4rem; margin: 0 8px; }
+
+/* 状态信息 */
+.status-bar {
+  display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem;
+  padding: 10px 16px; background: #edf2f7; border-radius: 8px; margin-top: 8px;
+}
+.status-item strong { color: #1a365d; }
+.status-item .highlight { color: #dd6b20; font-weight: 700; }
+.status-item .mod-val {
+  display: inline-block; background: #e9d8fd; padding: 1px 8px;
+  border-radius: 4px; color: #553c9a; font-weight: 700; font-family: monospace;
+}
+
+/* 步骤历史 */
+.step-list {
+  max-height: 220px; overflow-y: auto; font-size: 0.8rem;
+}
+.step-list .step {
+  padding: 5px 8px; border-left: 3px solid transparent; margin-bottom: 2px; cursor: pointer;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.step-list .step.active { background: #ebf8ff; border-left-color: #3182ce; }
+.step-list .step .step-num { font-weight: 700; color: #2b6cb0; flex-shrink: 0; min-width: 28px; }
+.step-list .step .step-icon { flex-shrink: 0; }
+.step-list .step .step-desc { color: #4a5568; }
+
+/* 模9性质卡片 */
+.mod9-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+@media (max-width: 700px) { .mod9-grid { grid-template-columns: 1fr; } }
+.mod9-item {
+  padding: 12px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;
+}
+.mod9-item .mod9-label {
+  font-size: 0.78rem; font-weight: 600; color: #718096; margin-bottom: 4px;
+}
+.mod9-item .mod9-value {
+  font-family: "SF Mono", monospace; font-size: 1rem; font-weight: 700;
+  color: #2d3748;
+}
+.mod9-item .mod9-value.match {
+  color: #38a169;
+}
+.mod9-item .mod9-value .calc-step {
+  font-size: 0.82rem; font-weight: 400; color: #718096;
+}
+
+/* 公式展示 */
+.formula-box {
+  padding: 12px 16px; background: #1a202c; color: #e2e8f0;
+  border-radius: 8px; font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.9rem; line-height: 1.8; margin-top: 8px;
+}
+.formula-box .highlight-val { color: #fbd38d; font-weight: 700; }
+.formula-box .highlight-op { color: #68d391; }
+.formula-box .highlight-match { color: #fc8181; font-weight: 700; }
+.formula-box .arrow { color: #718096; }
+
+/* 代码块 */
+.code-block {
+  background: #1a202c; color: #e2e8f0; padding: 16px; border-radius: 8px;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 0.8rem;
+  line-height: 1.6; overflow-x: auto; white-space: pre;
+}
+.code-block .kw { color: #9f7aea; }
+.code-block .type { color: #68d391; }
+.code-block .num { color: #fbd38d; }
+.code-block .str { color: #fc8181; }
+.code-block .cmt { color: #718096; font-style: italic; }
+.code-block .fn { color: #63b3ed; }
+.code-block .op { color: #f6ad55; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+/* 结论高亮 */
+.conclusion-box {
+  padding: 12px 16px; background: #c6f6d5; border: 2px solid #48bb78;
+  border-radius: 8px; text-align: center; font-size: 1rem;
+  color: #22543d; margin-top: 8px;
+}
+.conclusion-box .big-num {
+  font-size: 2rem; font-weight: 900; color: #276749; font-family: "SF Mono", monospace;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔢 九九归一</h1>
+  <span class="badge">数字根 · 模 9 性质</span>
+</header>
+
+<div class="container">
+
+  <!-- 题目描述 -->
+  <div class="card">
+    <h2>📋 题目描述</h2>
+    <p>给定一个正整数 <strong>n</strong>（可能非常大），不断重复"将 <strong>n</strong> 替换为它的各位数字之和"的操作，直到 <strong>n</strong> 变成一位数。输出最终得到的一位数。</p>
+    <p style="margin-top:6px;font-size:0.82rem;color:#718096;">数据范围：输入长度 ≤ 10⁵，T ≤ 10</p>
+  </div>
+
+  <!-- 输入区 -->
+  <div class="card">
+    <div class="controls">
+      <label>输入数字 <strong>n</strong>：</label>
+      <input id="inputNum" type="text" value="12345" placeholder="输入一个正整数...">
+      <button class="btn btn-primary" onclick="startDemo()">🚀 逐步演示</button>
+      <button class="btn btn-success" id="btnAuto" onclick="autoPlay()">▶️ 自动演示</button>
+      <button class="btn btn-gray" onclick="resetDemo()">↺ 重置</button>
+    </div>
+    <div class="controls" style="margin-bottom:0;">
+      <span style="font-size:0.82rem;color:#718096;">
+        速度：<input id="speedSlider" type="range" min="300" max="2500" value="1000" step="100" style="width:100px;vertical-align:middle;">
+        <span id="speedLabel">1000ms</span>
+      </span>
+      <span style="margin-left:12px;font-size:0.82rem;color:#718096;">
+        💡 键盘控制：<kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">→</kbd> 下一步
+        <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">←</kbd> 上一步
+        <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">Space</kbd> 自动演示
+      </span>
+    </div>
+  </div>
+
+  <!-- 主演示区 -->
+  <div class="card">
+    <h2>🧮 数字根推导过程</h2>
+    <div style="margin-bottom:10px;">
+      <button class="btn btn-warning btn-sm" id="btnStep" onclick="stepForward()" disabled>⏭ 下一步</button>
+      <button class="btn btn-gray btn-sm" id="btnReset" onclick="resetSteps()" disabled>↺ 重置步骤</button>
+      <span style="margin-left:10px;font-size:0.85rem;font-weight:600;">
+        步骤 <span id="stepNum">0</span> / <span id="stepTotal">0</span>
+      </span>
+    </div>
+
+    <div class="demo-area" id="demoArea">
+      <div style="text-align:center;color:#a0aec0;padding:40px 0;">
+        点击「🚀 逐步演示」或「▶️ 自动演示」开始
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-item"><strong>当前数字：</strong><span id="curNum">—</span></div>
+      <div class="status-item"><strong>各位和：</strong><span id="curSum">—</span></div>
+      <div class="status-item"><strong>数字根：</strong><span id="curResult">—</span></div>
+      <div class="status-item"><strong>n % 9：</strong><span id="curMod9" class="mod-val">—</span></div>
+    </div>
+  </div>
+
+  <!-- 双栏：步骤历史 + 模9性质 -->
+  <div class="two-col">
+    <!-- 步骤历史 -->
+    <div class="card">
+      <h2>📜 步骤历史</h2>
+      <div class="step-list" id="stepList">
+        <div style="color:#a0aec0;">等待开始...</div>
+      </div>
+    </div>
+
+    <!-- 模9性质验证 -->
+    <div class="card">
+      <h2>🔬 模 9 性质验证</h2>
+      <div id="mod9Panel">
+        <div style="color:#a0aec0;font-size:0.85rem;">等待开始演示...</div>
+      </div>
+
+      <h3 style="margin-top:14px;">📐 数字根公式</h3>
+      <div id="formulaPanel">
+        <div style="color:#a0aec0;font-size:0.85rem;">等待开始演示...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 参考代码 -->
+  <div class="card">
+    <h2>💻 参考代码 (C++)</h2>
+    <div class="code-block">
+<span class="cmt">// 九九归一 — 模9性质解法</span>
+<span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="type">int</span> <span class="fn">main</span>() {
+    <span class="fn">ios::sync_with_stdio</span>(<span class="kw">false</span>);
+    <span class="fn">cin.tie</span>(<span class="kw">nullptr</span>);
+
+    <span class="type">int</span> T;
+    cin <span class="op">&gt;&gt;</span> T;
+    <span class="kw">while</span> (T<span class="op">--</span>) {
+        string s;
+        cin <span class="op">&gt;&gt;</span> s;
+
+        <span class="cmt">// 利用模9性质：只需计算各位数字之和模9</span>
+        <span class="type">int</span> sum <span class="op">=</span> <span class="num">0</span>;
+        <span class="kw">for</span> (<span class="type">char</span> ch : s) {
+            sum <span class="op">+=</span> ch <span class="op">-</span> <span class="str">'0'</span>;
+        }
+
+        <span class="cmt">// 数字根公式</span>
+        <span class="kw">if</span> (sum <span class="op">%</span> <span class="num">9</span> <span class="op">==</span> <span class="num">0</span>) {
+            cout <span class="op">&lt;&lt;</span> <span class="num">9</span> <span class="op">&lt;&lt;</span> <span class="str">'\n'</span>;
+        } <span class="kw">else</span> {
+            cout <span class="op">&lt;&lt;</span> sum <span class="op">%</span> <span class="num">9</span> <span class="op">&lt;&lt;</span> <span class="str">'\n'</span>;
+        }
+    }
+    <span class="kw">return</span> <span class="num">0</span>;
+}
+    </div>
+  </div>
+
+  <!-- 解题思路 -->
+  <div class="card">
+    <h2>🧠 解题思路</h2>
+    <p>
+      <strong>①</strong> 核心性质：<strong>n ≡ 各位数字之和 (mod 9)</strong>。<br>
+      <strong>②</strong> 反复求各位数字之和，本质上是在不断求 <strong>n 模 9</strong> 的值。<br>
+      <strong>③</strong> 最终的一位数就是 <strong>数字根 (Digital Root)</strong>：<br>
+      &emsp;&emsp;若 n = 0，结果为 0；<br>
+      &emsp;&emsp;若 n % 9 = 0，结果为 9；<br>
+      &emsp;&emsp;否则结果为 n % 9。<br>
+      <strong>④</strong> 等价公式：<strong>dr(n) = 1 + (n - 1) % 9</strong>（n > 0 时成立）。
+    </p>
+    <p style="margin-top:8px;font-size:0.85rem;color:#718096;">
+      💡 由于输入可能很大（长度 10⁵），不能使用 int/long long 直接存，需用字符串读入后遍历求和。
+    </p>
+  </div>
+
+</div>
+
+<script>
+// ============ 步骤引擎 ============
+let steps = [];
+let currentStep = -1;
+let autoTimer = null;
+
+function generateSteps(numStr) {
+  const s = numStr.replace(/^0+/, '') || '0';
+  const steps = [];
+
+  // Step 0: init
+  steps.push({
+    type: 'init',
+    num: s,
+    desc: `输入数字 n = ${formatLargeNum(s)}`,
+    line: 'init'
+  });
+
+  let current = s;
+
+  while (current.length > 1) {
+    const digits = current.split('').map(Number);
+    const sum = digits.reduce((a, b) => a + b, 0);
+    const sumStr = String(sum);
+
+    // calc sum step
+    steps.push({
+      type: 'calc_sum',
+      num: current,
+      digits: digits,
+      sum: sum,
+      desc: `${formatLargeNum(current)} 的各位数字之和：${digits.join(' + ')} = ${sum}`
+    });
+
+    if (sumStr.length === 1) {
+      // done - single digit
+      steps.push({
+        type: 'done',
+        num: sumStr,
+        result: sum,
+        desc: `${sum} 是一位数！停止。结果为 ${sum}`,
+        resultVal: sum
+      });
+      current = sumStr;
+      break;
+    } else {
+      // not single digit yet
+      steps.push({
+        type: 'continue',
+        num: sumStr,
+        prev: current,
+        sum: sum,
+        desc: `${sum} 不是一位数，继续求和...`
+      });
+      current = sumStr;
+    }
+  }
+
+  // If already single digit
+  if (s.length === 1) {
+    steps.push({
+      type: 'done',
+      num: s,
+      result: parseInt(s),
+      desc: `${s} 已经是一位数，结果为 ${s}`,
+      resultVal: parseInt(s)
+    });
+  }
+
+  // Mod 9 verification
+  const finalResult = parseInt(current);
+  const mod9Val = computeMod9(s);
+  const sumVal = s.split('').reduce((a, c) => a + parseInt(c), 0);
+
+  steps.push({
+    type: 'mod9',
+    num: s,
+    sum: sumVal,
+    mod9: mod9Val,
+    result: finalResult,
+    desc: `模 9 验证：${formatLargeNum(s)} % 9 = ${mod9Val}，各位和 ${sumVal} % 9 = ${sumVal % 9}，${mod9Val === (sumVal % 9) ? '相等！' : '？'}`
+  });
+
+  // Formula
+  const bigIntMod = computeMod9(s);
+  const drFormula = bigIntMod === 0 ? 9 : bigIntMod;
+  steps.push({
+    type: 'formula',
+    num: s,
+    mod9: bigIntMod,
+    result: drFormula,
+    desc: `数字根公式：dr(${formatLargeNum(s)}) = 1 + (n - 1) % 9 = 1 + ${(parseInt(bigIntMod) - 1 + 9) % 9} = ${drFormula}`
+  });
+
+  return steps;
+}
+
+function computeMod9(s) {
+  let r = 0;
+  for (const ch of s) {
+    r = (r * 10 + parseInt(ch)) % 9;
+  }
+  return r;
+}
+
+function formatLargeNum(s) {
+  if (s.length <= 20) return s;
+  return s.slice(0, 10) + '...' + s.slice(-5) + ` (共 ${s.length} 位)`;
+}
+
+// ============ 渲染 ============
+function renderStep(stepIndex) {
+  const area = document.getElementById('demoArea');
+  if (stepIndex < 0 || stepIndex >= steps.length) {
+    area.innerHTML = '<div style="text-align:center;color:#a0aec0;padding:40px 0;">点击「🚀 逐步演示」或「▶️ 自动演示」开始</div>';
+    return;
+  }
+
+  const step = steps[stepIndex];
+
+  // Update number display
+  document.getElementById('curNum').textContent = step.num ? (step.num.length > 25 ? formatLargeNum(step.num) : step.num) : '—';
+  document.getElementById('curSum').textContent = step.sum !== undefined ? step.sum : (step.digits ? step.digits.reduce((a,b)=>a+b, 0) : '—');
+  document.getElementById('curResult').textContent = step.result !== undefined ? step.result : (step.type === 'done' ? step.resultVal : '—');
+
+  const mod9 = computeMod9(step.num || '0');
+  document.getElementById('curMod9').textContent = mod9;
+
+  let html = '';
+
+  switch (step.type) {
+    case 'init':
+      html = `
+        <div class="number-display">${step.num}</div>
+        <div style="text-align:center;padding:16px 0;font-size:1rem;color:#4a5568;">
+          输入数字 <strong>n = ${step.num}</strong>，准备开始求数字根...
+        </div>`;
+      break;
+
+    case 'calc_sum':
+      html = `
+        <div class="number-display">${step.num}</div>
+        <div style="font-size:0.85rem;color:#718096;text-align:center;padding:4px 0;">各位数字求和 ↓</div>
+        <div class="digit-row">
+          ${step.digits.map((d, i) => `
+            <span class="digit-box active">${d}</span>
+            ${i < step.digits.length - 1 ? '<span class="digit-op">+</span>' : ''}
+          `).join('')}
+          <span class="arrow">=</span>
+          <span class="sum-result"><span class="sum-num">${step.sum}</span></span>
+        </div>`;
+      break;
+
+    case 'continue':
+      html = `
+        <div class="number-display" style="color:#f6ad55;">${step.num}</div>
+        <div style="text-align:center;padding:16px 0;font-size:1rem;">
+          <span style="background:#fefcbf;padding:6px 16px;border-radius:6px;border:2px solid #d69e2e;">
+            ${step.num} 不是一位数，继续求和 🔄
+          </span>
+        </div>
+        <div class="digit-row">
+          ${step.num.split('').map(d => `<span class="digit-box" style="background:#fefcbf;border-color:#d69e2e;">${d}</span>`).join('<span class="digit-op">+</span>')}
+        </div>`;
+      break;
+
+    case 'done':
+      html = `
+        <div class="number-display" style="color:#68d391;font-size:2rem;">${step.resultVal || step.result}</div>
+        <div class="conclusion-box">
+          得到一位数 <span class="big-num">${step.resultVal || step.result}</span>，停止！
+        </div>`;
+      break;
+
+    case 'mod9':
+      const sumMod = step.sum % 9;
+      const nMod = step.mod9;
+      html = `
+        <div style="padding:8px 0;">
+          <div class="mod9-grid">
+            <div class="mod9-item">
+              <div class="mod9-label">🔢 原数 n</div>
+              <div class="mod9-value">${formatLargeNum(step.num)}</div>
+            </div>
+            <div class="mod9-item">
+              <div class="mod9-label">➕ 各位数字和</div>
+              <div class="mod9-value">${step.sum}</div>
+            </div>
+            <div class="mod9-item">
+              <div class="mod9-label">n ÷ 9 的余数</div>
+              <div class="mod9-value ${nMod === sumMod ? 'match' : ''}">
+                ${step.num.length <= 20 ? step.num : ''} % 9 = ${nMod}
+                ${nMod === sumMod ? ' ✅' : ''}
+              </div>
+            </div>
+            <div class="mod9-item">
+              <div class="mod9-label">各位和 ÷ 9 的余数</div>
+              <div class="mod9-value ${nMod === sumMod ? 'match' : ''}">
+                ${step.sum} % 9 = ${sumMod}
+                ${nMod === sumMod ? ' ✅' : ''}
+              </div>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:10px;font-size:1rem;font-weight:700;${nMod === sumMod ? 'color:#38a169;' : 'color:#e53e3e;'}">
+            ${nMod === sumMod ? '✓ n % 9 = 各位和 % 9，性质成立！' : '✗ 不相等，请检查计算'}
+          </div>
+        </div>`;
+      break;
+
+    case 'formula':
+      const dr = step.result;
+      const oneLess = (step.mod9 - 1 + 9) % 9;
+      html = `
+        <div class="formula-box">
+          dr(n) = 1 + (n - 1) % 9<br>
+          <span class="arrow">→</span> dr(${formatLargeNum(step.num)}) = 1 + (${formatLargeNum(step.num)} - 1) % 9<br>
+          <span class="arrow">→</span> = 1 + ${oneLess}<br>
+          <span class="arrow">→</span> = <span class="highlight-match">${dr}</span>
+        </div>
+        <div style="text-align:center;margin-top:8px;padding:8px;background:#e9d8fd;border-radius:6px;font-size:0.95rem;">
+          数字根 dr(${formatLargeNum(step.num)}) = <strong style="font-size:1.4rem;color:#553c9a;">${dr}</strong>
+          ${step.mod9 === 0 ? '（因为 n 是 9 的倍数，结果为 9）' : ''}
+        </div>`;
+      break;
+  }
+
+  area.innerHTML = html;
+}
+
+function renderStepList() {
+  const list = document.getElementById('stepList');
+  list.innerHTML = '';
+
+  const icons = {
+    'init': '📥',
+    'calc_sum': '➕',
+    'continue': '🔄',
+    'done': '✅',
+    'mod9': '🔬',
+    'formula': '📐'
+  };
+
+  steps.forEach((step, idx) => {
+    const div = document.createElement('div');
+    div.className = 'step' + (idx === currentStep ? ' active' : '');
+    div.innerHTML = `
+      <span class="step-num">#${idx + 1}</span>
+      <span class="step-icon">${icons[step.type] || '•'}</span>
+      <span class="step-desc">${step.desc}</span>`;
+    div.onclick = () => jumpToStep(idx);
+    list.appendChild(div);
+  });
+
+  if (currentStep >= 0) {
+    const active = list.querySelector('.step.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function renderMod9Panel() {
+  const panel = document.getElementById('mod9Panel');
+  const data = steps.find(s => s.type === 'mod9');
+  if (!data) {
+    panel.innerHTML = '<div style="color:#a0aec0;font-size:0.85rem;">等待计算...</div>';
+    return;
+  }
+
+  const sumMod = data.sum % 9;
+  const nMod = data.mod9;
+  const match = nMod === sumMod;
+
+  panel.innerHTML = `
+    <div class="mod9-grid">
+      <div class="mod9-item">
+        <div class="mod9-label">原数 n</div>
+        <div class="mod9-value" style="font-size:0.82rem;">${formatLargeNum(data.num)}</div>
+      </div>
+      <div class="mod9-item">
+        <div class="mod9-label">各位数字和 S</div>
+        <div class="mod9-value">${data.sum}</div>
+      </div>
+      <div class="mod9-item">
+        <div class="mod9-label">n % 9</div>
+        <div class="mod9-value ${match ? 'match' : ''}">${nMod}</div>
+      </div>
+      <div class="mod9-item">
+        <div class="mod9-label">S % 9</div>
+        <div class="mod9-value ${match ? 'match' : ''}">${sumMod}</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:8px;font-weight:700;${match ? 'color:#38a169;' : 'color:#e53e3e;'}">
+      ${match ? '✓ n % 9 ≡ S % 9 — 性质得证！' : '✗ 不相等'}
+    </div>`;
+}
+
+function renderFormulaPanel() {
+  const panel = document.getElementById('formulaPanel');
+  const data = steps.find(s => s.type === 'formula');
+  if (!data) {
+    panel.innerHTML = '<div style="color:#a0aec0;font-size:0.85rem;">等待计算...</div>';
+    return;
+  }
+
+  const oneLess = (data.mod9 - 1 + 9) % 9;
+
+  panel.innerHTML = `
+    <div class="formula-box" style="font-size:0.85rem;">
+      dr(n) = 1 + (n - 1) % 9 &emsp; <span class="cmt" style="color:#718096;">// 数字根公式</span><br>
+      dr(${formatLargeNum(data.num)}) = 1 + (${formatLargeNum(data.num)} - 1) % 9<br>
+      &emsp; = 1 + ${oneLess}<br>
+      &emsp; = <span class="highlight-match">${data.result}</span>
+    </div>
+    <div style="margin-top:6px;font-size:0.85rem;color:#4a5568;text-align:center;">
+      等价判断：${data.mod9 === 0 ? 'n % 9 = 0 → 结果为 <strong>9</strong>' : `n % 9 = ${data.mod9} → 结果为 <strong>${data.mod9}</strong>`}
+    </div>`;
+}
+
+function renderAll() {
+  const total = steps.length;
+  document.getElementById('stepNum').textContent = total > 0 ? currentStep + 1 : 0;
+  document.getElementById('stepTotal').textContent = total;
+
+  document.getElementById('btnStep').disabled = (currentStep >= total - 1);
+  document.getElementById('btnReset').disabled = (total === 0);
+
+  renderStep(currentStep);
+  renderStepList();
+  renderMod9Panel();
+  renderFormulaPanel();
+}
+
+// ============ 操作 ============
+function startDemo() {
+  stopAuto();
+  const input = document.getElementById('inputNum').value.trim();
+  if (!input || !/^\d+$/.test(input)) {
+    alert('请输入一个有效的正整数！');
+    return;
+  }
+
+  steps = generateSteps(input);
+  currentStep = 0;
+  renderAll();
+}
+
+function stepForward() {
+  if (steps.length === 0) { startDemo(); return; }
+  if (currentStep < steps.length - 1) {
+    currentStep++;
+    renderAll();
+  }
+}
+
+function prevStep() {
+  if (currentStep > 0) {
+    currentStep--;
+    renderAll();
+  }
+}
+
+function jumpToStep(idx) {
+  if (idx < 0 || idx >= steps.length) return;
+  currentStep = idx;
+  renderAll();
+}
+
+function resetSteps() {
+  stopAuto();
+  currentStep = 0;
+  renderAll();
+}
+
+function resetDemo() {
+  stopAuto();
+  steps = [];
+  currentStep = -1;
+  renderAll();
+  document.getElementById('demoArea').innerHTML = '<div style="text-align:center;color:#a0aec0;padding:40px 0;">点击「🚀 逐步演示」或「▶️ 自动演示」开始</div>';
+  document.getElementById('stepList').innerHTML = '<div style="color:#a0aec0;">等待开始...</div>';
+  document.getElementById('mod9Panel').innerHTML = '<div style="color:#a0aec0;font-size:0.85rem;">等待开始演示...</div>';
+  document.getElementById('formulaPanel').innerHTML = '<div style="color:#a0aec0;font-size:0.85rem;">等待开始演示...</div>';
+  document.getElementById('curNum').textContent = '—';
+  document.getElementById('curSum').textContent = '—';
+  document.getElementById('curResult').textContent = '—';
+  document.getElementById('curMod9').textContent = '—';
+  document.getElementById('stepNum').textContent = '0';
+  document.getElementById('stepTotal').textContent = '0';
+  document.getElementById('btnStep').disabled = true;
+  document.getElementById('btnReset').disabled = true;
+}
+
+function autoPlay() {
+  if (autoTimer) { stopAuto(); return; }
+
+  if (steps.length === 0 || currentStep >= steps.length - 1) {
+    startDemo();
+    if (steps.length === 0) return;
+    currentStep = -1;
+  }
+
+  const speed = parseInt(document.getElementById('speedSlider').value) || 1000;
+  document.getElementById('btnAuto').textContent = '⏸ 暂停';
+  document.getElementById('btnStep').disabled = true;
+
+  function tick() {
+    if (currentStep < steps.length - 1) {
+      currentStep++;
+      renderAll();
+      if (currentStep < steps.length - 1) {
+        autoTimer = setTimeout(tick, speed);
+      } else {
+        stopAuto();
+      }
+    }
+  }
+
+  autoTimer = setTimeout(tick, speed);
+}
+
+function stopAuto() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  document.getElementById('btnAuto').textContent = '▶️ 自动演示';
+  document.getElementById('btnStep').disabled = (currentStep >= steps.length - 1 && steps.length > 0);
+}
+
+// 速度滑块
+document.getElementById('speedSlider').addEventListener('input', function() {
+  document.getElementById('speedLabel').textContent = this.value + 'ms';
+});
+
+// 键盘控制
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight') { e.preventDefault(); stepForward(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
+  else if (e.key === ' ') { e.preventDefault(); autoTimer ? stopAuto() : autoPlay(); }
+  else if (e.key === 'r' || e.key === 'R') { resetDemo(); }
+});
+
+// Enter 键触发演示
+document.getElementById('inputNum').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { startDemo(); }
+});
+</script>
+
+</body>
+</html>
