@@ -94,38 +94,36 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .gcell .step-badge {
   position:absolute; top:1px; right:2px; z-index:2;
   width:16px; height:16px; border-radius:50%;
-  background:#059669; color:#fff; font-size:0.5rem; font-weight:700;
+  background:rgba(255,255,255,0.85); color:#1a202c; font-size:0.5rem; font-weight:700;
   display:flex; align-items:center; justify-content:center;
-  box-shadow:0 1px 3px rgba(0,0,0,0.2);
+  box-shadow:0 1px 3px rgba(0,0,0,0.15);
 }
 .gcell .arrow {
   position:absolute; font-size:0.7rem; z-index:2;
 }
 /* path trail — different backgrounds by step */
 .gcell.on-path { position:relative; }
-.gcell.on-path .ht { color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.3); }
-.gcell.on-path .fv { color:rgba(255,255,255,0.85); }
-.gcell.on-path .idx { color:rgba(255,255,255,0.4); }
-.gcell.on-path.s0 { background:#d97706; border-color:#d97706; } /* current = gold */
-.gcell.on-path.s1 { background:#059669; border-color:#059669; }
-.gcell.on-path.s2 { background:#0d9488; border-color:#0d9488; }
-.gcell.on-path.s3 { background:#0891b2; border-color:#0891b2; }
-.gcell.on-path.s4 { background:#2563eb; border-color:#2563eb; }
-.gcell.on-path.s5 { background:#7c3aed; border-color:#7c3aed; }
-.gcell.on-path.s6 { background:#6366f1; border-color:#6366f1; }
-.gcell.on-path.s7 { background:#8b5cf6; border-color:#8b5cf6; }
-.gcell.on-path.s8 { background:#a855f7; border-color:#a855f7; }
-.gcell.on-path.s9 { background:#d946ef; border-color:#d946ef; }
-.gcell.on-path.s10{ background:#ec4899; border-color:#ec4899; }
-.gcell.on-path.s11{ background:#f43f5e; border-color:#f43f5e; }
-.gcell.on-path.s12{ background:#e11d48; border-color:#e11d48; }
-.gcell.on-path.s13{ background:#be123c; border-color:#be123c; }
-.gcell.on-path.s14{ background:#9f1239; border-color:#9f1239; }
-.gcell.on-path.s15{ background:#881337; border-color:#881337; }
-.gcell.on-path.s16{ background:#4c0519; border-color:#4c0519; }
-/* fallback for >16 steps */
-.gcell.on-path.s16plus { background:#1e293b; border-color:#1e293b; }
-.gcell.on-path .ht { color:#fff; }
+.gcell.on-path .ht { color:#1a202c; font-weight:800; }
+.gcell.on-path .fv { color:#1a202c; }
+.gcell.on-path .idx { color:rgba(26,32,44,0.35); }
+.gcell.on-path.s0 { background:#fde68a; border-color:#d97706; } /* current = gold */
+.gcell.on-path.s1 { background:#a7f3d0; border-color:#059669; }
+.gcell.on-path.s2 { background:#99f6e4; border-color:#0d9488; }
+.gcell.on-path.s3 { background:#a5f3fc; border-color:#0891b2; }
+.gcell.on-path.s4 { background:#bfdbfe; border-color:#2563eb; }
+.gcell.on-path.s5 { background:#ddd6fe; border-color:#7c3aed; }
+.gcell.on-path.s6 { background:#c7d2fe; border-color:#6366f1; }
+.gcell.on-path.s7 { background:#e9d5ff; border-color:#8b5cf6; }
+.gcell.on-path.s8 { background:#f3e8ff; border-color:#a855f7; }
+.gcell.on-path.s9 { background:#fce7f3; border-color:#d946ef; }
+.gcell.on-path.s10{ background:#fbcfe8; border-color:#ec4899; }
+.gcell.on-path.s11{ background:#fecaca; border-color:#f43f5e; }
+.gcell.on-path.s12{ background:#fecdd3; border-color:#e11d48; }
+.gcell.on-path.s13{ background:#fed7aa; border-color:#be123c; }
+.gcell.on-path.s14{ background:#fed7aa; border-color:#9f1239; }
+.gcell.on-path.s15{ background:#fef9c3; border-color:#881337; }
+.gcell.on-path.s16{ background:#fef9c3; border-color:#4c0519; }
+.gcell.on-path.s16plus { background:#e2e8f0; border-color:#475569; }
 
 .gcell.lower { background:#f0fdf4; border-color:#86efac; }
 .gcell.lower .ht { color:#16a34a; }
@@ -597,16 +595,16 @@ function render(){
       }
 
       const bg=pathIdx>=0&&phase==='running'?'transparent':htBg(t);
-      const txt=pathIdx>=0&&phase==='running'?'#fff':htColor(t);
+      const txt=pathIdx>=0&&phase==='running'?'#1a202c':htColor(t);
 
       let fvText='', fvCls='';
       if(fv>0){ fvText='f='+fv; fvCls='done'; }
       else { fvText='?'; fvCls='pending'; }
 
       g+='<div class="'+cls+'" style="background:'+bg+';">';
-      g+='<div class="idx" style="color:'+(pathIdx>=0?'rgba(255,255,255,0.4)':'#cbd5e1')+';">'+i+','+j+'</div>';
+      g+='<div class="idx" style="color:'+(pathIdx>=0?'rgba(26,32,44,0.35)':'#cbd5e1')+';">'+i+','+j+'</div>';
       g+='<div class="ht" style="color:'+txt+';">'+h+'</div>';
-      g+='<div class="fv '+fvCls+'" style="color:'+(pathIdx>=0?'rgba(255,255,255,0.85)':'')+';">'+fvText+'</div>';
+      g+='<div class="fv '+fvCls+'" style="color:'+(pathIdx>=0?'#1a202c':'')+';">'+fvText+'</div>';
       if(pathIdx>=0&&phase==='running'){
         g+='<div class="step-badge">'+(pathIdx+1)+'</div>';
       }
