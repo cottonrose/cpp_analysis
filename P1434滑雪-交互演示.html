@@ -18,10 +18,27 @@ header h1 { font-size:1.5rem; font-weight:700; }
 header h1 span { color:#fde047; }
 header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 
+/* tabs */
+.tab-bar {
+  display:flex; gap:0; max-width:960px; margin:10px auto 0; padding:0 16px;
+}
+.tab-bar button {
+  flex:1; padding:10px 16px; border:none; font-size:0.85rem; font-weight:700;
+  cursor:pointer; transition:all 0.2s; border-radius:10px 10px 0 0;
+  background:#e2e8f0; color:#64748b;
+}
+.tab-bar button.active {
+  background:#fff; color:#0d9488;
+}
+.tab-bar button:not(.active):hover { background:#cbd5e1; }
+
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
 .problem {
-  background:#fff; margin:14px 16px 0; padding:14px 20px; border-radius:12px;
+  background:#fff; margin:0 16px; padding:14px 20px; border-radius:0 0 12px 12px;
   box-shadow:0 1px 4px rgba(0,0,0,0.06); max-width:960px; margin-inline:auto;
-  border:1px solid #e2e8f0;
+  border:1px solid #e2e8f0; border-top:none;
 }
 .problem h2 { font-size:0.95rem; color:#0d9488; margin-bottom:8px; }
 .problem .info { display:flex; gap:16px; flex-wrap:wrap; font-size:0.85rem; }
@@ -32,6 +49,7 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .problem .info .label { font-weight:600; color:#64748b; font-size:0.8rem; }
 .eq { font-family:monospace; background:#f0fdfa; padding:1px 5px; border-radius:3px; font-size:0.78rem; color:#0d9488; }
 
+/* ─── Controls ─── */
 .controls {
   background:#fff; border:1px solid #e2e8f0; border-radius:12px;
   padding:14px 20px; max-width:960px; margin:10px auto 0;
@@ -98,15 +116,16 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
   display:flex; align-items:center; justify-content:center;
   box-shadow:0 1px 3px rgba(0,0,0,0.15);
 }
-.gcell .arrow {
-  position:absolute; font-size:0.7rem; z-index:2;
+.gcell .stack-indicator {
+  position:absolute; bottom:1px; left:2px; font-size:0.45rem; color:rgba(26,32,44,0.4);
 }
-/* path trail — different backgrounds by step */
+
+/* path trail */
 .gcell.on-path { position:relative; }
 .gcell.on-path .ht { color:#1a202c; font-weight:800; }
 .gcell.on-path .fv { color:#1a202c; }
 .gcell.on-path .idx { color:rgba(26,32,44,0.35); }
-.gcell.on-path.s0 { background:#fde68a; border-color:#d97706; } /* current = gold */
+.gcell.on-path.s0 { background:#fde68a; border-color:#d97706; }
 .gcell.on-path.s1 { background:#a7f3d0; border-color:#059669; }
 .gcell.on-path.s2 { background:#99f6e4; border-color:#0d9488; }
 .gcell.on-path.s3 { background:#a5f3fc; border-color:#0891b2; }
@@ -125,6 +144,17 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .gcell.on-path.s16{ background:#fef9c3; border-color:#4c0519; }
 .gcell.on-path.s16plus { background:#e2e8f0; border-color:#475569; }
 
+/* memo tab: call stack + recursion */
+.gcell.in-stack { border-color:#f59e0b; border-width:2px; background:#fffbeb; }
+.gcell.in-stack .ht { color:#b45309; }
+.gcell.visiting { border-color:#f59e0b; border-width:3px; background:#fde68a; }
+.gcell.visiting .ht { color:#b45309; font-size:1.1rem; }
+.gcell.memo-done { background:#d1fae5; border-color:#059669; }
+.gcell.memo-done .ht { color:#065f46; }
+.gcell.memo-done .fv { color:#065f46; }
+.gcell.memo-current { border-color:#dc2626; border-width:3px; background:#fecaca; }
+.gcell.memo-current .ht { color:#991b1b; font-size:1.1rem; }
+
 .gcell.lower { background:#f0fdf4; border-color:#86efac; }
 .gcell.lower .ht { color:#16a34a; }
 .gcell.higher { background:#fef2f2; border-color:#fca5a5; }
@@ -139,6 +169,9 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .ls.hi { background:#fef2f2; }
 .ls.path { background:#059669; border-color:#059669; }
 .ls.cur { background:#d97706; border-color:#d97706; }
+.ls.stack { border-color:#f59e0b; border-width:2px; background:#fffbeb; }
+.ls.mdone { background:#d1fae5; border-color:#059669; }
+.ls.mcur { border-color:#dc2626; border-width:2px; background:#fecaca; }
 
 .info-panel {
   flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:12px;
@@ -149,7 +182,7 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .info-box {
   background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;
   font-size:0.82rem; line-height:1.7; flex:1; min-height:90px;
-  max-height:360px; overflow-y:auto;
+  max-height:380px; overflow-y:auto;
 }
 .hl-b { color:#0891b2; }
 .hl-g { color:#16a34a; }
@@ -158,6 +191,11 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .hl-gr { color:#64748b; }
 .hl-path { color:#059669; font-weight:700; }
 .path-chain { font-family:monospace; font-size:0.78rem; line-height:1.6; }
+.call-stack-box {
+  background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:6px 8px;
+  font-family:monospace; font-size:0.72rem; line-height:1.8; margin-top:4px;
+  max-height:120px; overflow-y:auto;
+}
 
 .ans-box {
   background:linear-gradient(135deg,#0d9488,#0891b2); border-radius:8px; padding:10px; text-align:center; color:#fff;
@@ -222,6 +260,23 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 }
 .sort-item.active { background:#d97706; color:#fff; border-color:#d97706; }
 .sort-item.done { background:#ccfbf1; color:#0d9488; border-color:#0d9488; }
+
+/* opt panel on tab2 */
+.opt-box {
+  background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  padding:14px; box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.opt-box h3 { font-size:0.88rem; color:#0d9488; margin-bottom:6px; }
+.opt-box p, .opt-box li { font-size:0.82rem; line-height:1.7; color:#475569; }
+.opt-box ul { padding-left:20px; }
+.compare-table {
+  width:100%; border-collapse:collapse; font-size:0.78rem; margin:6px 0;
+}
+.compare-table th, .compare-table td {
+  border:1px solid #e2e8f0; padding:6px 10px; text-align:left;
+}
+.compare-table th { background:#f0fdfa; color:#0d9488; font-weight:700; }
+.compare-table tr:nth-child(2n) td { background:#f8fafc; }
 </style>
 </head>
 <body>
@@ -241,29 +296,36 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
   </div>
 </div>
 
-<div class="mode active" id="modeDp">
-  <div class="controls" id="ctrlBar">
+<!-- ════════ TABS ════════ -->
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="tabDp">📊 排序 DP 演示</button>
+  <button class="tab-btn" data-tab="tabMemo">⚡ 记忆化搜索优化</button>
+</div>
+
+<!-- ════════ TAB 1: DP SORT ════════ -->
+<div class="tab-content active" id="tabDp">
+  <div class="controls">
     <label>n</label>
-    <input type="number" id="inpN" value="5" min="2" max="8">
+    <input type="number" id="dpN" value="5" min="2" max="8">
     <span class="sep">×</span>
-    <input type="number" id="inpM" value="5" min="2" max="10">
-    <button class="btn-gen" id="btnGen">🎲 随机</button>
-    <button class="btn-gen" id="btnSample" style="background:#0891b2;">📋 样例</button>
+    <input type="number" id="dpM" value="5" min="2" max="10">
+    <button class="btn-gen" id="dpGen">🎲 随机</button>
+    <button class="btn-gen" id="dpSample" style="background:#0891b2;">📋 样例</button>
     <div class="btns">
-      <button class="btn-prev" id="btnPrev" disabled>◀ 上一步</button>
-      <button class="btn-next" id="btnNext" disabled>下一步 ▶</button>
-      <button class="btn-auto" id="btnAuto" disabled>▶ 自动</button>
-      <button class="btn-reset" id="btnReset">⟳ 重置</button>
+      <button class="btn-prev" id="dpPrev" disabled>◀ 上一步</button>
+      <button class="btn-next" id="dpNext" disabled>下一步 ▶</button>
+      <button class="btn-auto" id="dpAuto" disabled>▶ 自动</button>
+      <button class="btn-reset" id="dpReset">⟳ 重置</button>
     </div>
   </div>
 
   <div class="main">
     <div class="grid-panel">
-      <h3>🗺️ 高度图 <span class="step-info" id="stepInfo">加载样例中…</span></h3>
-      <div id="gridContainer" style="overflow-x:auto;"></div>
+      <h3>🗺️ 高度图 <span class="step-info" id="dpStepInfo">加载样例中…</span></h3>
+      <div id="dpGrid"></div>
       <div class="sort-list">
         <div style="font-size:0.65rem;color:#64748b;margin-bottom:2px;">处理顺序（按高度升序）：</div>
-        <div class="items" id="sortList"></div>
+        <div class="items" id="dpSortList"></div>
       </div>
       <div class="legend">
         <span class="legend-item"><span class="ls lo"></span> 更低邻居</span>
@@ -274,45 +336,37 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
     </div>
     <div class="info-panel">
       <h3>📝 说明</h3>
-      <div class="info-box" id="infoBox">加载样例中…</div>
-      <div id="answerBox" style="display:none;" class="ans-box">
+      <div class="info-box" id="dpInfo">加载样例中…</div>
+      <div id="dpAns" style="display:none;" class="ans-box">
         <div class="ans-label">最长滑雪路径长度</div>
-        <div class="ans-num" id="ansNum">0</div>
+        <div class="ans-num" id="dpAnsNum">0</div>
         <div class="ans-label">ans</div>
       </div>
     </div>
   </div>
 
-  <details class="dp-steps" id="dpSteps" open>
+  <details class="dp-steps" open>
     <summary>📋 动态规划五步法（排序 DP）</summary>
     <div class="steps-grid">
-      <div class="dp-step" id="s1">
+      <div class="dp-step">
         <div class="stitle"><span class="snum n1">①</span> 划分阶段</div>
-        <div class="sbody">
-          按<span class="eq">高度升序</span>处理每个格子。<br>
-          排序保证处理当前格时，<span class="hl-g">更低的相邻格子 f 值已算好</span>。
-        </div>
+        <div class="sbody">按<span class="eq">高度升序</span>处理每个格子。排序保证处理当前格时，<span class="hl-g">更低相邻格子 f 值已算好</span>。</div>
       </div>
-      <div class="dp-step" id="s2">
+      <div class="dp-step">
         <div class="stitle"><span class="snum n1">②</span> 状态表示</div>
         <div class="sbody"><span class="eq">f[i][j]</span> = 从 <span class="eq">(i,j)</span> 出发的最长滑雪路径长度（含自身）</div>
       </div>
-      <div class="dp-step" id="s3">
+      <div class="dp-step">
         <div class="stitle"><span class="snum n1">③</span> 状态转移</div>
-        <div class="sbody">
-          遍历上下左右四个方向：<br>
-          <span class="eq">a[nx][ny] &lt; a[x][y]</span> → <span class="eq">f[x][y] = max(f[x][y], f[nx][ny])</span><br>
-          遍历完后 <span class="eq">f[x][y]++</span>（计入自身）<br>
-          同时记录 <span class="eq">nxt[x][y]</span> 指向最优下一格，用于还原路径
-        </div>
+        <div class="sbody">遍历四个方向：更低 → <span class="eq">f[x][y] = max(f[x][y], f[nx][ny])</span>；完后 <span class="eq">++</span><br>记录 <span class="eq">nxt[x][y]</span> 指向最优下一格，用于还原路径</div>
       </div>
-      <div class="dp-step" id="s4">
-        <div class="stitle"><span class="snum n1">④</span> 边界条件</div>
-        <div class="sbody"><span class="eq">f</span> 初始 <span class="eq">0</span>。局部最低点：<span class="hl-y">f = 1</span>（只能原地）</div>
+      <div class="dp-step">
+        <div class="stitle"><span class="snum n1">④</span> 边界</div>
+        <div class="sbody"><span class="eq">f</span> 初始 <span class="eq">0</span>。局部最低点：<span class="hl-y">f = 1</span></div>
       </div>
-      <div class="dp-step" id="s5">
+      <div class="dp-step">
         <div class="stitle"><span class="snum n2">⑤</span> 答案</div>
-        <div class="sbody"><span class="eq">ans = max(f[i][j])</span>，即所有起点中能滑出的最长路径长度。<br>样例答案：<span class="hl-y">25</span>（经过全部 25 个格子）</div>
+        <div class="sbody"><span class="eq">ans = max(f[i][j])</span>。样例答案：<span class="hl-y">25</span></div>
       </div>
     </div>
   </details>
@@ -341,30 +395,144 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
             cin &gt;&gt; a[i][j];
             b[++tot] = {a[i][j], i, j};
         }
-
-    sort(b + <span class="num">1</span>, b + <span class="num">1</span> + tot);          <span class="cm">// ① 按高度升序</span>
-
+    sort(b + <span class="num">1</span>, b + <span class="num">1</span> + tot);
     <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= tot; ++i) {
         <span class="kw">int</span> x = b[i].x, y = b[i].y;
-        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt;= <span class="num">3</span>; ++j) {       <span class="cm">// ③ 检查四方向</span>
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt;= <span class="num">3</span>; ++j) {
             <span class="kw">int</span> _x = x + dx[j], _y = y + dy[j];
             <span class="kw">if</span> (a[_x][_y] &lt; a[x][y])
                 f[x][y] = max(f[x][y], f[_x][_y]);
         }
-        f[x][y]++;                         <span class="cm">// ③ +1</span>
-        ans = max(ans, f[x][y]);           <span class="cm">// ⑤ 更新答案</span>
+        f[x][y]++;
+        ans = max(ans, f[x][y]);
     }
-
     cout &lt;&lt; ans;
     <span class="kw">return</span> <span class="num">0</span>;
 }</code></pre>
     </details>
+  </div>
+</div>
 
+<!-- ════════ TAB 2: MEMO ════════ -->
+<div class="tab-content" id="tabMemo">
+  <div class="controls">
+    <label>n</label>
+    <input type="number" id="memoN" value="5" min="2" max="8">
+    <span class="sep">×</span>
+    <input type="number" id="memoM" value="5" min="2" max="10">
+    <button class="btn-gen" id="memoGen">🎲 随机</button>
+    <button class="btn-gen" id="memoSample" style="background:#0891b2;">📋 样例</button>
+    <div class="btns">
+      <button class="btn-prev" id="memoPrev" disabled>◀ 上一步</button>
+      <button class="btn-next" id="memoNext" disabled>下一步 ▶</button>
+      <button class="btn-auto" id="memoAuto" disabled>▶ 自动</button>
+      <button class="btn-reset" id="memoReset">⟳ 重置</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="grid-panel">
+      <h3>🗺️ 递归过程 <span class="step-info" id="memoStepInfo">点击「DFS 演示」开始</span></h3>
+      <div id="memoGrid"></div>
+      <div class="legend">
+        <span class="legend-item"><span class="ls mcur"></span> 当前返回</span>
+        <span class="legend-item"><span class="ls mdone"></span> 已缓存</span>
+        <span class="legend-item"><span class="ls stack"></span> 调用栈中</span>
+        <span class="legend-item"><span class="ls path"></span> 当前最优路径</span>
+      </div>
+    </div>
+    <div class="info-panel">
+      <h3>📝 递归说明</h3>
+      <div class="info-box" id="memoInfo">点击「DFS 演示」观察记忆化搜索的递归过程。</div>
+      <div id="memoAns" style="display:none;" class="ans-box">
+        <div class="ans-label">从起点出发的最长路径</div>
+        <div class="ans-num" id="memoAnsNum">0</div>
+        <div class="ans-label">f[起点]</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 优化说明 -->
+  <div class="opt-box" style="max-width:960px;margin:10px auto 0;">
+    <h3>💡 为什么需要优化？</h3>
+    <table class="compare-table">
+      <tr><th>方法</th><th>思路</th><th>时间复杂度</th><th>特点</th></tr>
+      <tr>
+        <td>❌ 朴素 DFS</td>
+        <td>对每个起点递归搜索全部可能路径</td>
+        <td><span class="hl-r">O(4<sup>nm</sup>)</span></td>
+        <td>大量重复计算，同一个格子被反复访问</td>
+      </tr>
+      <tr>
+        <td>📊 排序 DP</td>
+        <td>按高度升序迭代处理</td>
+        <td><span class="hl-y">O(nm log nm)</span></td>
+        <td>需要排序，必须处理全部格子</td>
+      </tr>
+      <tr>
+        <td>⚡ 记忆化 DFS</td>
+        <td>递归 + 缓存，算过的不再重复</td>
+        <td><span class="hl-g">O(nm)</span></td>
+        <td>无需排序，只算可达的格子，代码最简洁</td>
+      </tr>
+    </table>
+    <p style="margin-top:6px;"><strong>核心优化：</strong><span class="eq">f[x][y]</span> 一旦算好就存下来，下次直接 <span class="eq">return f[x][y]</span>。这样每个格子只递归一次，指数级降为线性。</p>
+  </div>
+
+  <div class="main" style="margin-top:10px;">
+    <div class="grid-panel">
+      <h3>⚡ DFS 递归顺序</h3>
+      <div id="memoOrderGrid"></div>
+      <div style="font-size:0.65rem;color:#64748b;margin-top:4px;">单元格标记：①递归调用顺序（先序） / ②缓存完成顺序（后序）</div>
+    </div>
+    <div class="info-panel">
+      <h3>📋 调用栈</h3>
+      <div class="call-stack-box" id="memoCallStack">（开始演示后显示）</div>
+    </div>
+  </div>
+
+  <details class="dp-steps" style="margin-top:10px;" open>
+    <summary>📋 动态规划五步法（记忆化搜索）</summary>
+    <div class="steps-grid">
+      <div class="dp-step">
+        <div class="stitle"><span class="snum n1">①</span> 划分阶段</div>
+        <div class="sbody">按 <span class="eq">DFS 后序</span>（先递归更低邻居，再返回自身）。每个格子被递归一次。</div>
+      </div>
+      <div class="dp-step">
+        <div class="stitle"><span class="snum n1">②</span> 状态表示</div>
+        <div class="sbody"><span class="eq">f[x][y]</span> = 从 <span class="eq">(x,y)</span> 出发的最长滑雪路径长度。<span class="eq">-1</span> 表示未计算。</div>
+      </div>
+      <div class="dp-step">
+        <div class="stitle"><span class="snum n1">③</span> 状态转移</div>
+        <div class="sbody">
+          递归遍历四个方向中更低者：<br>
+          <span class="eq">f[x][y] = max(f[x][y], dfs(nx,ny))</span><br>
+          递归返回后 <span class="eq">++f[x][y]</span>，存入缓存
+        </div>
+      </div>
+      <div class="dp-step">
+        <div class="stitle"><span class="snum n1">④</span> 边界</div>
+        <div class="sbody">
+          <span class="eq">f</span> 初始 <span class="eq">-1</span>（表示未算）。<br>
+          <span class="eq">f[x][y] != -1</span> → 直接 <span class="eq">return</span>（缓存命中）<br>
+          无更低邻居 → <span class="eq">f = 0 → ++ → 1</span>
+        </div>
+      </div>
+      <div class="dp-step">
+        <div class="stitle"><span class="snum n2">⑤</span> 答案</div>
+        <div class="sbody">对每个格子执行 <span class="eq">ans = max(ans, dfs(i,j))</span>，最终 <span class="eq">ans</span> 即为最长路径长度</div>
+      </div>
+    </div>
+  </details>
+
+  <div class="code-wrap">
     <details class="code-panel">
-      <summary>💪 记忆化搜索优化版</summary>
+      <summary>💪 记忆化搜索优化代码</summary>
 <pre><code><span class="cm">// P1434 [SHOI2002] 滑雪 — 记忆化搜索  O(nm)</span>
-<span class="cm">/* 优化：排序版需 O(nm log nm) 排序 + 显式处理全部格子。
- * 记忆化搜索只需 O(nm)，只计算能到达的格子，代码更简洁。
+<span class="cm">/* 优化思路：
+ * 朴素 DFS 会反复计算同一个格子，导致指数级复杂度。
+ * 用 f[x][y] 缓存计算结果，每个格子只算一次，
+ * 时间复杂度从 O(4^nm) 降到 O(nm)，且无需排序。
  */</span>
 <span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
 <span class="kw">using namespace std;</span>
@@ -375,15 +543,17 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 <span class="kw">int</span> dy[<span class="num">4</span>] = {<span class="num">1</span>,<span class="num">-1</span>,<span class="num">0</span>,<span class="num">0</span>};
 
 <span class="kw">int</span> <span class="fn">dfs</span>(<span class="kw">int</span> x, <span class="kw">int</span> y) {
-    <span class="kw">if</span> (f[x][y] != <span class="num">-1</span>) <span class="kw">return</span> f[x][y];
-    f[x][y] = <span class="num">0</span>;
+    <span class="kw">if</span> (f[x][y] != <span class="num">-1</span>)              <span class="cm">// ③ 缓存命中</span>
+        <span class="kw">return</span> f[x][y];
+
+    f[x][y] = <span class="num">0</span>;                       <span class="cm">// ④ 初始 0</span>
     <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="num">4</span>; ++i) {
         <span class="kw">int</span> _x = x + dx[i], _y = y + dy[i];
         <span class="kw">if</span> (_x &gt;= <span class="num">1</span> &amp;&amp; _x &lt;= n &amp;&amp; _y &gt;= <span class="num">1</span> &amp;&amp; _y &lt;= m
             &amp;&amp; a[_x][_y] &lt; a[x][y])
-            f[x][y] = max(f[x][y], dfs(_x, _y));
+            f[x][y] = max(f[x][y], dfs(_x, _y)); <span class="cm">// ③ 递归更低邻居</span>
     }
-    <span class="kw">return</span> ++f[x][y];
+    <span class="kw">return</span> ++f[x][y];                   <span class="cm">// ③ +1 后返回并缓存</span>
 }
 
 <span class="kw">int</span> <span class="fn">main</span>() {
@@ -391,10 +561,13 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
     <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= n; ++i)
         <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= m; ++j)
             cin &gt;&gt; a[i][j];
-    memset(f, <span class="num">-1</span>, <span class="kw">sizeof</span>(f));
+
+    memset(f, <span class="num">-1</span>, <span class="kw">sizeof</span>(f));           <span class="cm">// ④ -1 表示未计算</span>
+
     <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= n; ++i)
         <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= m; ++j)
-            ans = max(ans, dfs(i, j));
+            ans = max(ans, dfs(i, j));          <span class="cm">// ⑤ 取最大值</span>
+
     cout &lt;&lt; ans;
     <span class="kw">return</span> <span class="num">0</span>;
 }</code></pre>
@@ -404,16 +577,7 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 
 <script>
 (function(){
-const $ = id => document.getElementById(id);
-const inpN = $('inpN'), inpM = $('inpM');
-const btnGen = $('btnGen'), btnSample = $('btnSample');
-const btnPrev = $('btnPrev'), btnNext = $('btnNext');
-const btnAuto = $('btnAuto'), btnReset = $('btnReset');
-const stepInfo = $('stepInfo'), gridC = $('gridContainer');
-const infoBox = $('infoBox'), answerBox = $('answerBox');
-const ansNum = $('ansNum'), sortList = $('sortList');
-const stepEls = [$('s1'),$('s2'),$('s3'),$('s4'),$('s5')];
-
+// ──────────── helpers ────────────
 const dx = [0,0,1,-1], dy = [1,-1,0,0];
 const dirNames = ['→','←','↓','↑'];
 
@@ -425,294 +589,7 @@ const SAMPLE = [
   [13,12,11,10,9]
 ];
 
-let n=5,m=5;
-let a=[];  // heights [1..n][1..m]
-let f=[];  // dp values
-let nxt=[]; // pathNext [1..n][1..m] = {x,y} or null
-let cells=[]; // sorted [{h,x,y},...]
-let stepIdx=0;
-let phase='idle';
-let autoTimer=null;
-let curX=1,curY=1;
-let lowerNeighbors=[]; // lower neighbors of current cell
-let curPath=[]; // [{x,y},...] full path from current cell
-
-function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-
-function loadHeights(src){
-  n=Math.min(8,Math.max(2,parseInt(inpN.value)||5));
-  m=Math.min(10,Math.max(2,parseInt(inpM.value)||5));
-  a=Array.from({length:n+2},()=>Array(m+2).fill(0));
-  if(src==='sample'){
-    const sh=Math.min(5,n), sw=Math.min(5,m);
-    for(let i=1;i<=n;i++)
-      for(let j=1;j<=m;j++){
-        if(i<=sh&&j<=sw) a[i][j]=SAMPLE[i-1][j-1];
-        else a[i][j]=randInt(1,99);
-      }
-  } else {
-    for(let i=1;i<=n;i++)
-      for(let j=1;j<=m;j++)
-        a[i][j]=randInt(1,99);
-  }
-  // force top-left to be unique min so paths are interesting
-  resetState();
-}
-
-function resetState(){
-  stopAuto();
-  f=Array.from({length:n+2},()=>Array(m+2).fill(0));
-  nxt=Array.from({length:n+2},()=>Array(m+2).fill(null));
-  cells=[];
-  for(let i=1;i<=n;i++)
-    for(let j=1;j<=m;j++)
-      cells.push({h:a[i][j],x:i,y:j});
-  cells.sort((a,b)=>a.h-b.h);
-  stepIdx=0;
-  curX=cells[0]?.x||1; curY=cells[0]?.y||1;
-  lowerNeighbors=[];
-  curPath=[];
-  phase='idle';
-  render();
-  btnNext.disabled=false; btnAuto.disabled=false;
-}
-
-function getLowerNeighbors(x,y){
-  const res=[];
-  for(let d=0;d<4;d++){
-    const nx=x+dx[d], ny=y+dy[d];
-    if(nx>=1&&nx<=n&&ny>=1&&ny<=m&&a[nx][ny]<a[x][y])
-      res.push({x:nx,y:ny,dir:d});
-  }
-  return res;
-}
-
-function getPath(x,y){
-  const path=[];
-  let cx=x, cy=y;
-  while(cx&&cy){
-    path.push({x:cx,y:cy});
-    const nx=nxt[cx]?.[cy];
-    if(!nx) break;
-    cx=nx.x; cy=nx.y;
-  }
-  return path;
-}
-
-function stepForward(){
-  if(phase==='done') return false;
-  if(stepIdx>=cells.length){ phase='done'; render(); return false; }
-  phase='running';
-
-  const cell=cells[stepIdx];
-  const {x,y}=cell;
-  const lowers=getLowerNeighbors(x,y);
-
-  let best=0, bestNx=null, bestNy=null;
-  for(const l of lowers){
-    if(f[l.x][l.y]>best){
-      best=f[l.x][l.y];
-      bestNx=l.x; bestNy=l.y;
-    }
-  }
-  f[x][y]=best+1;
-  if(bestNx!==null) nxt[x][y]={x:bestNx,y:bestNy};
-
-  curX=x; curY=y;
-  lowerNeighbors=lowers;
-  curPath=getPath(x,y);
-
-  stepIdx++;
-  if(stepIdx>=cells.length) phase='done';
-  render();
-  return true;
-}
-
-function stepBack(){
-  if(phase==='idle') return false;
-  if(stepIdx<=0) return false;
-  if(phase==='done'){ phase='running'; render(); return true; }
-
-  stepIdx--;
-  const cell=cells[stepIdx];
-  const {x,y}=cell;
-  f[x][y]=0; nxt[x][y]=null;
-  curX=x; curY=y;
-  lowerNeighbors=getLowerNeighbors(x,y);
-  curPath=getPath(x,y);
-
-  // redo previous cell
-  if(stepIdx>0){
-    const prev=cells[stepIdx-1];
-    const pl=getLowerNeighbors(prev.x,prev.y);
-    let pb=0, pnx=null, pny=null;
-    for(const l of pl){
-      if(f[l.x][l.y]>pb){ pb=f[l.x][l.y]; pnx=l.x; pny=l.y; }
-    }
-    f[prev.x][prev.y]=pb+1;
-    if(pnx!==null) nxt[prev.x][prev.y]={x:pnx,y:pny};
-    curX=prev.x; curY=prev.y;
-    lowerNeighbors=pl;
-    curPath=getPath(curX,curY);
-  }
-  render();
-  return true;
-}
-
-function render(){
-  const maxH=Math.max(...a.flat().filter(v=>v>0),1);
-
-  // ─── grid ───
-  let g='<div class="grid" style="grid-template-columns:repeat('+m+',60px);">';
-  for(let i=1;i<=n;i++){
-    for(let j=1;j<=m;j++){
-      const h=a[i][j]; const fv=f[i][j];
-      const isCur=(i===curX&&j===curY);
-      const isLower=lowerNeighbors.some(l=>l.x===i&&l.y===j);
-
-      // path index
-      let pathIdx=-1;
-      for(let k=0;k<curPath.length;k++){
-        if(curPath[k].x===i&&curPath[k].y===j){ pathIdx=k; break; }
-      }
-
-      let cls='gcell';
-      const t=h/maxH;
-
-      if(pathIdx>=0&&phase==='running'){
-        const si=Math.min(pathIdx,16);
-        cls+=' on-path s'+(si===16?'16plus':si);
-      } else if(isCur&&phase==='running'){
-        // nothing extra (path class handles it if on curPath)
-      } else if(isLower){
-        cls+=' lower';
-      } else {
-        // height-based bg
-        if(t<0.25) cls+=' ht-low';
-        else if(t<0.5) cls+=' ht-mid';
-        else if(t<0.75) cls+=' ht-high';
-        else cls+=' ht-high2';
-      }
-
-      const bg=pathIdx>=0&&phase==='running'?'transparent':htBg(t);
-      const txt=pathIdx>=0&&phase==='running'?'#1a202c':htColor(t);
-
-      let fvText='', fvCls='';
-      if(fv>0){ fvText='f='+fv; fvCls='done'; }
-      else { fvText='?'; fvCls='pending'; }
-
-      g+='<div class="'+cls+'" style="background:'+bg+';">';
-      g+='<div class="idx" style="color:'+(pathIdx>=0?'rgba(26,32,44,0.35)':'#cbd5e1')+';">'+i+','+j+'</div>';
-      g+='<div class="ht" style="color:'+txt+';">'+h+'</div>';
-      g+='<div class="fv '+fvCls+'" style="color:'+(pathIdx>=0?'#1a202c':'')+';">'+fvText+'</div>';
-      if(pathIdx>=0&&phase==='running'){
-        g+='<div class="step-badge">'+(pathIdx+1)+'</div>';
-      }
-      g+='</div>';
-    }
-  }
-  g+='</div>';
-  gridC.innerHTML=g;
-
-  // ─── sort list ───
-  let sl='<div class="items">';
-  for(let k=0;k<cells.length;k++){
-    const c=cells[k];
-    let cl='sort-item';
-    if(k<stepIdx&&phase!=='idle') cl+=' done';
-    else if(k===stepIdx&&phase==='running') cl+=' active';
-    sl+='<div class="'+cl+'" title="('+c.x+','+c.y+') h='+c.h+'">'+c.h+'</div>';
-  }
-  sl+='</div>';
-  sortList.innerHTML=sl;
-
-  // ─── step info ───
-  if(phase==='idle') stepInfo.textContent='已生成，点「下一步」开始';
-  else if(phase==='running') stepInfo.textContent='第 '+stepIdx+'/'+cells.length+' 格';
-  else if(phase==='done') stepInfo.textContent='✅ 完成！最长路径 = '+getAns();
-
-  // ─── info box ───
-  let ih='';
-  if(phase==='idle'){
-    ih='<b>网格已生成</b>（'+n+'×'+m+'，共 '+cells.length+' 格）<br>';
-    ih+='格子中的数字 = 高度<br>';
-    ih+='<span class="hl-gr">点击「下一步」开始排序 DP 计算。</span>';
-  } else if(phase==='running'){
-    const x=curX, y=curY;
-    ih='<b>第 '+stepIdx+'/'+cells.length+' 格</b> &nbsp; ';
-    ih+='<span class="eq">('+x+','+y+')</span> 高度 <b>'+a[x][y]+'</b><br>';
-    ih+='— — — — —<br>';
-
-    const lowers=getLowerNeighbors(x,y);
-    if(lowers.length===0){
-      ih+='<span class="hl-gr">四周无更低邻居（局部最低点）</span><br>';
-      ih+='→ <span class="hl-y">f['+x+']['+y+'] = 1</span>';
-    } else {
-      ih+='<b>'+lowers.length+'</b> 个更低邻居：<br>';
-      for(const l of lowers){
-        const isBest=nxt[x][y]&&nxt[x][y].x===l.x&&nxt[x][y].y===l.y;
-        ih+='&nbsp;&nbsp;<span class="'+(isBest?'hl-path':'')+'">'
-          +dirNames[l.dir]+' ('+l.x+','+l.y+') h='+a[l.x][l.y]
-          +' f='+f[l.x][l.y]+(isBest?' ← 最优':'')+'</span><br>';
-      }
-      ih+='→ max(f[邻居]) = <span class="hl-b">'+(f[x][y]-1)+'</span><br>';
-      ih+='→ <span class="hl-y">f['+x+']['+y+'] = '+f[x][y]+'</span>';
-    }
-    ih+='<br>— — — — —<br><span class="hl-path">⛷️ 路径（'+curPath.length+' 步）：</span><br>';
-    ih+='<div class="path-chain">';
-    for(let k=0;k<curPath.length;k++){
-      const p=curPath[k];
-      if(k>0) ih+=' <span style="color:#94a3b8;">→</span> ';
-      ih+=k+1!==1?'':'<b>';
-      ih+='('+p.x+','+p.y+')'+'<span style="font-size:0.65rem;color:#94a3b8;">h='+a[p.x][p.y]+'</span>';
-      ih+=k+1!==1?'':'</b>';
-    }
-    ih+='</div>';
-    ih+='<span class="hl-gr">当前最大 ans = '+getAns()+'</span>';
-  } else if(phase==='done'){
-    ih='<b>✅ 计算完成！</b><br>';
-    ih+='最长滑雪路径长度 = <span class="hl-y">'+getAns()+'</span><br>';
-    // find start of longest path
-    let bestX=1,bestY=1;
-    for(let i=1;i<=n;i++)
-      for(let j=1;j<=m;j++)
-        if(f[i][j]>f[bestX][bestY]){ bestX=i; bestY=j; }
-    const finalPath=getPath(bestX,bestY);
-    ih+='最长路径起点：<b>('+bestX+','+bestY+')</b><br>';
-    ih+='<span class="hl-path">⛷️ 路径（'+finalPath.length+' 步）：</span><br>';
-    ih+='<div class="path-chain">';
-    for(let k=0;k<finalPath.length;k++){
-      if(k>0) ih+=' <span style="color:#94a3b8;">→</span> ';
-      ih+='('+finalPath[k].x+','+finalPath[k].y+')'
-        +'<span style="font-size:0.65rem;color:#94a3b8;">h='+a[finalPath[k].x][finalPath[k].y]+'</span>';
-    }
-    ih+='</div>';
-  }
-  infoBox.innerHTML=ih;
-
-  if(phase==='done'){
-    answerBox.style.display='block';
-    ansNum.textContent=getAns();
-  } else {
-    answerBox.style.display='none';
-  }
-
-  stepEls.forEach(el=>{
-    if(phase==='idle') el.classList.remove('done');
-    else el.classList.add('done');
-  });
-
-  btnPrev.disabled=phase==='idle'||stepIdx===0;
-  btnNext.disabled=phase==='idle'||phase==='done';
-}
-
-function getAns(){
-  let best=0;
-  for(let i=1;i<=n;i++)
-    for(let j=1;j<=m;j++)
-      best=Math.max(best,f[i][j]);
-  return best;
-}
+function randInt(mn,mx){ return Math.floor(Math.random()*(mx-mn+1))+mn; }
 
 function htBg(t){
   if(t<0.25) return '#f0fdf4';
@@ -727,34 +604,523 @@ function htColor(t){
   return '#dc2626';
 }
 
+// ════════════ TAB 1: DP SORT ════════════
+(function(){
+const $=id=>document.getElementById(id);
+const inpN=$('dpN'),inpM=$('dpM');
+const btnGen=$('dpGen'),btnSample=$('dpSample');
+const btnPrev=$('dpPrev'),btnNext=$('dpNext');
+const btnAuto=$('dpAuto'),btnReset=$('dpReset');
+const stepInfo=$('dpStepInfo'),gridC=$('dpGrid');
+const infoBox=$('dpInfo'),answerBox=$('dpAns');
+const ansNum=$('dpAnsNum'),sortList=$('dpSortList');
+
+let n=5,m=5,a=[],f=[],nxt=[],cells=[],stepIdx=0,phase='idle',autoTimer=null;
+let curX=1,curY=1,lowerNeighbors=[],curPath=[];
+
+function load(src){
+  n=Math.min(8,Math.max(2,parseInt(inpN.value)||5));
+  m=Math.min(10,Math.max(2,parseInt(inpM.value)||5));
+  a=Array.from({length:n+2},()=>Array(m+2).fill(0));
+  if(src==='sample'){
+    const sn=Math.min(5,n),sm=Math.min(5,m);
+    for(let i=1;i<=n;i++) for(let j=1;j<=m;j++)
+      a[i][j]=(i<=sn&&j<=sm)?SAMPLE[i-1][j-1]:randInt(1,99);
+  } else {
+    for(let i=1;i<=n;i++) for(let j=1;j<=m;j++) a[i][j]=randInt(1,99);
+  }
+  reset();
+}
+
+function reset(){
+  stop();
+  f=Array.from({length:n+2},()=>Array(m+2).fill(0));
+  nxt=Array.from({length:n+2},()=>Array(m+2).fill(null));
+  cells=[];
+  for(let i=1;i<=n;i++) for(let j=1;j<=m;j++) cells.push({h:a[i][j],x:i,y:j});
+  cells.sort((a,b)=>a.h-b.h);
+  stepIdx=0; curX=cells[0]?.x||1; curY=cells[0]?.y||1;
+  lowerNeighbors=[]; curPath=[]; phase='idle';
+  render(); btnNext.disabled=false; btnAuto.disabled=false;
+}
+
+function getLower(x,y){
+  const r=[];
+  for(let d=0;d<4;d++){ const nx=x+dx[d],ny=y+dy[d]; if(nx>=1&&nx<=n&&ny>=1&&ny<=m&&a[nx][ny]<a[x][y]) r.push({x:nx,y:ny,dir:d}); }
+  return r;
+}
+function getPath(x,y){
+  const p=[]; let cx=x,cy=y;
+  while(cx&&cy){ p.push({x:cx,y:cy}); const nx=nxt[cx]?.[cy]; if(!nx) break; cx=nx.x; cy=nx.y; }
+  return p;
+}
+
+function stepForward(){
+  if(phase==='done') return false;
+  if(stepIdx>=cells.length){ phase='done'; render(); return false; }
+  phase='running';
+  const {x,y}=cells[stepIdx];
+  const lowers=getLower(x,y);
+  let best=0,bnx=null,bny=null;
+  for(const l of lowers){ if(f[l.x][l.y]>best){ best=f[l.x][l.y]; bnx=l.x; bny=l.y; } }
+  f[x][y]=best+1; if(bnx!==null) nxt[x][y]={x:bnx,y:bny};
+  curX=x; curY=y; lowerNeighbors=lowers; curPath=getPath(x,y);
+  stepIdx++; if(stepIdx>=cells.length) phase='done';
+  render(); return true;
+}
+
+function stepBack(){
+  if(phase==='idle'||stepIdx<=0) return false;
+  if(phase==='done'){ phase='running'; render(); return true; }
+  stepIdx--;
+  const {x,y}=cells[stepIdx]; f[x][y]=0; nxt[x][y]=null;
+  curX=x; curY=y; lowerNeighbors=getLower(x,y); curPath=getPath(x,y);
+  if(stepIdx>0){
+    const p=cells[stepIdx-1], pl=getLower(p.x,p.y);
+    let pb=0,pnx=null,pny=null;
+    for(const l of pl){ if(f[l.x][l.y]>pb){ pb=f[l.x][l.y]; pnx=l.x; pny=l.y; } }
+    f[p.x][p.y]=pb+1; if(pnx!==null) nxt[p.x][p.y]={x:pnx,y:pny};
+    curX=p.x; curY=p.y; lowerNeighbors=pl; curPath=getPath(curX,curY);
+  }
+  render(); return true;
+}
+
+function render(){
+  const maxH=Math.max(...a.flat().filter(v=>v>0),1);
+  let g='<div class="grid" style="grid-template-columns:repeat('+m+',60px);">';
+  for(let i=1;i<=n;i++) for(let j=1;j<=m;j++){
+    const h=a[i][j],fv=f[i][j];
+    const isCur=(i===curX&&j===curY);
+    const isLower=lowerNeighbors.some(l=>l.x===i&&l.y===j);
+    let pathIdx=-1;
+    for(let k=0;k<curPath.length;k++){ if(curPath[k].x===i&&curPath[k].y===j){ pathIdx=k; break; } }
+    let cls='gcell'; const t=h/maxH;
+    if(pathIdx>=0&&phase==='running'){
+      const si=Math.min(pathIdx,16); cls+=' on-path s'+(si===16?'16plus':si);
+    } else if(isLower){ cls+=' lower'; }
+    const bg=pathIdx>=0&&phase==='running'?'transparent':htBg(t);
+    const txt=pathIdx>=0&&phase==='running'?'#1a202c':htColor(t);
+    let fvText='',fvCls='';
+    if(fv>0){ fvText='f='+fv; fvCls='done'; } else { fvText='?'; fvCls='pending'; }
+    g+='<div class="'+cls+'" style="background:'+bg+';">';
+    g+='<div class="idx" style="color:'+(pathIdx>=0?'rgba(26,32,44,0.35)':'#cbd5e1')+';">'+i+','+j+'</div>';
+    g+='<div class="ht" style="color:'+txt+';">'+h+'</div>';
+    g+='<div class="fv '+fvCls+'" style="color:'+(pathIdx>=0?'#1a202c':'')+';">'+fvText+'</div>';
+    if(pathIdx>=0&&phase==='running') g+='<div class="step-badge">'+(pathIdx+1)+'</div>';
+    g+='</div>';
+  }
+  g+='</div>'; gridC.innerHTML=g;
+
+  let sl='<div class="items">';
+  for(let k=0;k<cells.length;k++){
+    const c=cells[k]; let cl='sort-item';
+    if(k<stepIdx&&phase!=='idle') cl+=' done';
+    else if(k===stepIdx&&phase==='running') cl+=' active';
+    sl+='<div class="'+cl+'" title="('+c.x+','+c.y+') h='+c.h+'">'+c.h+'</div>';
+  }
+  sl+='</div>'; sortList.innerHTML=sl;
+
+  if(phase==='idle') stepInfo.textContent='已生成，点「下一步」开始';
+  else if(phase==='running') stepInfo.textContent='第 '+stepIdx+'/'+cells.length+' 格';
+  else stepInfo.textContent='✅ 完成！最长路径 = '+getAns();
+
+  let ih='';
+  if(phase==='idle'){
+    ih='<b>网格已生成</b>（'+n+'×'+m+'）<br><span class="hl-gr">点击「下一步」开始排序 DP。</span>';
+  } else if(phase==='running'){
+    const x=curX,y=curY;
+    ih='<b>第 '+stepIdx+'/'+cells.length+' 格</b> <span class="eq">('+x+','+y+')</span> 高度 <b>'+a[x][y]+'</b><br>— — —<br>';
+    const lowers=getLower(x,y);
+    if(lowers.length===0){ ih+='<span class="hl-gr">四周无更低邻居（局部最低点）</span><br>→ <span class="hl-y">f['+x+']['+y+'] = 1</span>'; }
+    else {
+      ih+='<b>'+lowers.length+'</b> 个更低邻居：<br>';
+      for(const l of lowers){
+        const best=nxt[x][y]&&nxt[x][y].x===l.x&&nxt[x][y].y===l.y;
+        ih+='&nbsp;&nbsp;<span class="'+(best?'hl-path':'')+'">'+dirNames[l.dir]+' ('+l.x+','+l.y+') h='+a[l.x][l.y]+' f='+f[l.x][l.y]+(best?' ← 最优':'')+'</span><br>';
+      }
+      ih+='→ max = <span class="hl-b">'+(f[x][y]-1)+'</span> → <span class="hl-y">f['+x+']['+y+'] = '+f[x][y]+'</span>';
+    }
+    ih+='<br>— — —<br><span class="hl-path">⛷️ 路径（'+curPath.length+' 步）：</span><br><div class="path-chain">';
+    for(let k=0;k<curPath.length;k++){
+      if(k>0) ih+=' <span style="color:#94a3b8;">→</span> ';
+      ih+='('+curPath[k].x+','+curPath[k].y+')<span style="font-size:0.65rem;color:#94a3b8;">h='+a[curPath[k].x][curPath[k].y]+'</span>';
+    }
+    ih+='</div><span class="hl-gr">当前最大 ans = '+getAns()+'</span>';
+  } else {
+    ih='<b>✅ 计算完成！</b><br>最长滑雪路径长度 = <span class="hl-y">'+getAns()+'</span><br>';
+    let bx=1,by=1;
+    for(let i=1;i<=n;i++) for(let j=1;j<=m;j++) if(f[i][j]>f[bx][by]){ bx=i; by=j; }
+    const fp=getPath(bx,by);
+    ih+='最长路径起点：<b>('+bx+','+by+')</b><br><span class="hl-path">⛷️ 路径（'+fp.length+' 步）：</span><br><div class="path-chain">';
+    for(let k=0;k<fp.length;k++){
+      if(k>0) ih+=' <span style="color:#94a3b8;">→</span> ';
+      ih+='('+fp[k].x+','+fp[k].y+')<span style="font-size:0.65rem;color:#94a3b8;">h='+a[fp[k].x][fp[k].y]+'</span>';
+    }
+    ih+='</div>';
+  }
+  infoBox.innerHTML=ih;
+  if(phase==='done'){ answerBox.style.display='block'; ansNum.textContent=getAns(); }
+  else answerBox.style.display='none';
+  btnPrev.disabled=phase==='idle'||stepIdx===0;
+  btnNext.disabled=phase==='idle'||phase==='done';
+}
+
+function getAns(){ let b=0; for(let i=1;i<=n;i++) for(let j=1;j<=m;j++) b=Math.max(b,f[i][j]); return b; }
+
 function toggleAuto(){
-  if(autoTimer){ stopAuto(); return; }
-  if(phase==='done'){ loadHeights('sample'); render(); }
-  autoTimer=setInterval(()=>{
-    if(phase==='done'||!stepForward()) stopAuto();
-  },400);
+  if(autoTimer){ clearInterval(autoTimer); autoTimer=null; btnAuto.textContent='▶'; btnAuto.classList.remove('playing'); return; }
+  if(phase==='done'){ load('sample'); render(); }
+  autoTimer=setInterval(()=>{ if(phase==='done'||!stepForward()){ clearInterval(autoTimer); autoTimer=null; btnAuto.textContent='▶'; btnAuto.classList.remove('playing'); } },400);
   btnAuto.textContent='⏹'; btnAuto.classList.add('playing');
 }
-function stopAuto(){
-  if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
-  btnAuto.textContent='▶'; btnAuto.classList.remove('playing');
-}
+function stop(){ if(autoTimer){ clearInterval(autoTimer); autoTimer=null; btnAuto.textContent='▶'; btnAuto.classList.remove('playing'); } }
 
-btnSample.addEventListener('click',()=>{ inpN.value=5; inpM.value=5; loadHeights('sample'); });
-btnGen.addEventListener('click',()=>loadHeights('random'));
+btnSample.addEventListener('click',()=>{ inpN.value=5; inpM.value=5; load('sample'); });
+btnGen.addEventListener('click',()=>load('random'));
 btnNext.addEventListener('click',stepForward);
 btnPrev.addEventListener('click',stepBack);
-btnReset.addEventListener('click',()=>{ resetState(); });
+btnReset.addEventListener('click',reset);
 btnAuto.addEventListener('click',toggleAuto);
+load('sample');
+})();
 
-document.addEventListener('keydown',e=>{
-  if(e.target.tagName==='INPUT') return;
-  if(e.key==='ArrowRight'||e.key===' '){ e.preventDefault(); btnNext.click(); }
-  if(e.key==='ArrowLeft'){ e.preventDefault(); btnPrev.click(); }
-  if(e.key==='r'||e.key==='R'){ e.preventDefault(); btnReset.click(); }
+// ════════════ TAB 2: MEMO ════════════
+(function(){
+const $=id=>document.getElementById(id);
+const inpN=$('memoN'),inpM=$('memoM');
+const btnGen=$('memoGen'),btnSample=$('memoSample');
+const btnPrev=$('memoPrev'),btnNext=$('memoNext');
+const btnAuto=$('memoAuto'),btnReset=$('memoReset');
+const stepInfo=$('memoStepInfo'),gridC=$('memoGrid');
+const orderGrid=$('memoOrderGrid');
+const infoBox=$('memoInfo'),answerBox=$('memoAns');
+const ansNum=$('memoAnsNum'),callStackEl=$('memoCallStack');
+
+let n=5,m=5,a=[],f=[];
+let phase='idle',autoTimer=null;
+// steps in DFS post-order from a chosen start cell
+let dfsSteps=[]; // [{x,y,type:'pre'|'post',depth,order},...]
+let stepIdx=0;
+let curX=1,curY=1;
+let memoF=[]; // computed f values during demo
+let startX=3,startY=3; // start DFS from peak by default
+let currentPath=[];
+
+function load(src){
+  n=Math.min(8,Math.max(2,parseInt(inpN.value)||5));
+  m=Math.min(10,Math.max(2,parseInt(inpM.value)||5));
+  a=Array.from({length:n+2},()=>Array(m+2).fill(0));
+  if(src==='sample'){
+    const sn=Math.min(5,n),sm=Math.min(5,m);
+    for(let i=1;i<=n;i++) for(let j=1;j<=m;j++)
+      a[i][j]=(i<=sn&&j<=sm)?SAMPLE[i-1][j-1]:randInt(1,99);
+  } else {
+    for(let i=1;i<=n;i++) for(let j=1;j<=m;j++) a[i][j]=randInt(1,99);
+  }
+  reset();
+}
+
+function reset(){
+  stop();
+  memoF=Array.from({length:n+2},()=>Array(m+2).fill(-1));
+  dfsSteps=[]; stepIdx=0;
+  phase='idle'; curX=startX; curY=startY; currentPath=[];
+  // find peak for default start
+  let peakX=1,peakY=1;
+  for(let i=1;i<=n;i++) for(let j=1;j<=m;j++) if(a[i][j]>a[peakX][peakY]){ peakX=i; peakY=j; }
+  startX=peakX; startY=peakY; curX=peakX; curY=peakY;
+  render(); renderOrderGrid();
+  btnNext.disabled=false; btnAuto.disabled=false;
+}
+
+function buildDfsSteps(sx,sy){
+  const visited=Array.from({length:n+2},()=>Array(m+2).fill(false));
+  const steps=[];
+  let order=0;
+  const cache=Array.from({length:n+2},()=>Array(m+2).fill(-1));
+  function dfs(x,y,depth){
+    if(visited[x][y]) return;
+    visited[x][y]=true;
+    steps.push({x,y,type:'pre',depth,order:++order});
+    for(let d=0;d<4;d++){
+      const nx=x+dx[d],ny=y+dy[d];
+      if(nx>=1&&nx<=n&&ny>=1&&ny<=m&&a[nx][ny]<a[x][y]) dfs(nx,ny,depth+1);
+    }
+    let best=0;
+    for(let d=0;d<4;d++){
+      const nx=x+dx[d],ny=y+dy[d];
+      if(nx>=1&&nx<=n&&ny>=1&&ny<=m&&a[nx][ny]<a[x][y]) best=Math.max(best,cache[nx][ny]);
+    }
+    cache[x][y]=best+1;
+    steps.push({x,y,type:'post',depth,order:++order,fv:best+1});
+  }
+  dfs(sx,sy,0);
+  return steps;
+}
+
+function startDfs(){
+  stop();
+  dfsSteps=buildDfsSteps(startX,startY);
+  // reset f
+  memoF=Array.from({length:n+2},()=>Array(m+2).fill(-1));
+  stepIdx=0; phase='running';
+  render(); renderOrderGrid(); stepInfo.textContent='DFS 进行中…';
+  btnNext.disabled=false; btnAuto.disabled=false;
+}
+
+function stepForward(){
+  if(phase==='idle'){
+    startDfs();
+    // step to first
+    if(dfsSteps.length>0){
+      const s=dfsSteps[0];
+      curX=s.x; curY=s.y;
+      if(s.type==='post'){ memoF[s.x][s.y]=s.fv; }
+      stepIdx=1;
+      render(); renderOrderGrid();
+    }
+    return true;
+  }
+  if(phase==='done'||stepIdx>=dfsSteps.length){ phase='done'; render(); renderOrderGrid(); return false; }
+  const s=dfsSteps[stepIdx];
+  curX=s.x; curY=s.y;
+  if(s.type==='post'){ memoF[s.x][s.y]=s.fv; }
+  stepIdx++;
+  if(stepIdx>=dfsSteps.length) phase='done';
+  render(); renderOrderGrid();
+  return true;
+}
+
+function stepBack(){
+  if(phase==='idle'||stepIdx<=0) return false;
+  if(phase==='done'){ phase='running'; render(); renderOrderGrid(); return true; }
+  stepIdx--;
+  for(let i=stepIdx;i<dfsSteps.length;i++){
+    const ss=dfsSteps[i];
+    if(ss.type==='post') memoF[ss.x][ss.y]=-1;
+  }
+  if(stepIdx>0){ const ls=dfsSteps[stepIdx-1]; curX=ls.x; curY=ls.y; }
+  else { curX=startX; curY=startY; }
+  render(); renderOrderGrid();
+  return true;
+}
+  render(); renderOrderGrid();
+  return true;
+}
+
+function render(){
+  const maxH=Math.max(...a.flat().filter(v=>v>0),1);
+  let g='<div class="grid" style="grid-template-columns:repeat('+m+',60px);">';
+  // get call stack info
+  const inStack=new Set();
+  for(let i=0;i<stepIdx&&i<dfsSteps.length;i++){
+    const s=dfsSteps[i];
+    if(s.type==='pre') inStack.add(s.x+','+s.y);
+    else if(s.type==='post') inStack.delete(s.x+','+s.y);
+  }
+
+  for(let i=1;i<=n;i++) for(let j=1;j<=m;j++){
+    const h=a[i][j]; const fv=memoF[i][j];
+    const isCur=(i===curX&&j===curY);
+    const isCached=fv>=0;
+    const isOnStack=inStack.has(i+','+j);
+    const isPre=(isOnStack&&!isCached);
+
+    let cls='gcell'; const t=h/maxH;
+    if(isCur&&phase==='running'&&isCached) cls+=' memo-current';
+    else if(isCur&&phase==='running') cls+=' visiting';
+    else if(isCached) cls+=' memo-done';
+    else if(isOnStack) cls+=' in-stack';
+    else { cls+= (t<0.25?' ht-low':t<0.5?' ht-mid':t<0.75?' ht-high':' ht-high2'); }
+
+    const bg=isCur||isCached||isOnStack?'transparent':htBg(t);
+    const txt=isCur||isCached||isOnStack?'#1a202c':htColor(t);
+
+    let fvText='',fvCls='';
+    if(fv>=0){ fvText='f='+fv; fvCls='done'; } else if(isOnStack){ fvText='…'; fvCls='pending'; } else { fvText='?'; fvCls='pending'; }
+
+    g+='<div class="'+cls+'" style="background:'+bg+';">';
+    g+='<div class="idx" style="color:'+(isCur||isCached||isOnStack?'rgba(26,32,44,0.35)':'#cbd5e1')+';">'+i+','+j+'</div>';
+    g+='<div class="ht" style="color:'+txt+';">'+h+'</div>';
+    g+='<div class="fv '+fvCls+'" style="color:'+(isCur||isCached||isOnStack?'#1a202c':'')+';">'+fvText+'</div>';
+    if(isCur&&phase==='running'&&!isCached) g+='<div class="step-badge" style="background:#f59e0b;color:#fff;">↓</div>';
+    g+='</div>';
+  }
+  g+='</div>'; gridC.innerHTML=g;
+
+  // info box
+  let ih='';
+  if(phase==='idle'){
+    ih='<b>DFS 演示</b>：从最高点 <span class="eq">('+startX+','+startY+')</span>（高度 '+a[startX][startY]+'）开始递归。<br>';
+    ih+='<span class="hl-gr">点击「下一步」观察记忆化搜索过程。</span>';
+  } else if(phase==='running'||phase==='done'){
+    const x=curX,y=curY;
+    const s=stepIdx<=dfsSteps.length?dfsSteps[Math.min(stepIdx-1,dfsSteps.length-1)]:null;
+    if(s){
+      ih='<b>第 '+stepIdx+'/'+dfsSteps.length+' 步</b><br>';
+      if(s.type==='pre'){
+        ih+='📞 <span class="hl-y">递归进入</span> <span class="eq">('+x+','+y+')</span> 高度 '+a[x][y]+'<br>';
+        ih+='深度 <b>'+s.depth+'</b>，准备检查四个方向的更低邻居…<br>';
+        const lowers=[];
+        for(let d=0;d<4;d++){ const nx=x+dx[d],ny=y+dy[d]; if(nx>=1&&nx<=n&&ny>=1&&ny<=m&&a[nx][ny]<a[x][y]) lowers.push({x:nx,y:ny,dir:d}); }
+        if(lowers.length>0){
+          ih+='找到 <b>'+lowers.length+'</b> 个更低邻居：';
+          for(const l of lowers) ih+=' <span class="hl-g">'+dirNames[l.dir]+'('+l.x+','+l.y+')</span>';
+        } else ih+='<span class="hl-gr">四周无更低邻居，将直接返回 1</span>';
+      } else {
+        ih+='✅ <span class="hl-path">递归返回</span> <span class="eq">('+x+','+y+')</span> 高度 '+a[x][y]+'<br>';
+        ih+='f['+x+']['+y+'] = <span class="hl-y">'+s.fv+'</span>（已缓存）<br>';
+        // path from this cell
+        const path=getMemoPath(x,y);
+        if(path.length>1){
+          ih+='<span class="hl-path">⛷️ 路径：</span>';
+          for(let k=0;k<Math.min(path.length,10);k++){
+            if(k>0) ih+=' → ';
+            ih+='('+path[k].x+','+path[k].y+')';
+          }
+          if(path.length>10) ih+=' …';
+        }
+      }
+      ih+='<br><span class="hl-gr">已缓存 '+countCached()+' 个格子</span>';
+    }
+  }
+  infoBox.innerHTML=ih;
+  if(phase==='done'){
+    answerBox.style.display='block';
+    ansNum.textContent=memoF[startX][startY];
+  } else answerBox.style.display='none';
+  btnPrev.disabled=phase==='idle'||stepIdx===0;
+  btnNext.disabled=phase==='idle'||phase==='done';
+
+  // call stack
+  renderCallStack();
+}
+
+function renderCallStack(){
+  let html='';
+  if(phase==='idle'){ html='<span class="hl-gr">点击「下一步」开始 DFS 演示。</span>'; }
+  else {
+    const stack=[];
+    for(let i=0;i<stepIdx&&i<dfsSteps.length;i++){
+      const s=dfsSteps[i];
+      if(s.type==='pre') stack.push(s);
+      else if(s.type==='post'&&stack.length>0){
+        const top=stack.pop();
+        html+= '<div style="color:#059669;">↩ dfs('+top.x+','+top.y+') → <b>f='+s.fv+'</b></div>';
+      }
+    }
+    // remaining stack
+    if(stack.length>0){
+      html+='<div style="border-top:1px dashed #e2e8f0;margin:2px 0;padding-top:2px;color:#b45309;font-weight:600;">调用栈（'+stack.length+' 层）：</div>';
+      for(let i=stack.length-1;i>=0;i--){
+        html+='<div style="padding-left:'+((stack.length-1-i)*12)+'px;color:#b45309;">└ dfs('+stack[i].x+','+stack[i].y+') h='+a[stack[i].x][stack[i].y]+'</div>';
+      }
+    } else if(phase!=='idle'&&dfsSteps.length>0){
+      html+='<span class="hl-gr">所有递归已返回。</span>';
+    }
+  }
+  callStackEl.innerHTML=html||'<span class="hl-gr">（栈为空）</span>';
+}
+
+function renderOrderGrid(){
+  if(!dfsSteps||dfsSteps.length===0){
+    // show height-only grid
+    const maxH=Math.max(...a.flat().filter(v=>v>0),1);
+    let g='<div class="grid" style="grid-template-columns:repeat('+m+',60px);">';
+    for(let i=1;i<=n;i++) for(let j=1;j<=m;j++){
+      const h=a[i][j]; const t=h/maxH;
+      g+='<div class="gcell" style="background:'+htBg(t)+';"><div class="idx">'+i+','+j+'</div><div class="ht" style="color:'+htColor(t)+';">'+h+'</div></div>';
+    }
+    g+='</div>'; orderGrid.innerHTML=g;
+    return;
+  }
+  // order map: pre-order number, post-order number
+  const preMap={},postMap={};
+  let preIdx=0,postIdx=0;
+  for(let k=0;k<dfsSteps.length;k++){
+    const s=dfsSteps[k];
+    const key=s.x+','+s.y;
+    if(s.type==='pre'){ preIdx++; preMap[key]=preIdx; }
+    else { postIdx++; postMap[key]=postIdx; }
+  }
+  const doneSet=new Set();
+  for(let k=0;k<stepIdx&&k<dfsSteps.length;k++){ const s=dfsSteps[k]; if(s.type==='post') doneSet.add(s.x+','+s.y); }
+  const stackSet=new Set();
+  for(let k=0;k<stepIdx&&k<dfsSteps.length;k++){ const s=dfsSteps[k]; if(s.type==='pre') stackSet.add(s.x+','+s.y); else if(s.type==='post') stackSet.delete(s.x+','+s.y); }
+
+  const maxH=Math.max(...a.flat().filter(v=>v>0),1);
+  let g='<div class="grid" style="grid-template-columns:repeat('+m+',60px);">';
+  for(let i=1;i<=n;i++) for(let j=1;j<=m;j++){
+    const h=a[i][j]; const t=h/maxH;
+    const key=i+','+j;
+    const pn=preMap[key]||'', pon=postMap[key]||'';
+    const isDone=doneSet.has(key);
+    const isOnStack=stackSet.has(key)&&!isDone;
+    let cls='gcell';
+    if(isDone) cls+=' memo-done';
+    else if(isOnStack) cls+=' in-stack';
+    else if(pn) cls+=''; // visited in pre but not yet returned
+    const bg=isDone||isOnStack?'transparent':htBg(t);
+    const txt=isDone||isOnStack?'#1a202c':htColor(t);
+    g+='<div class="'+cls+'" style="background:'+bg+';">';
+    g+='<div class="idx" style="color:'+(isDone||isOnStack?'rgba(26,32,44,0.35)':'#cbd5e1')+';">'+i+','+j+'</div>';
+    g+='<div class="ht" style="color:'+txt+';">'+h+'</div>';
+    g+='<div class="fv '+(isDone?'done':'pending')+'" style="color:'+(isDone?'#065f46':'#94a3b8')+';">'
+      +(pon?'②'+pon:pn?'①'+pn:'')+'</div>';
+    g+='</div>';
+  }
+  g+='</div>'; orderGrid.innerHTML=g;
+}
+
+function getMemoPath(x,y){
+  // reconstruct from memoF
+  const p=[]; let cx=x,cy=y;
+  while(cx&&cy){
+    p.push({x:cx,y:cy});
+    let best=-1,bnx=null,bny=null;
+    for(let d=0;d<4;d++){
+      const nx=cx+dx[d],ny=cy+dy[d];
+      if(nx>=1&&nx<=n&&ny>=1&&ny<=m&&a[nx][ny]<a[cx][cy]&&memoF[nx][ny]>=0){
+        if(memoF[nx][ny]>best){ best=memoF[nx][ny]; bnx=nx; bny=ny; }
+      }
+    }
+    if(bnx===null) break;
+    cx=bnx; cy=bny;
+  }
+  return p;
+}
+
+function countCached(){ let c=0; for(let i=1;i<=n;i++) for(let j=1;j<=m;j++) if(memoF[i][j]>=0) c++; return c; }
+
+function toggleAuto(){
+  if(autoTimer){ clearInterval(autoTimer); autoTimer=null; btnAuto.textContent='▶'; btnAuto.classList.remove('playing'); return; }
+  if(phase==='done'){ load('sample'); startDfs(); render(); renderOrderGrid(); }
+  autoTimer=setInterval(()=>{
+    if(phase==='done'||!stepForward()){ clearInterval(autoTimer); autoTimer=null; btnAuto.textContent='▶'; btnAuto.classList.remove('playing'); }
+  },500);
+  btnAuto.textContent='⏹'; btnAuto.classList.add('playing');
+}
+function stop(){ if(autoTimer){ clearInterval(autoTimer); autoTimer=null; btnAuto.textContent='▶'; btnAuto.classList.remove('playing'); } }
+
+btnSample.addEventListener('click',()=>{ inpN.value=5; inpM.value=5; load('sample'); });
+btnGen.addEventListener('click',()=>load('random'));
+btnNext.addEventListener('click',stepForward);
+btnPrev.addEventListener('click',stepBack);
+btnReset.addEventListener('click',reset);
+btnAuto.addEventListener('click',toggleAuto);
+load('sample');
+})();
+
+// ──────────── tab switching ────────────
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById(this.dataset.tab).classList.add('active');
+  });
 });
 
-loadHeights('sample');
 })();
 </script>
 </body>
