@@ -40,9 +40,42 @@ header p { font-size: 0.95rem; opacity: 0.85; }
 .btn-demo { background: #2b6cb0; color: #fff; }
 .btn-demo:hover { background: #2c5282; }
 .footer { text-align: center; font-size: 0.8rem; color: #a0aec0; margin: 32px 0; }
+/* password gate */
+#pw-overlay {
+  position:fixed; inset:0; z-index:9999;
+  background:rgba(15,23,42,0.85);
+  display:flex; align-items:center; justify-content:center;
+  backdrop-filter:blur(4px);
+}
+#pw-box {
+  background:#fff; border-radius:16px; padding:40px 36px;
+  width:340px; text-align:center; box-shadow:0 24px 48px rgba(0,0,0,0.3);
+}
+#pw-box h2 { font-size:1.2rem; color:#1e293b; margin-bottom:4px; }
+#pw-box p { font-size:0.85rem; color:#64748b; margin-bottom:20px; }
+#pw-box input {
+  width:100%; padding:10px 14px; border:2px solid #e2e8f0; border-radius:8px;
+  font-size:1rem; text-align:center; outline:none; transition:border-color 0.2s;
+}
+#pw-box input:focus { border-color:#0d9488; }
+#pw-box .pw-err { color:#dc2626; font-size:0.8rem; margin-top:8px; display:none; }
+#pw-box button {
+  margin-top:16px; width:100%; padding:10px; border:none; border-radius:8px;
+  background:#0d9488; color:#fff; font-size:1rem; font-weight:600; cursor:pointer;
+}
+#pw-box button:hover { background:#0f766e; }
 </style>
 </head>
 <body>
+<div id="pw-overlay">
+  <div id="pw-box">
+    <h2>🔒 教师专用</h2>
+    <p>请输入密码查看题目列表</p>
+    <input type="password" id="pw-input" placeholder="输入密码" autocomplete="off">
+    <div class="pw-err" id="pw-err">密码错误，请重试</div>
+    <button id="pw-btn">确认</button>
+  </div>
+</div>
 
 <header>
   <h1>🧪 C++ 编程题 · 交互演示</h1>
@@ -187,5 +220,22 @@ header p { font-size: 0.95rem; opacity: 0.85; }
   cottonrose / cpp_analysis · GitHub Pages
 </div>
 
+<script>
+(function(){
+  const PW = 'teacher'; // ← 在这里修改密码
+  const overlay = document.getElementById('pw-overlay');
+  const input = document.getElementById('pw-input');
+  const errEl = document.getElementById('pw-err');
+  const btn = document.getElementById('pw-btn');
+  if(sessionStorage.getItem('cpp_auth')===PW){ overlay.style.display='none'; return; }
+  function check(){
+    if(input.value===PW){ sessionStorage.setItem('cpp_auth',PW); overlay.style.display='none'; }
+    else { errEl.style.display='block'; input.select(); }
+  }
+  btn.addEventListener('click',check);
+  input.addEventListener('keydown',e=>{ if(e.key==='Enter') check(); });
+  input.focus();
+})();
+</script>
 </body>
 </html>
