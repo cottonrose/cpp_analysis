@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B3636 文字工作 — DP 交互演示</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8; color: #2d3748; min-height: 100vh;
+}
+
+/* ─── Header ─── */
+header {
+  background: linear-gradient(135deg, #1a365d, #2a5298);
+  color: #fff; padding: 20px 28px; text-align: center;
+}
+header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+header h1 span { color: #fbd38d; }
+header p { font-size: 0.88rem; opacity: 0.85; max-width: 700px; margin: 0 auto; }
+
+/* ─── Problem Panel ─── */
+.problem {
+  background: #fff; margin: 16px; padding: 16px 20px; border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); max-width: 960px; margin-left: auto; margin-right: auto;
+}
+.problem h2 { font-size: 1rem; color: #1a365d; margin-bottom: 8px; }
+.problem .ops { display: flex; gap: 20px; flex-wrap: wrap; }
+.problem .ops > div {
+  background: #f7fafc; border-radius: 8px; padding: 8px 14px; flex: 1; min-width: 180px;
+}
+.problem .ops .label { font-weight: 600; font-size: 0.85rem; }
+.problem .ops .label .key {
+  display: inline-block; background: #e2e8f0; border-radius: 4px; padding: 0 8px;
+  font-family: monospace; font-size: 0.8rem; margin-right: 4px;
+}
+.problem .goal { margin-top: 8px; font-size: 0.88rem; color: #4a5568; }
+
+/* ─── Control Bar ─── */
+.controls {
+  background: #fff; margin: 0 16px 16px; padding: 14px 20px; border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); max-width: 960px; margin-left: auto; margin-right: auto;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.controls label { font-size: 0.9rem; font-weight: 600; white-space: nowrap; }
+.controls input[type="range"] { flex: 1; min-width: 100px; }
+.controls .n-val { font-size: 1.2rem; font-weight: 700; color: #2b6cb0; min-width: 36px; text-align: center; }
+.controls .btns { display: flex; gap: 6px; margin-left: auto; }
+.controls button {
+  padding: 6px 16px; border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; transition: background 0.15s, opacity 0.15s;
+}
+.controls button:disabled { opacity: 0.4; cursor: default; }
+.btn-prev { background: #e2e8f0; color: #2d3748; }
+.btn-prev:hover:not(:disabled) { background: #cbd5e0; }
+.btn-next { background: #2b6cb0; color: #fff; }
+.btn-next:hover:not(:disabled) { background: #2c5282; }
+.btn-auto { background: #38a169; color: #fff; }
+.btn-auto:hover:not(:disabled) { background: #2f855a; }
+.btn-auto.playing { background: #e53e3e; }
+.btn-auto.playing:hover:not(:disabled) { background: #c53030; }
+.btn-reset { background: #edf2f7; color: #4a5568; }
+.btn-reset:hover:not(:disabled) { background: #e2e8f0; }
+
+/* ─── Main Area ─── */
+.main {
+  display: flex; gap: 16px; max-width: 960px; margin: 0 16px 16px;
+  margin-left: auto; margin-right: auto;
+}
+@media (max-width: 720px) { .main { flex-direction: column; } }
+
+/* ─── DP Table ─── */
+.dp-panel {
+  flex: 2; background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  padding: 16px; overflow-x: auto; min-width: 0;
+}
+.dp-panel h3 { font-size: 0.9rem; color: #1a365d; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.dp-panel h3 .step-info { font-weight: 400; color: #718096; font-size: 0.82rem; }
+.dp-table {
+  display: inline-grid; gap: 3px; margin-bottom: 8px;
+}
+.dp-cell {
+  width: 50px; height: 48px; border-radius: 6px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; font-size: 0.75rem; position: relative;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.2s; cursor: default;
+}
+.dp-cell .idx { font-size: 0.6rem; color: #a0aec0; line-height: 1; }
+.dp-cell .val { font-size: 1rem; font-weight: 700; line-height: 1.3; }
+.dp-cell .src {
+  font-size: 0.55rem; opacity: 0.7; line-height: 1;
+}
+.dp-cell.empty { background: #edf2f7; }
+.dp-cell.empty .val { color: #a0aec0; font-weight: 400; }
+.dp-cell.done { background: #ebf8ff; }
+.dp-cell.done .val { color: #2b6cb0; }
+.dp-cell.from-plus { background: #bee3f8; }
+.dp-cell.from-plus .val { color: #2b6cb0; }
+.dp-cell.from-double { background: #fed7d7; }
+.dp-cell.from-double .val { color: #c53030; }
+.dp-cell.from-both { background: #e9d8fd; }
+.dp-cell.from-both .val { color: #6b46c1; }
+.dp-cell.current { box-shadow: 0 0 0 3px #2b6cb0; transform: scale(1.08); z-index: 1; }
+.dp-cell.path { background: #c6f6d5 !important; }
+.dp-cell.path .val { color: #276749 !important; }
+.dp-cell.path .src { color: #276749; }
+.dp-cell.path.current-path { box-shadow: 0 0 0 3px #38a169; transform: scale(1.08); z-index: 1; }
+
+.legend {
+  display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; font-size: 0.72rem;
+}
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-swatch { width: 14px; height: 14px; border-radius: 3px; }
+.legend-swatch.lb { background: #bee3f8; }
+.legend-swatch.lr { background: #fed7d7; }
+.legend-swatch.lp { background: #e9d8fd; }
+.legend-swatch.lg { background: #c6f6d5; }
+.legend-swatch.le { background: #edf2f7; }
+
+/* ─── Info Panel ─── */
+.info-panel {
+  flex: 1; background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  padding: 16px; min-width: 200px; display: flex; flex-direction: column; gap: 10px;
+}
+.info-panel h3 { font-size: 0.9rem; color: #1a365d; }
+.info-box {
+  background: #f7fafc; border-radius: 8px; padding: 12px; flex: 1;
+  font-size: 0.85rem; line-height: 1.7; min-height: 100px;
+}
+.info-box .highlight { font-weight: 700; }
+.hl-blue { color: #2b6cb0; }
+.hl-red { color: #c53030; }
+.hl-green { color: #276749; }
+.hl-purple { color: #6b46c1; }
+
+.path-list {
+  margin-top: 4px; display: flex; flex-wrap: wrap; gap: 3px; align-items: center;
+}
+.path-step {
+  display: inline-flex; align-items: center; gap: 2px;
+  background: #c6f6d5; border-radius: 4px; padding: 2px 6px; font-size: 0.78rem; font-weight: 600;
+}
+.path-step .op { font-size: 0.65rem; color: #276749; margin: 0 2px; }
+.path-step.dim { background: #edf2f7; color: #a0aec0; }
+.path-arrow { color: #a0aec0; font-size: 0.7rem; }
+
+.ans-box {
+  background: #1a365d; color: #fff; border-radius: 8px; padding: 12px; text-align: center;
+}
+.ans-box .ans-num { font-size: 2rem; font-weight: 800; }
+.ans-box .ans-label { font-size: 0.78rem; opacity: 0.8; }
+
+.footer {
+  text-align: center; font-size: 0.78rem; color: #a0aec0; margin: 24px 0 32px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>B3636 <span>文字工作</span></h1>
+  <p>动态规划交互演示 · 洛谷入门DP · 打字 + 全选复制粘贴</p>
+</header>
+
+<div class="problem">
+  <h2>📄 题目描述</h2>
+  <div class="ops">
+    <div>
+      <div class="label"><span class="key">A</span> 打字</div>
+      <div>字数 +1</div>
+    </div>
+    <div>
+      <div class="label"><span class="key">B</span> 全选 + 复制 + 粘贴</div>
+      <div>字数 ×2</div>
+    </div>
+  </div>
+  <div class="goal">
+    初始有 <strong>1</strong> 个字，每次可选操作 A 或 B，<strong>恰好</strong>达到 n 个字，求最少操作次数。
+  </div>
+</div>
+
+<div class="controls">
+  <label for="nSlider">n =</label>
+  <input type="range" id="nSlider" min="1" max="200" value="12">
+  <span class="n-val" id="nVal">12</span>
+  <div class="btns">
+    <button class="btn-prev" id="btnPrev" disabled>◀ 上一步</button>
+    <button class="btn-next" id="btnNext">下一步 ▶</button>
+    <button class="btn-auto" id="btnAuto">▶ 自动</button>
+    <button class="btn-reset" id="btnReset">⟳ 重置</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="dp-panel">
+    <h3>
+      🧮 DP 表
+      <span class="step-info" id="stepInfo">就绪</span>
+    </h3>
+    <div id="dpTableContainer" style="overflow-x:auto;"></div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch le"></span> 未计算</div>
+      <div class="legend-item"><span class="legend-swatch lb"></span> 从 +1 转移</div>
+      <div class="legend-item"><span class="legend-swatch lr"></span> 从 ×2 转移</div>
+      <div class="legend-item"><span class="legend-swatch lp"></span> 两种均可</div>
+      <div class="legend-item"><span class="legend-swatch lg"></span> 最优路径</div>
+    </div>
+  </div>
+  <div class="info-panel">
+    <h3>📝 说明</h3>
+    <div class="info-box" id="infoBox">
+      拖动滑块设置 n，然后点击「下一步」逐步观察 DP 填表过程。
+    </div>
+    <div id="answerBox" style="display:none;" class="ans-box">
+      <div class="ans-label">最少操作次数</div>
+      <div class="ans-num" id="ansNum">0</div>
+      <div class="ans-label" id="ansLabel">步</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  B3636 文字工作 · 洛谷 · DP 交互演示
+</div>
+
+<script>
+(function(){
+// ─── State ───
+let n = 12;
+let dp = [];
+let from = []; // '+' '+' or '*' or ''
+let step = 0; // how many i's have been computed (starting from 1)
+let phase = 'idle'; // 'idle' | 'computing' | 'done' | 'tracing'
+let trace = [];
+let traceIdx = 0;
+let autoTimer = null;
+
+const $ = id => document.getElementById(id);
+const nSlider = $('nSlider');
+const nVal = $('nVal');
+const btnPrev = $('btnPrev');
+const btnNext = $('btnNext');
+const btnAuto = $('btnAuto');
+const btnReset = $('btnReset');
+const stepInfo = $('stepInfo');
+const dpContainer = $('dpTableContainer');
+const infoBox = $('infoBox');
+const answerBox = $('answerBox');
+const ansNum = $('ansNum');
+const ansLabel = $('ansLabel');
+
+// ─── Helpers ───
+function getCols() {
+  if (n <= 25) return n;
+  return 20;
+}
+function getCellWidth() {
+  if (n <= 25) return 54;
+  if (n <= 60) return 50;
+  return 46;
+}
+
+// ─── Core Logic ───
+function resetDP() {
+  dp = [null]; from = [null];
+  dp[1] = 0; from[1] = '';
+  step = 1;
+  phase = (n === 1) ? 'done' : 'computing';
+  trace = []; traceIdx = 0;
+  if (n === 1) { trace = [1]; traceIdx = 0; }
+}
+
+function computeNext() {
+  if (phase === 'done' || phase === 'tracing') return false;
+  if (step >= n) {
+    phase = 'done';
+    buildTrace();
+    return false;
+  }
+  const i = step + 1;
+  const cand1 = dp[i - 1] + 1;
+  let cand2 = Infinity, src2 = '';
+  if (i % 2 === 0) {
+    cand2 = dp[i / 2] + 1;
+  }
+  if (cand1 <= cand2) {
+    dp[i] = cand1;
+    from[i] = '+';
+  }
+  if (cand2 <= cand1 && i % 2 === 0) {
+    dp[i] = cand2;
+    from[i] = (from[i] === '+' ? 'both' : '*');
+  }
+  step = i;
+  if (step === n) {
+    phase = 'done';
+    buildTrace();
+  }
+  return true;
+}
+
+function stepPrev() {
+  if (phase === 'tracing') {
+    if (traceIdx > 0) { traceIdx--; return true; }
+    return false;
+  }
+  if (step <= 1) return false;
+  // can only undo during computing phase
+  if (phase !== 'computing') return false;
+  dp[step] = undefined;
+  from[step] = undefined;
+  step--;
+  return true;
+}
+
+function buildTrace() {
+  trace = [];
+  let cur = n;
+  while (cur > 1) {
+    trace.unshift(cur);
+    if (from[cur] === '+' || from[cur] === 'both') {
+      cur = cur - 1;
+    } else {
+      cur = cur / 2;
+    }
+  }
+  trace.unshift(1);
+  traceIdx = 0;
+}
+
+// ─── Render ───
+function render() {
+  const cols = getCols();
+  const cellW = getCellWidth();
+  const rows = Math.ceil(n / cols);
+  // Table
+  let html = '<div class="dp-table" style="grid-template-columns:repeat(' + cols + ', ' + cellW + 'px);">';
+  for (let i = 1; i <= n; i++) {
+    let cls = 'dp-cell ';
+    let valText = '?';
+    let srcText = '';
+    let isPath = false;
+
+    if (dp[i] !== undefined) {
+      valText = dp[i];
+      if (from[i] === '+') { cls += 'from-plus'; srcText = '+1'; }
+      else if (from[i] === '*') { cls += 'from-double'; srcText = '×2'; }
+      else if (from[i] === 'both') { cls += 'from-both'; srcText = '+1/×2'; }
+      else if (from[i] === '') { cls += 'done'; srcText = '起点'; }
+      else { cls += 'done'; }
+    } else {
+      cls += 'empty';
+    }
+
+    if (trace.length > 0 && trace.includes(i)) {
+      cls = cls.replace(/from-plus|from-double|from-both|done|empty/g, '');
+      cls += ' path';
+      if (traceIdx >= 0 && trace.indexOf(i) <= traceIdx) {
+        cls += ' current-path';
+      }
+    }
+
+    // Current step highlight
+    if (i === step && phase === 'computing') cls += ' current';
+
+    html += '<div class="' + cls + '">';
+    html += '<div class="idx">' + i + '</div>';
+    html += '<div class="val">' + valText + '</div>';
+    if (srcText) html += '<div class="src">' + srcText + '</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  dpContainer.innerHTML = html;
+
+  // Step info
+  if (phase === 'idle') stepInfo.textContent = '等待开始';
+  else if (phase === 'computing') stepInfo.textContent = '正在计算… i = ' + step + '/' + n;
+  else if (phase === 'done') stepInfo.textContent = '✅ 完成！最少 ' + dp[n] + ' 步';
+  else if (phase === 'tracing') {
+    const pct = traceIdx > 0 ? Math.round(traceIdx / (trace.length - 1) * 100) : 0;
+    stepInfo.textContent = '🔄 路径回溯 ' + pct + '%';
+  }
+
+  // Info text
+  updateInfo();
+
+  // Answer box
+  if (phase === 'done' || phase === 'tracing') {
+    answerBox.style.display = 'block';
+    ansNum.textContent = dp[n];
+    ansLabel.textContent = '步  (1 → ' + n + ')';
+  } else {
+    answerBox.style.display = 'none';
+  }
+
+  // Buttons
+  const traceEnd = (phase === 'done' || phase === 'tracing') && traceIdx >= trace.length - 1;
+  btnNext.disabled = traceEnd || (n === 1 && phase === 'done');
+  const noPrevCompute = phase === 'computing' && step <= 1;
+  const noPrevDone = phase === 'done' && n === 1;
+  btnPrev.disabled = noPrevCompute || noPrevDone;
+}
+
+function updateInfo() {
+  let html = '';
+  if (phase === 'idle' || (phase === 'computing' && step <= 1)) {
+    html = '🎯 设置 n = <strong>' + n + '</strong>，点击「下一步」开始 DP 填表。';
+    html += '<br><br>dp[1] = <strong>0</strong>（已有 1 个字，无需操作）';
+  } else if (phase === 'computing') {
+    const i = step;
+    if (dp[i] === undefined) {
+      html = '正在准备计算 dp[<strong>' + i + '</strong>]…';
+    } else {
+      const fromPlus = dp[i - 1] + 1;
+      html = '<strong>计算 dp[' + i + ']</strong><br>';
+      html += '① 从 dp[' + (i - 1) + '] + 1 = ' + dp[i - 1] + ' + 1 = <span class="hl-blue">' + fromPlus + '</span>';
+      if (from[i] === '*' || from[i] === 'both') html += ' ← 候选';
+      else html += ' ← 选中 ✓';
+      html += '<br>';
+      if (i % 2 === 0) {
+        const fromDouble = dp[i / 2] + 1;
+        html += '② 从 dp[' + (i / 2) + '] ×2 = ' + dp[i / 2] + ' + 1 = <span class="hl-red">' + fromDouble + '</span>';
+        if (from[i] === '+' || from[i] === 'both') html += ' ← 候选';
+        else html += ' ← 选中 ✓';
+        html += '<br>';
+      } else {
+        html += '② i 为奇数，无法 ×2<br>';
+      }
+      if (from[i] === 'both') html += '→ 两种转移均可，取 <span class="hl-purple">' + dp[i] + '</span>';
+      else html += '→ dp[' + i + '] = <span class="hl-green">' + dp[i] + '</span>';
+    }
+    if (n > 1) {
+      html += '<br><br>⏱ 已完成 ' + step + '/' + n;
+    }
+  } else if (phase === 'done' && trace.length <= 1) {
+    html = '✅ dp 表计算完成！<br>';
+    html += 'dp[' + n + '] = <strong>' + dp[n] + '</strong><br>';
+    if (n === 1) html += 'n=1，不需要任何操作。';
+  } else if (phase === 'done' || phase === 'tracing') {
+    const last = n;
+    const lastFrom = dp[last - 1] + 1;
+    const lastInfo = (last % 2 === 0) ? ' 或 dp[' + (last/2) + ']×2+' + dp[last/2] + '→' + (dp[last/2]+1) : '';
+    html = '✅ dp 表计算完成！<br>';
+    html += '最后一步：dp[' + last + '] 从 dp[' + (last-1) + ']+1=' + lastFrom;
+    if (lastInfo) html += lastInfo;
+    html += ' 中选择 → <strong>' + dp[last] + '</strong>';
+    if (from[n] === 'both') html += '（两种均可）';
+    html += '<br><br>';
+    html += '🔄 <strong>路径回溯</strong><br>';
+    html += '<div class="path-list">';
+    for (let k = 0; k < trace.length; k++) {
+      const v = trace[k];
+      if (k > 0) {
+        const prev = trace[k - 1];
+        const op = (v === prev * 2) ? '×2' : '+1';
+        if (k <= traceIdx + 1) {
+          html += '<span class="path-step"><span class="op">' + op + '</span>→ ' + v + '</span>';
+        } else {
+          html += '<span class="path-step dim">' + v + '</span>';
+        }
+      } else {
+        html += '<span class="path-step">' + v + '</span>';
+      }
+      if (k < trace.length - 1 && k <= traceIdx) {
+        html += '<span class="path-arrow">→</span>';
+      }
+    }
+    html += '</div>';
+    if (traceIdx < trace.length - 1 && phase !== 'tracing') {
+      html += '<br>👆 点击「下一步」逐步回溯最优路径';
+    }
+  }
+
+  infoBox.innerHTML = html;
+}
+
+function nextStep() {
+  if (phase === 'computing') {
+    computeNext();
+    if (step === n && dp[n] !== undefined) {
+      phase = 'done';
+      buildTrace();
+    }
+    render();
+    return;
+  }
+  if (phase === 'done') {
+    if (traceIdx < trace.length - 1) {
+      traceIdx++;
+      if (traceIdx >= trace.length - 1) {
+        phase = 'tracing';
+      }
+      render();
+    }
+    return;
+  }
+  if (phase === 'tracing') {
+    if (traceIdx < trace.length - 1) {
+      traceIdx++;
+      render();
+    }
+    return;
+  }
+}
+
+function prevStep() {
+  if (phase === 'tracing') {
+    if (traceIdx > 0) {
+      traceIdx--;
+      if (traceIdx < trace.length - 1) phase = 'done';
+      render();
+      return;
+    }
+    // traceIdx === 0, fall through to go back to 'done' phase
+    phase = 'done';
+    render();
+    return;
+  }
+  if (phase === 'done') {
+    if (trace.length > 0 && trace.length > 1) {
+      phase = 'computing';
+      step = n - 1;
+      dp[n] = undefined;
+      from[n] = undefined;
+      trace = [];
+      traceIdx = 0;
+      render();
+      return;
+    }
+    // trace.length <= 1 (n=1), do nothing
+    return;
+  }
+  if (phase === 'computing' && step > 1) {
+    dp[step] = undefined;
+    from[step] = undefined;
+    step--;
+    render();
+  }
+}
+
+function resetAll() {
+  stopAuto();
+  resetDP();
+  trace = [];
+  traceIdx = 0;
+  render();
+}
+
+function toggleAuto() {
+  if (autoTimer) {
+    stopAuto();
+    return;
+  }
+  if ((phase === 'done' && traceIdx >= trace.length - 1) || (n === 1)) {
+    resetAll();
+  }
+  autoTimer = setInterval(() => {
+    if ((phase === 'done' && traceIdx >= trace.length - 1) || (phase === 'tracing' && traceIdx >= trace.length - 1)) {
+      stopAuto();
+      return;
+    }
+    nextStep();
+  }, 400);
+  btnAuto.textContent = '⏹ 停止';
+  btnAuto.classList.add('playing');
+}
+
+function stopAuto() {
+  if (autoTimer) {
+    clearInterval(autoTimer);
+    autoTimer = null;
+  }
+  btnAuto.textContent = '▶ 自动';
+  btnAuto.classList.remove('playing');
+}
+
+// ─── Init ───
+function init() {
+  n = parseInt(nSlider.value);
+  nVal.textContent = n;
+  resetDP();
+  render();
+
+  nSlider.addEventListener('input', () => {
+    stopAuto();
+    n = parseInt(nSlider.value);
+    nVal.textContent = n;
+    resetDP();
+    render();
+  });
+
+  btnNext.addEventListener('click', nextStep);
+  btnPrev.addEventListener('click', prevStep);
+  btnAuto.addEventListener('click', toggleAuto);
+  btnReset.addEventListener('click', resetAll);
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      nextStep();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      prevStep();
+    } else if (e.key === 'r' || e.key === 'R') {
+      resetAll();
+    }
+  });
+}
+
+init();
+})();
+</script>
+</body>
+</html>
