@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P1434 [SHOI2002] 滑雪 — DP 交互演示</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  background:#f0f4f8; color:#1a202c; min-height:100vh;
+}
+header {
+  background:linear-gradient(135deg,#0d9488,#0891b2);
+  color:#fff; padding:20px 28px; text-align:center; position:relative;
+}
+header h1 { font-size:1.5rem; font-weight:700; }
+header h1 span { color:#fde047; }
+header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
+
+/* ─── Problem ─── */
+.problem {
+  background:#fff; margin:14px 16px 0; padding:14px 20px; border-radius:12px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06); max-width:960px; margin-inline:auto;
+  border:1px solid #e2e8f0;
+}
+.problem h2 { font-size:0.95rem; color:#0d9488; margin-bottom:8px; }
+.problem .info { display:flex; gap:16px; flex-wrap:wrap; font-size:0.85rem; }
+.problem .info > div {
+  background:#f8fafc; border-radius:8px; padding:6px 14px; flex:1; min-width:120px;
+  border:1px solid #e2e8f0;
+}
+.problem .info .label { font-weight:600; color:#64748b; font-size:0.8rem; }
+.eq { font-family:monospace; background:#f0fdfa; padding:1px 5px; border-radius:3px; font-size:0.78rem; color:#0d9488; }
+
+/* ─── Controls ─── */
+.controls {
+  background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  padding:14px 20px; max-width:960px; margin:10px auto 0;
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.controls label { font-size:0.82rem; font-weight:600; color:#64748b; white-space:nowrap; }
+.controls input[type="number"] {
+  width:56px; padding:4px 6px; font-size:0.9rem; font-weight:700;
+  border:2px solid #e2e8f0; border-radius:6px;
+  background:#f8fafc; color:#1a202c; text-align:center;
+  font-family:monospace; transition:border-color 0.2s;
+}
+.controls input[type="number"]:focus { border-color:#0d9488; outline:none; }
+.controls .sep { color:#94a3b8; font-weight:700; }
+.controls .btns { display:flex; gap:5px; margin-left:auto; flex-wrap:wrap; }
+.controls button {
+  padding:6px 14px; border:none; border-radius:6px; font-size:0.78rem; font-weight:600;
+  cursor:pointer; transition:all 0.15s; white-space:nowrap;
+}
+.controls button:disabled { opacity:0.35; cursor:default; }
+.btn-gen { background:#0d9488; color:#fff; }
+.btn-gen:hover { background:#0f766e; }
+.btn-prev { background:#e2e8f0; color:#475569; }
+.btn-prev:hover:not(:disabled) { background:#cbd5e1; }
+.btn-next { background:#0891b2; color:#fff; }
+.btn-next:hover:not(:disabled) { background:#0e7490; }
+.btn-auto { background:#059669; color:#fff; }
+.btn-auto:hover:not(:disabled) { background:#047857; }
+.btn-auto.playing { background:#dc2626; }
+.btn-auto.playing:hover:not(:disabled) { background:#b91c1c; }
+.btn-reset { background:#e2e8f0; color:#475569; }
+.btn-reset:hover:not(:disabled) { background:#cbd5e1; }
+.btn-preset { background:#fef3c7; color:#92400e; }
+.btn-preset:hover { background:#fde68a; }
+
+/* ─── Main Area ─── */
+.main { display:flex; gap:12px; max-width:960px; margin:10px auto 0; padding:0 16px; }
+@media (max-width:700px){ .main{flex-direction:column;} }
+
+/* ─── Grid Panel ─── */
+.grid-panel {
+  flex:2; background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  padding:14px; overflow-x:auto; min-width:0; box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.grid-panel h3 {
+  font-size:0.88rem; color:#0d9488; margin-bottom:8px;
+  display:flex; align-items:center; gap:8px;
+}
+.grid-panel h3 .step-info { font-weight:400; color:#94a3b8; font-size:0.78rem; }
+.grid {
+  display:inline-grid; gap:2px; border-radius:6px; overflow:hidden;
+}
+.gcell {
+  width:56px; height:52px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; position:relative;
+  transition:all 0.25s; cursor:default; border-radius:4px; border:1px solid transparent;
+}
+.gcell .idx { font-size:0.45rem; color:#cbd5e1; position:absolute; top:1px; left:3px; }
+.gcell .ht {
+  font-size:0.95rem; font-weight:800; line-height:1.2;
+}
+.gcell .fv {
+  font-size:0.6rem; line-height:1; margin-top:1px; font-weight:600;
+}
+.gcell .fv.done { color:#0d9488; }
+.gcell .fv.pending { color:#94a3b8; }
+.gcell .fv.zero { color:#94a3b8; }
+
+.gcell.proc { border-color:#f59e0b; border-width:2px; transform:scale(1.06); z-index:1; }
+.gcell.proc .ht { color:#b45309; }
+.gcell.seen { border-color:#0d9488; border-width:2px; }
+.gcell.lower { background:#f0fdf4; border-color:#86efac; }
+.gcell.lower .ht { color:#16a34a; }
+.gcell.higher { background:#fef2f2; border-color:#fca5a5; }
+.gcell.higher .ht { color:#dc2626; }
+
+.legend {
+  display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; font-size:0.68rem;
+}
+.legend-item { display:flex; align-items:center; gap:4px; }
+.ls { width:12px; height:12px; border-radius:3px; display:inline-block; border:1px solid #e2e8f0; }
+.ls.lo { background:#f0fdf4; }
+.ls.hi { background:#fef2f2; }
+.ls.pr { border-color:#f59e0b; border-width:2px; background:#fffbeb; }
+.ls.se { border-color:#0d9488; border-width:2px; }
+
+/* ─── Info Panel ─── */
+.info-panel {
+  flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  padding:14px; min-width:170px; display:flex; flex-direction:column; gap:8px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.info-panel h3 { font-size:0.88rem; color:#0d9488; }
+.info-box {
+  background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;
+  font-size:0.82rem; line-height:1.7; flex:1; min-height:90px;
+}
+.hl-b { color:#0891b2; }
+.hl-g { color:#16a34a; }
+.hl-r { color:#dc2626; }
+.hl-y { color:#b45309; }
+.hl-gr { color:#64748b; }
+
+.ans-box {
+  background:linear-gradient(135deg,#0d9488,#0891b2); border-radius:8px; padding:10px; text-align:center; color:#fff;
+}
+.ans-box .ans-num { font-size:1.6rem; font-weight:800; font-family:monospace; }
+.ans-box .ans-label { font-size:0.72rem; opacity:0.75; }
+
+/* ─── DP Steps Panel ─── */
+.dp-steps {
+  background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  max-width:960px; margin:10px auto 0; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.dp-steps[open] { padding-bottom:4px; }
+.dp-steps summary {
+  padding:10px 20px; font-size:0.85rem; font-weight:700; color:#0d9488;
+  cursor:pointer; user-select:none; display:flex; align-items:center; gap:8px;
+}
+.dp-steps summary:hover { background:#f8fafc; }
+.dp-steps .steps-grid { display:grid; grid-template-columns:1fr 1fr; gap:0; border-top:1px solid #e2e8f0; }
+@media (max-width:600px){ .dp-steps .steps-grid{grid-template-columns:1fr;} }
+.dp-step {
+  padding:8px 14px; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0;
+  transition:background 0.3s; font-size:0.82rem;
+}
+.dp-step:nth-child(2n){ border-right:none; }
+.dp-step .snum { display:inline-flex; width:20px; height:20px; border-radius:50%; font-size:0.68rem; font-weight:700; align-items:center; justify-content:center; margin-right:5px; flex-shrink:0; }
+.dp-step .snum.n1 { background:#ccfbf1; color:#0d9488; }
+.dp-step .snum.n2 { background:#d1fae5; color:#059669; }
+.dp-step .stitle { font-weight:700; font-size:0.8rem; display:flex; align-items:center; margin-bottom:2px; }
+.dp-step .sbody { font-size:0.76rem; color:#64748b; line-height:1.5; margin-left:25px; }
+.dp-step .sbody .eq { font-size:0.74rem; }
+.dp-step.done { background:#f0fdf4; }
+.dp-step.done .stitle { color:#059669; }
+
+/* ─── Code Panel ─── */
+.code-wrap {
+  max-width:960px; margin:10px auto 16px;
+}
+.code-panel {
+  background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.code-panel + .code-panel { margin-top:8px; }
+.code-panel summary {
+  padding:10px 20px; font-size:0.85rem; font-weight:700; color:#0d9488;
+  cursor:pointer; user-select:none; display:flex; align-items:center; gap:8px;
+}
+.code-panel summary:hover { background:#f8fafc; }
+.code-panel pre {
+  margin:0; padding:12px 20px; overflow-x:auto; font-size:0.8rem; line-height:1.6;
+  background:#f8fafc; color:#1e293b; border-top:1px solid #e2e8f0;
+  tab-size:4;
+}
+.code-panel code { font-family:'SF Mono','Fira Code','Courier New',monospace; }
+.cm { color:#6b7280; font-style:italic; }
+.kw { color:#7c3aed; }
+.fn { color:#0d9488; }
+.str { color:#059669; }
+.num { color:#d97706; }
+
+/* sorting list */
+.sort-list {
+  margin-top:6px; display:flex; flex-wrap:wrap; gap:2px; font-size:0.6rem;
+}
+.sort-item {
+  width:30px; height:20px; display:flex; align-items:center; justify-content:center;
+  border-radius:3px; background:#f1f5f9; color:#94a3b8; font-weight:600;
+  border:1px solid #e2e8f0; font-size:0.55rem;
+}
+.sort-item.active { background:#f59e0b; color:#fff; border-color:#f59e0b; }
+.sort-item.done { background:#ccfbf1; color:#0d9488; border-color:#0d9488; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>P1434 <span>[SHOI2002] 滑雪</span></h1>
+  <p>排序 DP · 记忆化搜索 · 最长路径</p>
+</header>
+
+<div class="problem">
+  <h2>📄 题目描述</h2>
+  <div class="info">
+    <div><div class="label">🏔️ 地形</div><span class="eq">n × m</span> 网格，每个格子有高度</div>
+    <div><div class="label">⛷️ 滑行规则</div>从高到低，四方向（上下左右）</div>
+    <div><div class="label">🎯 目标</div>找最长的滑行路径长度（含起点）</div>
+  </div>
+</div>
+
+<div class="mode active" id="modeDp">
+  <div class="controls" id="ctrlBar">
+    <label>n</label>
+    <input type="number" id="inpN" value="4" min="2" max="8">
+    <span class="sep">×</span>
+    <input type="number" id="inpM" value="4" min="2" max="10">
+    <button class="btn-gen" id="btnGen">🎲 生成</button>
+    <button class="btn-preset" id="btnPreset">📋 示例</button>
+    <div class="btns">
+      <button class="btn-prev" id="btnPrev" disabled>◀ 上一步</button>
+      <button class="btn-next" id="btnNext" disabled>下一步 ▶</button>
+      <button class="btn-auto" id="btnAuto" disabled>▶ 自动</button>
+      <button class="btn-reset" id="btnReset">⟳ 重置</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="grid-panel">
+      <h3>🗺️ 高度图 <span class="step-info" id="stepInfo">点击「生成」或「示例」</span></h3>
+      <div id="gridContainer" style="overflow-x:auto;"></div>
+      <div class="sort-list" id="sortList"></div>
+      <div class="legend">
+        <span class="legend-item"><span class="ls lo"></span> 更低邻居 (已算)</span>
+        <span class="legend-item"><span class="ls hi"></span> 更高邻居 (跳过)</span>
+        <span class="legend-item"><span class="ls pr"></span> 正在处理</span>
+        <span class="legend-item"><span class="ls se"></span> 用于计算的邻居</span>
+      </div>
+    </div>
+    <div class="info-panel">
+      <h3>📝 说明</h3>
+      <div class="info-box" id="infoBox">设置网格大小，点击「生成」获得随机高度图，然后逐步观看排序 DP 计算过程。</div>
+      <div id="answerBox" style="display:none;" class="ans-box">
+        <div class="ans-label">最长滑雪路径长度</div>
+        <div class="ans-num" id="ansNum">0</div>
+        <div class="ans-label">ans</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DP 五步法 -->
+  <details class="dp-steps" id="dpSteps" open>
+    <summary>📋 动态规划五步法（排序 DP）</summary>
+    <div class="steps-grid">
+      <div class="dp-step" id="s1">
+        <div class="stitle"><span class="snum n1">①</span> 划分阶段</div>
+        <div class="sbody">
+          按<span class="eq">高度升序</span>处理每个格子。<br>
+          将所有格子按高度从小到大排序，保证处理当前格时，<span class="hl-g">更低的相邻格子 f 值已算好</span>。
+        </div>
+      </div>
+      <div class="dp-step" id="s2">
+        <div class="stitle"><span class="snum n1">②</span> 状态表示</div>
+        <div class="sbody"><span class="eq">f[i][j]</span> = 从 <span class="eq">(i,j)</span> 出发能获得的最长滑雪路径长度（包含自身）</div>
+      </div>
+      <div class="dp-step" id="s3">
+        <div class="stitle"><span class="snum n1">③</span> 状态转移方程</div>
+        <div class="sbody">
+          <div style="margin-bottom:3px;">遍历上、下、左、右四个方向：</div>
+          <div style="margin-bottom:3px;font-family:monospace;padding-left:1em;font-size:0.74rem;">
+            若 a[nx][ny] &lt; a[x][y] 且 (nx,ny) 在界内：<br>
+            &nbsp;&nbsp;f[x][y] = max(f[x][y], f[nx][ny])
+          </div>
+          <div style="margin-bottom:3px;">处理完所有更低邻居后 <span class="eq">+1</span>（计入自身）：</div>
+          <div style="margin-bottom:3px;font-family:monospace;padding-left:1em;">f[x][y]++</div>
+        </div>
+      </div>
+      <div class="dp-step" id="s4">
+        <div class="stitle"><span class="snum n1">④</span> 边界条件</div>
+        <div class="sbody">
+          <span class="eq">f</span> 数组初始化为 <span class="eq">0</span><br>
+          若四周都更高（局部最低点）：<br>
+          <span class="hl-y">f = 0 → ++ → 1</span>（只能待在原地）
+        </div>
+      </div>
+      <div class="dp-step" id="s5">
+        <div class="stitle"><span class="snum n2">⑤</span> 答案</div>
+        <div class="sbody">
+          <span class="eq">ans = max</span>(所有 <span class="eq">f[i][j]</span>)<br>
+          即所有可能起点中，能滑出的最长路径长度。
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- Code Panels -->
+  <div class="code-wrap">
+    <details class="code-panel">
+      <summary>💻 DP 排序版参考代码</summary>
+<pre><code><span class="cm">// P1434 [SHOI2002] 滑雪 — DP 排序版  O(nm log nm)</span>
+<span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
+<span class="kw">using namespace std;</span>
+
+<span class="kw">const int</span> N = <span class="num">105</span>;
+<span class="kw">int</span> n, m, a[N][N], f[N][N], tot, ans;
+<span class="kw">int</span> dx[<span class="num">4</span>] = {<span class="num">0</span>,<span class="num">0</span>,<span class="num">1</span>,<span class="num">-1</span>};
+<span class="kw">int</span> dy[<span class="num">4</span>] = {<span class="num">1</span>,<span class="num">-1</span>,<span class="num">0</span>,<span class="num">0</span>};
+
+<span class="kw">struct</span> <span class="fn">node</span> {
+    <span class="kw">int</span> h, x, y;             <span class="cm">// 高度，横坐标，纵坐标</span>
+    <span class="kw">bool operator&lt;</span>(<span class="kw">const</span> node &amp;x)<span class="kw">const</span> {
+        <span class="kw">return</span> h &lt; x.h;          <span class="cm">// 按高度升序</span>
+    }
+} b[N * N];
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+    cin &gt;&gt; n &gt;&gt; m;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= n; ++i)
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= m; ++j) {
+            cin &gt;&gt; a[i][j];
+            b[++tot] = {a[i][j], i, j};     <span class="cm">// ① 收集所有格子</span>
+        }
+
+    sort(b + <span class="num">1</span>, b + <span class="num">1</span> + tot);           <span class="cm">// ① 按高度升序排序</span>
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= tot; ++i) {     <span class="cm">// ① 按排序后顺序处理</span>
+        <span class="kw">int</span> x = b[i].x, y = b[i].y;
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt;= <span class="num">3</span>; ++j) {    <span class="cm">// ③ 检查四个方向</span>
+            <span class="kw">int</span> _x = x + dx[j], _y = y + dy[j];
+            <span class="kw">if</span> (a[_x][_y] &lt; a[x][y])     <span class="cm">// 找到更低邻居</span>
+                f[x][y] = max(f[x][y], f[_x][_y]);
+        }
+        f[x][y]++;                         <span class="cm">// ③ 计入自身</span>
+        ans = max(ans, f[x][y]);           <span class="cm">// ⑤ 更新答案</span>
+    }
+
+    cout &lt;&lt; ans;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</code></pre>
+    </details>
+
+    <details class="code-panel">
+      <summary>💪 记忆化搜索优化版参考代码</summary>
+<pre><code><span class="cm">// P1434 [SHOI2002] 滑雪 — 记忆化搜索  O(nm)</span>
+<span class="cm">/* 优化思路：
+ *   DP 排序版需要排序 O(nm log nm)，且必须显式处理所有格子。
+ *   记忆化搜索只需 O(nm)，只计算能到达的格子，代码更简洁。
+ *   核心：f[x][y] != -1 表示已算过，直接返回，避免重复递归。
+ */</span>
+<span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
+<span class="kw">using namespace std;</span>
+
+<span class="kw">const int</span> N = <span class="num">105</span>;
+<span class="kw">int</span> n, m, a[N][N], f[N][N], ans;
+<span class="kw">int</span> dx[<span class="num">4</span>] = {<span class="num">0</span>,<span class="num">0</span>,<span class="num">1</span>,<span class="num">-1</span>};
+<span class="kw">int</span> dy[<span class="num">4</span>] = {<span class="num">1</span>,<span class="num">-1</span>,<span class="num">0</span>,<span class="num">0</span>};
+
+<span class="kw">int</span> <span class="fn">dfs</span>(<span class="kw">int</span> x, <span class="kw">int</span> y) {
+    <span class="kw">if</span> (f[x][y] != <span class="num">-1</span>)             <span class="cm">// ③ 已算过，直接返回</span>
+        <span class="kw">return</span> f[x][y];
+
+    f[x][y] = <span class="num">0</span>;                     <span class="cm">// ④ 初始为 0</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="num">4</span>; ++i) {
+        <span class="kw">int</span> _x = x + dx[i];
+        <span class="kw">int</span> _y = y + dy[i];
+        <span class="kw">if</span> (_x &gt;= <span class="num">1</span> &amp;&amp; _x &lt;= n &amp;&amp; _y &gt;= <span class="num">1</span> &amp;&amp; _y &lt;= m
+            &amp;&amp; a[_x][_y] &lt; a[x][y])
+            f[x][y] = max(f[x][y], dfs(_x, _y));  <span class="cm">// ③ 递归 + 取最大值</span>
+    }
+    <span class="kw">return</span> ++f[x][y];                 <span class="cm">// ③ 计入自身后返回</span>
+}
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+    cin &gt;&gt; n &gt;&gt; m;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= n; ++i)
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= m; ++j)
+            cin &gt;&gt; a[i][j];
+
+    memset(f, <span class="num">-1</span>, <span class="kw">sizeof</span>(f));       <span class="cm">// ④ -1 表示未计算</span>
+
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= n; ++i)
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= m; ++j)
+            ans = max(ans, dfs(i, j));           <span class="cm">// ⑤ 取最大值</span>
+
+    cout &lt;&lt; ans;
+    <span class="kw">return</span> <span class="num">0</span>;
+}</code></pre>
+    </details>
+  </div>
+</div>
+
+<script>
+(function(){
+const $ = id => document.getElementById(id);
+const inpN = $('inpN'), inpM = $('inpM');
+const btnGen = $('btnGen'), btnPreset = $('btnPreset');
+const btnPrev = $('btnPrev'), btnNext = $('btnNext');
+const btnAuto = $('btnAuto'), btnReset = $('btnReset');
+const stepInfo = $('stepInfo'), gridC = $('gridContainer');
+const infoBox = $('infoBox'), answerBox = $('answerBox');
+const ansNum = $('ansNum'), sortList = $('sortList');
+const stepEls = [$('s1'),$('s2'),$('s3'),$('s4'),$('s5')];
+
+const dx = [0,0,1,-1], dy = [1,-1,0,0];
+const dirNames = ['→','←','↓','↑'];
+
+// ─── State ───
+let n=4,m=4;
+let a=[]; // heights [1..n][1..m]
+let f=[]; // dp values
+let cells=[]; // sorted cells [{h,x,y},...]
+let stepIdx=0; // index in cells that has been processed (next to process = stepIdx+1)
+let phase='idle'; // idle|running|done
+  let autoTimer=null;
+  let curX=0,curY=0; // current cell being shown in info
+  let lowerNeighbors=[]; // list of (x,y) of neighbors that are lower
+
+const PRESET = [
+  [5,2,8,3],
+  [9,4,7,6],
+  [12,10,11,1],
+  [16,14,13,15]
+];
+
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+function generate(usePreset){
+  n=Math.min(8,Math.max(2,parseInt(inpN.value)||4));
+  m=Math.min(10,Math.max(2,parseInt(inpM.value)||4));
+  a=Array.from({length:n+2},()=>Array(m+2).fill(0));
+  if(usePreset){
+    for(let i=1;i<=Math.min(4,n);i++)
+      for(let j=1;j<=Math.min(4,m);j++)
+        a[i][j]=PRESET[i-1][j-1];
+    // fill extra cells with random
+    for(let i=1;i<=n;i++)
+      for(let j=1;j<=m;j++)
+        if(a[i][j]===0) a[i][j]=randInt(1,20);
+  } else {
+    for(let i=1;i<=n;i++)
+      for(let j=1;j<=m;j++)
+        a[i][j]=randInt(1,20);
+  }
+  resetState();
+}
+
+function resetState(){
+  stopAuto();
+  f=Array.from({length:n+2},()=>Array(m+2).fill(0));
+  cells=[];
+  for(let i=1;i<=n;i++)
+    for(let j=1;j<=m;j++)
+      cells.push({h:a[i][j],x:i,y:j});
+  cells.sort((a,b)=>a.h-b.h);
+  stepIdx=0;
+  curX=cells[0]?.x||1; curY=cells[0]?.y||1;
+  lowerNeighbors=[];
+  phase='idle';
+  render();
+  btnNext.disabled=false; btnAuto.disabled=false;
+}
+
+function getLowerNeighbors(x,y){
+  const res=[];
+  for(let d=0;d<4;d++){
+    const nx=x+dx[d], ny=y+dy[d];
+    if(nx>=1&&nx<=n&&ny>=1&&ny<=m&&a[nx][ny]<a[x][y])
+      res.push({x:nx,y:ny,dir:d});
+  }
+  return res;
+}
+
+function stepForward(){
+  if(phase==='done') return false;
+  if(stepIdx>=cells.length){ phase='done'; render(); return false; }
+
+  phase='running';
+  const cell=cells[stepIdx];
+  const {x,y}=cell;
+
+  // compute
+  const lowers=getLowerNeighbors(x,y);
+  let best=0;
+  for(const l of lowers){
+    best=Math.max(best,f[l.x][l.y]);
+  }
+  f[x][y]=best+1;
+  curX=x; curY=y;
+  lowerNeighbors=lowers;
+
+  stepIdx++;
+  if(stepIdx>=cells.length) phase='done';
+  render();
+  return true;
+}
+
+function stepBack(){
+  if(phase==='idle') return false;
+  if(stepIdx<=0) return false;
+  if(phase==='done'){ phase='running'; render(); return true; }
+
+  stepIdx--;
+  const cell=cells[stepIdx];
+  const {x,y}=cell;
+  f[x][y]=0;
+  curX=x; curY=y;
+  lowerNeighbors=getLowerNeighbors(x,y);
+  // recompute the one before (if any)
+  if(stepIdx>0){
+    const prev=cells[stepIdx-1];
+    curX=prev.x; curY=prev.y;
+    // redo prev
+    const pl=getLowerNeighbors(prev.x,prev.y);
+    let pb=0;
+    for(const l of pl) pb=Math.max(pb,f[l.x][l.y]);
+    f[prev.x][prev.y]=pb+1;
+    curX=prev.x; curY=prev.y;
+    lowerNeighbors=pl;
+  }
+  render();
+  return true;
+}
+
+// ─── Render ───
+function render(){
+  // grid
+  let g='<div class="grid" style="grid-template-columns:repeat('+m+',56px);">';
+  const maxH=Math.max(...a.flat().filter(v=>v>0),1);
+  for(let i=1;i<=n;i++){
+    for(let j=1;j<=m;j++){
+      const h=a[i][j];
+      const fv=f[i][j];
+      const isCur=(i===curX&&j===curY);
+      const isLower=lowerNeighbors.some(l=>l.x===i&&l.y===j);
+
+      let cls='gcell';
+      // height bg
+      const t=h/maxH;
+      if(t<0.33) cls+=' ht-low';
+      else if(t<0.66) cls+=' ht-mid';
+      else cls+=' ht-high';
+
+      if(isCur&&phase==='running') cls+=' proc';
+      else if(isLower) cls+=' lower';
+
+      // style background from height
+      const bg=htBg(t);
+      const txt=htColor(t);
+
+      let fvText='', fvCls='';
+      if(fv>0){ fvText='f='+fv; fvCls='done'; }
+      else if(isCur&&phase==='running'){ fvText='f=...'; fvCls='pending'; }
+      else { fvText='?'; fvCls='pending'; }
+
+      g+='<div class="'+cls+'" style="background:'+bg+';">';
+      g+='<div class="idx">'+i+','+j+'</div>';
+      g+='<div class="ht" style="color:'+txt+';">'+h+'</div>';
+      g+='<div class="fv '+fvCls+'">'+fvText+'</div>';
+      g+='</div>';
+    }
+  }
+  g+='</div>';
+  gridC.innerHTML=g;
+
+  // sort list
+  let sl='<div style="font-size:0.65rem;color:#64748b;margin-top:6px;">处理顺序（按高度升序）：</div><div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:2px;">';
+  for(let k=0;k<cells.length;k++){
+    const c=cells[k];
+    let cl='sort-item';
+    if(k<stepIdx&&phase!=='idle') cl+=' done';
+    else if(k===stepIdx&&phase==='running') cl+=' active';
+    sl+='<div class="'+cl+'" title="('+c.x+','+c.y+') h='+c.h+'">'+c.h+'</div>';
+  }
+  sl+='</div>';
+  sortList.innerHTML=sl;
+
+  // step info
+  if(phase==='idle') stepInfo.textContent='已生成，点「下一步」开始计算';
+  else if(phase==='running') stepInfo.textContent='第 '+stepIdx+'/'+cells.length+' 个格子';
+  else if(phase==='done') stepInfo.textContent='✅ 完成！最长路径 = '+getAns();
+
+  // info box
+  let ih='';
+  if(phase==='idle'){
+    ih='网格已生成，共 <b>'+cells.length+'</b> 个格子（'+n+'×'+m+'）。<br>';
+    ih+='单元格数字 = 高度，f = 路径长度。';
+    ih+='<br><span class="hl-gr">点击「下一步」开始排序 DP 计算。</span>';
+  } else if(phase==='running'){
+    const x=curX, y=curY;
+    ih='<b>处理第 '+stepIdx+'/'+cells.length+' 个格子</b><br>';
+    ih+='坐标 (<b>'+x+','+y+'</b>) &nbsp; 高度 <b>'+a[x][y]+'</b><br>';
+    ih+='— — — — —<br>';
+    const lowers=getLowerNeighbors(x,y);
+    if(lowers.length===0){
+      ih+='<span class="hl-gr">四周无更低邻居（局部最低点）</span><br>';
+      ih+='→ <span class="hl-y">f['+x+']['+y+'] = '+(f[x][y]||1)+'</span>';
+    } else {
+      ih+='找到 <b>'+lowers.length+'</b> 个更低邻居：<br>';
+      for(const l of lowers){
+        ih+='&nbsp;&nbsp;'+dirNames[l.dir]+' ('+l.x+','+l.y+') h='+a[l.x][l.y];
+        ih+=' f='+f[l.x][l.y]+'<br>';
+      }
+      ih+='→ max(f[邻居]) = <span class="hl-b">'+(f[x][y]-1)+'</span><br>';
+      ih+='→ <span class="hl-y">f['+x+']['+y+'] = '+f[x][y]+'</span>';
+    }
+    ih+='<br><span class="hl-gr">当前最大 ans = '+getAns()+'</span>';
+  } else if(phase==='done'){
+    ih='<b>✅ 所有格子计算完毕！</b><br>';
+    ih+'最长滑雪路径长度 = <span class="hl-y">'+getAns()+'</span><br>';
+    ih+'从最高点滑到最低点，每次只能往更低的相邻格走。<br>';
+    ih+'排序 DP 保证处理每个格时，所有更低邻居的 f 值都已确定。';
+  }
+  infoBox.innerHTML=ih;
+
+  // answer
+  if(phase==='done'){
+    answerBox.style.display='block';
+    ansNum.textContent=getAns();
+  } else {
+    answerBox.style.display='none';
+  }
+
+  // 五步法
+  if(phase==='idle'){
+    stepEls.forEach(el=>el.classList.remove('done'));
+  } else {
+    stepEls.forEach(el=>el.classList.add('done'));
+  }
+
+  // buttons
+  btnPrev.disabled=phase==='idle'||stepIdx===0;
+  btnNext.disabled=phase==='idle'||phase==='done';
+}
+
+function getAns(){
+  let best=0;
+  for(let i=1;i<=n;i++)
+    for(let j=1;j<=m;j++)
+      best=Math.max(best,f[i][j]);
+  return best;
+}
+
+function htBg(t){
+  if(t<0.25) return '#f0fdf4';
+  if(t<0.5) return '#faf5ff';
+  if(t<0.75) return '#fffbeb';
+  return '#fef2f2';
+}
+function htColor(t){
+  if(t<0.25) return '#16a34a';
+  if(t<0.5) return '#7c3aed';
+  if(t<0.75) return '#b45309';
+  return '#dc2626';
+}
+
+// ─── Auto ───
+function toggleAuto(){
+  if(autoTimer){ stopAuto(); return; }
+  if(phase==='done'){ resetState(); render(); }
+  autoTimer=setInterval(()=>{
+    if(phase==='done'||!stepForward()) stopAuto();
+  },300);
+  btnAuto.textContent='⏹'; btnAuto.classList.add('playing');
+}
+function stopAuto(){
+  if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
+  btnAuto.textContent='▶'; btnAuto.classList.remove('playing');
+}
+
+// ─── Events ───
+btnGen.addEventListener('click',()=>{ generate(false); });
+btnPreset.addEventListener('click',()=>{ generate(true); });
+btnNext.addEventListener('click',stepForward);
+btnPrev.addEventListener('click',stepBack);
+btnReset.addEventListener('click',()=>{ resetState(); });
+
+btnAuto.addEventListener('click',toggleAuto);
+
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(e.key==='ArrowRight'||e.key===' '){ e.preventDefault(); btnNext.click(); }
+  if(e.key==='ArrowLeft'){ e.preventDefault(); btnPrev.click(); }
+  if(e.key==='r'||e.key==='R'){ e.preventDefault(); btnReset.click(); }
+});
+
+generate(true);
+})();
+</script>
+</body>
+</html>
