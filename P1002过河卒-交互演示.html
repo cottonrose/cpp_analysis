@@ -8,65 +8,66 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-  background:#1a1a2e; color:#e2e8f0; min-height:100vh;
-  background-image:radial-gradient(ellipse at 20% 20%,#16213e 0%,#1a1a2e 70%);
+  background:#f0f4f8; color:#1a202c; min-height:100vh;
 }
 header {
-  background:linear-gradient(135deg,#0f3460,#533483);
-  color:#fff; padding:20px 28px; text-align:center; position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#1e3a5f,#2563eb);
+  color:#fff; padding:20px 28px; text-align:center; position:relative;
 }
-header::after {
-  content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%;
-  background:radial-gradient(circle at 30% 50%,rgba(255,255,255,0.04) 0%,transparent 60%);
-}
-header h1 { font-size:1.5rem; font-weight:700; position:relative; }
-header h1 span { color:#f6ad55; }
-header p { font-size:0.85rem; opacity:0.8; margin-top:4px; position:relative; }
+header h1 { font-size:1.5rem; font-weight:700; }
+header h1 span { color:#fbbf24; }
+header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
+
+/* ─── Problem ─── */
 .problem {
-  background:rgba(255,255,255,0.06); backdrop-filter:blur(8px);
-  margin:14px 16px 0; padding:14px 20px; border-radius:12px; border:1px solid rgba(255,255,255,0.08);
-  max-width:960px; margin-inline:auto;
+  background:#fff; margin:14px 16px 0; padding:14px 20px; border-radius:12px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06); max-width:960px; margin-inline:auto;
+  border:1px solid #e2e8f0;
 }
-.problem h2 { font-size:0.95rem; color:#f6ad55; margin-bottom:8px; }
+.problem h2 { font-size:0.95rem; color:#2563eb; margin-bottom:8px; }
 .problem .info { display:flex; gap:16px; flex-wrap:wrap; font-size:0.85rem; }
-.problem .info > div { background:rgba(255,255,255,0.04); border-radius:8px; padding:6px 14px; flex:1; min-width:120px; }
-.problem .info .label { font-weight:600; color:#a0aec0; font-size:0.8rem; }
-.problem .info .val { font-family:monospace; font-size:1rem; }
+.problem .info > div {
+  background:#f8fafc; border-radius:8px; padding:6px 14px; flex:1; min-width:120px;
+  border:1px solid #e2e8f0;
+}
+.problem .info .label { font-weight:600; color:#64748b; font-size:0.8rem; }
+.problem .info .val { font-family:monospace; font-size:1rem; font-weight:600; color:#2563eb; }
+.eq { font-family:monospace; background:#eef2ff; padding:1px 5px; border-radius:3px; font-size:0.78rem; color:#2563eb; }
 
 /* ─── Controls ─── */
 .controls {
-  background:rgba(255,255,255,0.06); backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,0.08); border-radius:12px;
+  background:#fff; border:1px solid #e2e8f0; border-radius:12px;
   padding:14px 20px; max-width:960px; margin:10px auto 0;
   display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
 }
-.controls label { font-size:0.82rem; font-weight:600; color:#a0aec0; white-space:nowrap; }
+.controls label { font-size:0.82rem; font-weight:600; color:#64748b; white-space:nowrap; }
 .controls input[type="number"] {
   width:56px; padding:4px 6px; font-size:0.9rem; font-weight:700;
-  border:2px solid rgba(255,255,255,0.15); border-radius:6px;
-  background:rgba(255,255,255,0.08); color:#e2e8f0; text-align:center;
+  border:2px solid #e2e8f0; border-radius:6px;
+  background:#f8fafc; color:#1a202c; text-align:center;
   font-family:monospace; transition:border-color 0.2s;
 }
-.controls input[type="number"]:focus { border-color:#f6ad55; outline:none; }
-.controls .sep { color:#4a5568; font-weight:700; }
-.controls .btns { display:flex; gap:5px; margin-left:auto; }
+.controls input[type="number"]:focus { border-color:#2563eb; outline:none; }
+.controls .sep { color:#94a3b8; font-weight:700; }
+.controls .btns { display:flex; gap:5px; margin-left:auto; flex-wrap:wrap; }
 .controls button {
   padding:6px 14px; border:none; border-radius:6px; font-size:0.78rem; font-weight:600;
   cursor:pointer; transition:all 0.15s; white-space:nowrap;
 }
-.controls button:disabled { opacity:0.3; cursor:default; }
-.btn-prev { background:#4a5568; color:#e2e8f0; }
-.btn-prev:hover:not(:disabled) { background:#718096; }
-.btn-next { background:#4299e1; color:#fff; }
-.btn-next:hover:not(:disabled) { background:#3182ce; }
-.btn-auto { background:#48bb78; color:#fff; }
-.btn-auto:hover:not(:disabled) { background:#38a169; }
-.btn-auto.playing { background:#e53e3e; }
-.btn-auto.playing:hover:not(:disabled) { background:#c53030; }
-.btn-reset { background:#4a5568; color:#e2e8f0; }
-.btn-reset:hover:not(:disabled) { background:#718096; }
-.btn-go { background:#f6ad55; color:#1a202c; font-weight:700; }
-.btn-go:hover { background:#ed8936; }
+.controls button:disabled { opacity:0.35; cursor:default; }
+.btn-prev { background:#e2e8f0; color:#475569; }
+.btn-prev:hover:not(:disabled) { background:#cbd5e1; }
+.btn-next { background:#2563eb; color:#fff; }
+.btn-next:hover:not(:disabled) { background:#1d4ed8; }
+.btn-auto { background:#059669; color:#fff; }
+.btn-auto:hover:not(:disabled) { background:#047857; }
+.btn-auto.playing { background:#dc2626; }
+.btn-auto.playing:hover:not(:disabled) { background:#b91c1c; }
+.btn-reset { background:#e2e8f0; color:#475569; }
+.btn-reset:hover:not(:disabled) { background:#cbd5e1; }
+.btn-go { background:#f59e0b; color:#1e293b; font-weight:700; }
+.btn-go:hover { background:#d97706; }
 
 /* ─── Main Area ─── */
 .main { display:flex; gap:12px; max-width:960px; margin:10px auto 0; padding:0 16px; }
@@ -74,126 +75,122 @@ header p { font-size:0.85rem; opacity:0.8; margin-top:4px; position:relative; }
 
 /* ─── Grid Panel ─── */
 .grid-panel {
-  flex:2; background:rgba(255,255,255,0.06); backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px; overflow-x:auto; min-width:0;
+  flex:2; background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  padding:14px; overflow-x:auto; min-width:0; box-shadow:0 1px 4px rgba(0,0,0,0.04);
 }
 .grid-panel h3 {
-  font-size:0.88rem; color:#f6ad55; margin-bottom:8px;
+  font-size:0.88rem; color:#2563eb; margin-bottom:8px;
   display:flex; align-items:center; gap:8px;
 }
-.grid-panel h3 .step-info { font-weight:400; color:#718096; font-size:0.78rem; }
-.grid-wrap { display:inline-block; }
+.grid-panel h3 .step-info { font-weight:400; color:#94a3b8; font-size:0.78rem; }
 .grid {
   display:inline-grid; gap:2px; border-radius:6px; overflow:hidden;
 }
 .gcell {
   width:52px; height:46px; display:flex; flex-direction:column;
   align-items:center; justify-content:center; font-size:0.7rem; position:relative;
-  transition:all 0.3s; cursor:default; border-radius:4px;
+  transition:all 0.25s; cursor:default; border-radius:4px; border:1px solid transparent;
 }
-.gcell .idx { font-size:0.5rem; color:rgba(255,255,255,0.25); line-height:1; position:absolute; top:2px; left:4px; }
+.gcell .idx { font-size:0.5rem; color:#cbd5e1; line-height:1; position:absolute; top:2px; left:4px; }
 .gcell .val { font-size:0.9rem; font-weight:700; line-height:1.2; }
-.gcell .src { font-size:0.5rem; opacity:0.5; line-height:1; }
-.gcell.empty { background:rgba(255,255,255,0.04); }
-.gcell.empty .val { color:rgba(255,255,255,0.2); }
-.gcell.computed { background:rgba(66,153,225,0.15); }
-.gcell.computed .val { color:#90cdf4; }
-.gcell.blocked { background:rgba(245,101,101,0.2); }
-.gcell.blocked .val { color:#fc8181; font-size:1rem; }
-.gcell.start { background:rgba(72,187,120,0.2); }
-.gcell.start .val { color:#68d391; font-size:1rem; }
-.gcell.end { background:rgba(246,173,85,0.25); }
-.gcell.end .val { color:#f6ad55; font-size:1rem; }
-.gcell.current { box-shadow:inset 0 0 0 2px #f6ad55; transform:scale(1.05); z-index:1; background:rgba(246,173,85,0.12); }
-.gcell.current .val { color:#f6ad55; }
-.gcell .horse { font-size:1.1rem; line-height:1; }
+.gcell .src { font-size:0.5rem; opacity:0.6; line-height:1; }
+.gcell.empty { background:#f8fafc; border-color:#e2e8f0; }
+.gcell.empty .val { color:#cbd5e1; }
+.gcell.computed { background:#eff6ff; border-color:#93c5fd; }
+.gcell.computed .val { color:#1d4ed8; }
+.gcell.blocked { background:#fef2f2; border-color:#fca5a5; }
+.gcell.blocked .val { color:#dc2626; font-size:1rem; }
+.gcell.start { background:#f0fdf4; border-color:#86efac; }
+.gcell.start .val { color:#16a34a; font-size:1rem; }
+.gcell.end { background:#fffbeb; border-color:#fcd34d; }
+.gcell.end .val { color:#d97706; font-size:1rem; }
+.gcell.current { border-color:#2563eb; border-width:2px; transform:scale(1.05); z-index:1; background:#dbeafe; }
+.gcell.current .val { color:#2563eb; }
 
 .legend {
   display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; font-size:0.68rem;
 }
 .legend-item { display:flex; align-items:center; gap:4px; }
-.ls { width:12px; height:12px; border-radius:3px; display:inline-block; }
-.ls.le { background:rgba(255,255,255,0.04); }
-.ls.lc { background:rgba(66,153,225,0.15); }
-.ls.lb { background:rgba(245,101,101,0.2); }
-.ls.lg { background:rgba(72,187,120,0.2); }
-.ls.ly { background:rgba(246,173,85,0.25); }
+.ls { width:12px; height:12px; border-radius:3px; display:inline-block; border:1px solid #e2e8f0; }
+.ls.le { background:#f8fafc; }
+.ls.lc { background:#eff6ff; }
+.ls.lb { background:#fef2f2; }
+.ls.lg { background:#f0fdf4; }
+.ls.ly { background:#fffbeb; }
 
 /* ─── Info Panel ─── */
 .info-panel {
-  flex:1; background:rgba(255,255,255,0.06); backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,0.08); border-radius:12px;
+  flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:12px;
   padding:14px; min-width:170px; display:flex; flex-direction:column; gap:8px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
 }
-.info-panel h3 { font-size:0.88rem; color:#f6ad55; }
+.info-panel h3 { font-size:0.88rem; color:#2563eb; }
 .info-box {
-  background:rgba(255,255,255,0.04); border-radius:8px; padding:10px;
+  background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;
   font-size:0.82rem; line-height:1.7; flex:1; min-height:80px;
 }
-.hl-b { color:#90cdf4; }
-.hl-r { color:#fc8181; }
-.hl-g { color:#68d391; }
-.hl-y { color:#f6ad55; }
-.hl-gr { color:#a0aec0; }
-.eq { font-family:monospace; background:rgba(255,255,255,0.08); padding:1px 5px; border-radius:3px; font-size:0.78rem; }
+.hl-b { color:#2563eb; }
+.hl-r { color:#dc2626; }
+.hl-g { color:#16a34a; }
+.hl-y { color:#d97706; }
+.hl-gr { color:#64748b; }
 
 .ans-box {
-  background:linear-gradient(135deg,#0f3460,#533483); border-radius:8px; padding:10px; text-align:center;
+  background:linear-gradient(135deg,#1e3a5f,#2563eb); border-radius:8px; padding:10px; text-align:center; color:#fff;
 }
 .ans-box .ans-num { font-size:1.6rem; font-weight:800; font-family:monospace; }
-.ans-box .ans-label { font-size:0.72rem; opacity:0.7; }
+.ans-box .ans-label { font-size:0.72rem; opacity:0.75; }
 
 /* ─── DP Steps Panel ─── */
 .dp-steps {
-  background:rgba(255,255,255,0.06); backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,0.08); border-radius:12px;
-  max-width:960px; margin:10px auto 0; overflow:hidden;
+  background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  max-width:960px; margin:10px auto 0; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.04);
 }
 .dp-steps[open] { padding-bottom:4px; }
 .dp-steps summary {
-  padding:10px 20px; font-size:0.85rem; font-weight:700; color:#f6ad55;
+  padding:10px 20px; font-size:0.85rem; font-weight:700; color:#2563eb;
   cursor:pointer; user-select:none; display:flex; align-items:center; gap:8px;
 }
-.dp-steps summary:hover { background:rgba(255,255,255,0.04); }
-.dp-steps .steps-grid { display:grid; grid-template-columns:1fr 1fr; gap:0; border-top:1px solid rgba(255,255,255,0.06); }
+.dp-steps summary:hover { background:#f8fafc; }
+.dp-steps .steps-grid { display:grid; grid-template-columns:1fr 1fr; gap:0; border-top:1px solid #e2e8f0; }
 @media (max-width:600px){ .dp-steps .steps-grid{grid-template-columns:1fr;} }
 .dp-step {
-  padding:8px 14px; border-right:1px solid rgba(255,255,255,0.06); border-bottom:1px solid rgba(255,255,255,0.06);
+  padding:8px 14px; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0;
   transition:background 0.3s; font-size:0.82rem;
 }
 .dp-step:nth-child(2n){ border-right:none; }
 .dp-step .snum { display:inline-flex; width:20px; height:20px; border-radius:50%; font-size:0.68rem; font-weight:700; align-items:center; justify-content:center; margin-right:5px; flex-shrink:0; }
-.dp-step .snum.n0 { background:rgba(255,255,255,0.1); color:#a0aec0; }
-.dp-step .snum.n1 { background:rgba(66,153,225,0.3); color:#90cdf4; }
-.dp-step .snum.n2 { background:rgba(72,187,120,0.3); color:#68d391; }
+.dp-step .snum.n0 { background:#e2e8f0; color:#475569; }
+.dp-step .snum.n1 { background:#dbeafe; color:#2563eb; }
+.dp-step .snum.n2 { background:#d1fae5; color:#059669; }
 .dp-step .stitle { font-weight:700; font-size:0.8rem; display:flex; align-items:center; margin-bottom:2px; }
-.dp-step .sbody { font-size:0.76rem; color:#a0aec0; line-height:1.5; margin-left:25px; }
+.dp-step .sbody { font-size:0.76rem; color:#64748b; line-height:1.5; margin-left:25px; }
 .dp-step .sbody .eq { font-size:0.74rem; }
-.dp-step.done { background:rgba(72,187,120,0.06); }
-.dp-step.done .stitle { color:#68d391; }
+.dp-step.done { background:#f0fdf4; }
+.dp-step.done .stitle { color:#059669; }
 
 /* ─── Code Panel ─── */
 .code-panel {
-  background:rgba(255,255,255,0.06); backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,0.08); border-radius:12px;
-  max-width:960px; margin:10px auto 16px; overflow:hidden;
+  background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  max-width:960px; margin:10px auto 16px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.04);
 }
 .code-panel summary {
-  padding:10px 20px; font-size:0.85rem; font-weight:700; color:#f6ad55;
+  padding:10px 20px; font-size:0.85rem; font-weight:700; color:#2563eb;
   cursor:pointer; user-select:none; display:flex; align-items:center; gap:8px;
 }
-.code-panel summary:hover { background:rgba(255,255,255,0.04); }
+.code-panel summary:hover { background:#f8fafc; }
 .code-panel pre {
   margin:0; padding:12px 20px; overflow-x:auto; font-size:0.8rem; line-height:1.6;
-  background:rgba(0,0,0,0.3); color:#e6edf3; border-top:1px solid rgba(255,255,255,0.06);
+  background:#f8fafc; color:#1e293b; border-top:1px solid #e2e8f0;
+  tab-size:4;
 }
 .code-panel code { font-family:'SF Mono','Fira Code','Courier New',monospace; }
-.cm { color:#8b949e; font-style:italic; }
-.kw { color:#ff7b72; }
-.fn { color:#d2a8ff; }
-.str { color:#a5d6ff; }
-.num { color:#79c0ff; }
-.tp { color:#ffa657; }
+.cm { color:#6b7280; font-style:italic; }
+.kw { color:#7c3aed; }
+.fn { color:#2563eb; }
+.str { color:#059669; }
+.num { color:#d97706; }
+.tp { color:#0891b2; }
 </style>
 </head>
 <body>
@@ -213,7 +210,6 @@ header p { font-size:0.85rem; opacity:0.8; margin-top:4px; position:relative; }
   </div>
 </div>
 
-<!-- ════════════════ DP MODE ════════════════ -->
 <div class="mode active" id="modeDp">
   <div class="controls" id="ctrlBar">
     <label>B点</label>
@@ -221,9 +217,9 @@ header p { font-size:0.85rem; opacity:0.8; margin-top:4px; position:relative; }
     <span class="sep">,</span>
     <input type="number" id="inpM" value="6" min="0" max="20">
     <label style="margin-left:8px;">🐴 马</label>
-    <input type="number" id="inpHx" value="3" min="0" max="20">
+    <input type="number" id="inpMx" value="3" min="0" max="20">
     <span class="sep">,</span>
-    <input type="number" id="inpHy" value="3" min="0" max="20">
+    <input type="number" id="inpMy" value="3" min="0" max="20">
     <button class="btn-go" id="btnGo">开始</button>
     <div class="btns">
       <button class="btn-prev" id="btnPrev" disabled>◀ 上一步</button>
@@ -242,7 +238,7 @@ header p { font-size:0.85rem; opacity:0.8; margin-top:4px; position:relative; }
         <span class="legend-item"><span class="ls lc"></span> 已计算</span>
         <span class="legend-item"><span class="ls lb"></span> 马的控制点</span>
         <span class="legend-item"><span class="ls lg"></span> 起点</span>
-        <span class="legend-item"><span class="ls ly"></span> 终点 <span style="font-size:0.75rem;">← 当前</span></span>
+        <span class="legend-item"><span class="ls ly"></span> 终点</span>
       </div>
     </div>
     <div class="info-panel">
@@ -251,7 +247,7 @@ header p { font-size:0.85rem; opacity:0.8; margin-top:4px; position:relative; }
       <div id="answerBox" style="display:none;" class="ans-box">
         <div class="ans-label">到达终点的路径条数</div>
         <div class="ans-num" id="ansNum">0</div>
-        <div class="ans-label">dp[<span id="ansLabel">0,0</span>]</div>
+        <div class="ans-label">f[<span id="ansLabel">0,0</span>]</div>
       </div>
     </div>
   </div>
@@ -266,24 +262,33 @@ header p { font-size:0.85rem; opacity:0.8; margin-top:4px; position:relative; }
       </div>
       <div class="dp-step" id="s2">
         <div class="stitle"><span class="snum n1">②</span> 状态表示</div>
-        <div class="sbody"><span class="eq">dp[i][j]</span> = 从 <span class="eq">(0,0)</span> 到 <span class="eq">(i,j)</span> 的路径条数</div>
+        <div class="sbody"><span class="eq">f[i][j]</span> = 从 <span class="eq">(0,0)</span> 到 <span class="eq">(i,j)</span> 的路径条数</div>
       </div>
       <div class="dp-step" id="s3">
         <div class="stitle"><span class="snum n1">③</span> 状态转移方程</div>
         <div class="sbody">
-          <div style="margin-bottom:3px;">📌 一般情况：上 + 左</div>
-          <div style="margin-bottom:3px;font-family:monospace;padding-left:1em;">dp[i][j] = dp[i−1][j] + dp[i][j−1]</div>
-          <div style="margin-bottom:3px;">📌 控制点：<span class="eq">dp[i][j] = 0</span></div>
-          <div style="margin-bottom:3px;">📌 第 0 行/列：只从一个方向来</div>
+          <div style="margin-bottom:3px;">📌 马的控制点判定（<span class="eq">check(i,j)</span>）：</div>
+          <div style="margin-bottom:3px;font-family:monospace;padding-left:1em;font-size:0.74rem;">
+            |i−mx|==1 &amp;&amp; |j−my|==2  → 日字跳<br>
+            |i−mx|==2 &amp;&amp; |j−my|==1  → 日字跳<br>
+            i==mx &amp;&amp; j==my          → 马本身
+          </div>
+          <div style="margin-bottom:3px;">📌 若 <span class="eq">check(i,j)=1</span>：<span class="eq">f[i][j] = 0</span>（不可达）</div>
+          <div style="margin-bottom:3px;">📌 否则（<span class="eq">i≥1, j≥1</span>）：</div>
+          <div style="margin-bottom:3px;font-family:monospace;padding-left:1em;">f[i][j] = f[i−1][j] + f[i][j−1]</div>
         </div>
       </div>
       <div class="dp-step" id="s4">
         <div class="stitle"><span class="snum n1">④</span> 边界条件</div>
-        <div class="sbody"><span class="eq">dp[0][0] = 1</span>（起点本身算 1 条路径）</div>
+        <div class="sbody">
+          <span class="eq">f[0][0] = 1</span>（起点算 1 条路径）<br>
+          第 0 列：<span class="eq">i=0..n</span> 顺序初始化，遇控制点 <span class="eq">break</span>，后续为 0<br>
+          第 0 行：<span class="eq">j=0..m</span> 顺序初始化，遇控制点 <span class="eq">break</span>，后续为 0
+        </div>
       </div>
       <div class="dp-step" id="s5">
         <div class="stitle"><span class="snum n2">⑤</span> 答案</div>
-        <div class="sbody"><span class="eq">dp[n][m] = </span><strong id="ansValue">?</strong></div>
+        <div class="sbody"><span class="eq">f[n][m] = </span><strong id="ansValue">?</strong></div>
       </div>
     </div>
   </details>
@@ -294,36 +299,44 @@ header p { font-size:0.85rem; opacity:0.8; margin-top:4px; position:relative; }
     <pre><code><span class="cm">// P1002 过河卒  O(nm)  n,m ≤ 20</span>
 <span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
 <span class="kw">using namespace std;</span>
-<span class="kw">using ll = long long</span>;
 
-<span class="kw">const int</span> dx[] = {<span class="num">0</span>,<span class="num">-1</span>,<span class="num">1</span>,<span class="num">-2</span>,<span class="num">2</span>,<span class="num">-2</span>,<span class="num">2</span>,<span class="num">-1</span>,<span class="num">1</span>};
-<span class="kw">const int</span> dy[] = {<span class="num">0</span>,<span class="num">-2</span>,<span class="num">-2</span>,<span class="num">-1</span>,<span class="num">-1</span>,<span class="num">1</span>,<span class="num">1</span>,<span class="num">2</span>,<span class="num">2</span>};
+<span class="kw">int</span> n, m, mx, my;
+<span class="kw">long long</span> f[<span class="num">25</span>][<span class="num">25</span>];
+
+<span class="kw">int</span> <span class="fn">check</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) {
+    <span class="cm">// 日字跳：马一步能跳到 (a,b) 则被控制</span>
+    <span class="kw">if</span> (abs(a - mx) == <span class="num">1</span> &amp;&amp; abs(b - my) == <span class="num">2</span>
+    ||  abs(a - mx) == <span class="num">2</span> &amp;&amp; abs(b - my) == <span class="num">1</span>)
+        <span class="kw">return</span> <span class="num">1</span>;
+    <span class="cm">// 马本身的位置</span>
+    <span class="kw">if</span> (a == mx &amp;&amp; b == my)
+        <span class="kw">return</span> <span class="num">1</span>;
+    <span class="kw">return</span> <span class="num">0</span>;
+}
 
 <span class="kw">int</span> <span class="fn">main</span>() {
-  <span class="kw">int</span> n, m, hx, hy;
-  <span class="fn">cin</span> &gt;&gt; n &gt;&gt; m &gt;&gt; hx &gt;&gt; hy;
+    cin &gt;&gt; n &gt;&gt; m &gt;&gt; mx &gt;&gt; my;
 
-  <span class="kw">bool</span> block[<span class="num">25</span>][<span class="num">25</span>] = {};           <span class="cm">// 标记控制点</span>
-  <span class="kw">for</span> (<span class="kw">int</span> k = <span class="num">0</span>; k &lt; <span class="num">9</span>; k++) {
-    <span class="kw">int</span> x = hx + dx[k], y = hy + dy[k];
-    <span class="kw">if</span> (x &gt;= <span class="num">0</span> &amp;&amp; x &lt;= n &amp;&amp; y &gt;= <span class="num">0</span> &amp;&amp; y &lt;= m)
-      block[x][y] = <span class="kw">true</span>;
-  }
+    <span class="cm">// ④ 边界：第 0 列 — 遇控制点则 break，后续为 0</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt;= n; ++i)
+        <span class="kw">if</span> (<span class="fn">check</span>(i, <span class="num">0</span>)) <span class="kw">break</span>;
+        <span class="kw">else</span> f[i][<span class="num">0</span>] = <span class="num">1</span>;
 
-  ll dp[<span class="num">25</span>][<span class="num">25</span>] = {};
-  dp[<span class="num">0</span>][<span class="num">0</span>] = <span class="num">1</span>;                         <span class="cm">// ④ 边界</span>
+    <span class="cm">// ④ 边界：第 0 行 — 遇控制点则 break，后续为 0</span>
+    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt;= m; ++j)
+        <span class="kw">if</span> (<span class="fn">check</span>(<span class="num">0</span>, j)) <span class="kw">break</span>;
+        <span class="kw">else</span> f[<span class="num">0</span>][j] = <span class="num">1</span>;
 
-  <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt;= n; i++) {
-    <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt;= m; j++) {
-      <span class="kw">if</span> (block[i][j]) { dp[i][j] = <span class="num">0</span>; <span class="kw">continue</span>; }
-      <span class="kw">if</span> (i == <span class="num">0</span> &amp;&amp; j == <span class="num">0</span>) <span class="kw">continue</span>;
-      <span class="kw">if</span> (i &gt; <span class="num">0</span>) dp[i][j] += dp[i<span class="num">-1</span>][j]; <span class="cm">// ③ 从上方来</span>
-      <span class="kw">if</span> (j &gt; <span class="num">0</span>) dp[i][j] += dp[i][j<span class="num">-1</span>]; <span class="cm">// ③ 从左方来</span>
-    }
-  }
+    <span class="cm">// ③ 状态转移：填表 O(nm)</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= n; ++i)
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= m; ++j)
+            <span class="kw">if</span> (<span class="fn">check</span>(i, j))
+                f[i][j] = <span class="num">0</span>;          <span class="cm">// 马的控制点不可达</span>
+            <span class="kw">else</span>
+                f[i][j] = f[i - <span class="num">1</span>][j] + f[i][j - <span class="num">1</span>];
 
-  <span class="fn">cout</span> &lt;&lt; dp[n][m] &lt;&lt; <span class="str">'\n'</span>;             <span class="cm">// ⑤ 答案</span>
-  <span class="kw">return</span> <span class="num">0</span>;
+    <span class="fn">cout</span> &lt;&lt; f[n][m];                    <span class="cm">// ⑤ 答案</span>
+    <span class="kw">return</span> <span class="num">0</span>;
 }</code></pre>
   </details>
 </div>
@@ -331,15 +344,16 @@ header p { font-size:0.85rem; opacity:0.8; margin-top:4px; position:relative; }
 <script>
 (function(){
 // ─── State ───
-let n=6,m=6,hx=3,hy=3;
-let dp=[],block=[];
-let stepI=0,stepJ=-1; // position of last computed cell; (-1) means not started
-let phase='idle'; // idle | running | done
-let totalCells=0;
+let n=6,m=6,mx=3,my=3;
+let f=[];
+let stepI=0,stepJ=-1;
+let phase='idle';
+let order='col0'; // 'col0' | 'row0' | 'interior' | 'done'
+let doneCol0=false, doneRow0=false;
 let autoTimer=null;
 
 const $=id=>document.getElementById(id);
-const inpN=$('inpN'),inpM=$('inpM'),inpHx=$('inpHx'),inpHy=$('inpHy');
+const inpN=$('inpN'),inpM=$('inpM'),inpMx=$('inpMx'),inpMy=$('inpMy');
 const btnGo=$('btnGo'),btnPrev=$('btnPrev'),btnNext=$('btnNext');
 const btnAuto=$('btnAuto'),btnReset=$('btnReset');
 const stepInfo=$('stepInfo'),gridC=$('gridContainer');
@@ -347,52 +361,89 @@ const infoBox=$('infoBox'),answerBox=$('answerBox');
 const ansNum=$('ansNum'),ansLabel=$('ansLabel'),ansValue=$('ansValue');
 const stepEls=[$('s1'),$('s2'),$('s3'),$('s4'),$('s5')];
 
-const dx=[0,-1,1,-2,2,-2,2,-1,1];
-const dy=[0,-2,-2,-1,-1,1,1,2,2];
+function check(a,b){
+  if(Math.abs(a-mx)===1&&Math.abs(b-my)===2) return true;
+  if(Math.abs(a-mx)===2&&Math.abs(b-my)===1) return true;
+  if(a===mx&&b===my) return true;
+  return false;
+}
 
 function initBoard(){
   n=Math.min(20,Math.max(0,parseInt(inpN.value)||0));
   m=Math.min(20,Math.max(0,parseInt(inpM.value)||0));
-  hx=Math.min(20,Math.max(0,parseInt(inpHx.value)||0));
-  hy=Math.min(20,Math.max(0,parseInt(inpHy.value)||0));
+  mx=Math.min(20,Math.max(0,parseInt(inpMx.value)||0));
+  my=Math.min(20,Math.max(0,parseInt(inpMy.value)||0));
 
-  dp=Array.from({length:n+1},()=>Array(m+1).fill(0));
-  block=Array.from({length:n+1},()=>Array(m+1).fill(false));
+  f=Array.from({length:n+1},()=>Array(m+1).fill(0));
+  f[0][0]=1;
+}
 
-  for(let k=0;k<9;k++){
-    let x=hx+dx[k],y=hy+dy[k];
-    if(x>=0&&x<=n&&y>=0&&y<=m) block[x][y]=true;
+function computeCol0(){
+  for(let i=0;i<=n;i++){
+    if(check(i,0)) break;
+    f[i][0]=1;
   }
-  dp[0][0]=1;
+}
+function computeRow0(){
+  for(let j=0;j<=m;j++){
+    if(check(0,j)) break;
+    f[0][j]=1;
+  }
 }
 
-function computeCell(i,j){
-  if(block[i][j]){ dp[i][j]=0; return; }
-  if(i===0&&j===0){ dp[0][0]=1; return; }
-  let val=0;
-  if(i>0) val+=dp[i-1][j];
-  if(j>0) val+=dp[i][j-1];
-  dp[i][j]=val;
-}
-
-// Get next cell in row-major order. Returns [i,j] or null if done.
+// ─── Stepping logic ───
 function nextCell(){
   if(phase==='idle') return null;
-  // stepI,stepJ is the LAST computed cell
+  if(phase==='done') return null;
+  // Phase 1: column 0
+  if(!doneCol0){
+    let nextI=stepI+1;
+    if(nextI>n||check(nextI,0)){
+      doneCol0=true; stepI=0; stepJ=0;
+      return nextCell();
+    }
+    stepI=nextI; stepJ=0;
+    return 'col0';
+  }
+  // Phase 2: row 0
+  if(!doneRow0){
+    let nextJ=stepJ+1;
+    if(nextJ>m||check(0,nextJ)){
+      doneRow0=true; stepI=1; stepJ=1;
+      return nextCell();
+    }
+    stepI=0; stepJ=nextJ;
+    return 'row0';
+  }
+  // Phase 3: interior
   let ni=stepI, nj=stepJ+1;
-  if(nj>m){ ni++; nj=0; }
-  if(ni>n) return null;
-  return [ni,nj];
+  if(nj>m){ ni++; nj=1; }
+  if(ni>n){ phase='done'; return null; }
+  stepI=ni; stepJ=nj;
+  return 'interior';
 }
 
 function stepForward(){
   if(phase==='idle') return false;
   if(phase==='done') return false;
-  const nx=nextCell();
-  if(!nx){ phase='done'; render(); return false; }
-  const [i,j]=nx;
-  computeCell(i,j);
-  stepI=i; stepJ=j;
+
+  if(!doneCol0||!doneRow0){
+    // For col0/row0, the computation is already done in init
+    const result=nextCell();
+    if(!result) return false;
+    render();
+    return true;
+  }
+
+  // interior: compute
+  const result=nextCell();
+  if(!result) return false;
+  const i=stepI, j=stepJ;
+  if(check(i,j)){
+    f[i][j]=0;
+  } else {
+    f[i][j]=f[i-1][j]+f[i][j-1];
+  }
   if(stepI===n&&stepJ===m) phase='done';
   render();
   return true;
@@ -400,15 +451,39 @@ function stepForward(){
 
 function stepBack(){
   if(phase==='idle') return false;
-  if(stepI===0&&stepJ===0) return false;
+  const atFirstCol0=(stepI===0&&stepJ===0&&!doneCol0);
+  const atFirstRow0=(stepI===0&&stepJ===0&&doneCol0&&!doneRow0);
+  if(atFirstCol0||atFirstRow0) return false;
+  if(phase==='done'){
+    phase='running';
+    render();
+    return true;
+  }
   // Undo current cell
-  dp[stepI][stepJ]=block[stepI][stepJ]?0:0;
-  // Previous cell
-  let pi=stepI, pj=stepJ-1;
-  if(pj<0){ pi--; pj=m; }
-  if(pi<0){ pi=0; pj=0; phase='running'; }
+  f[stepI][stepJ]=0;
+  let pi=stepI, pj=stepJ;
+
+  if(!doneCol0){
+    // Going backwards in column 0
+    pi=stepI-1;
+    if(pi<0) return false;
+    stepI=pi; stepJ=0;
+    render();
+    return true;
+  }
+  if(!doneRow0){
+    // Going backwards in row 0
+    pj=stepJ-1;
+    if(pj<0){ doneCol0=false; stepI=0; stepJ=0; render(); return true; }
+    stepI=0; stepJ=pj;
+    render();
+    return true;
+  }
+  // interior backwards
+  pj=stepJ-1;
+  if(pj<1){ pi=stepI-1; pj=m; }
+  if(pi<1){ doneRow0=false; stepI=0; stepJ=m; render(); return true; }
   stepI=pi; stepJ=pj;
-  if(phase==='done') phase='running';
   render();
   return true;
 }
@@ -417,42 +492,83 @@ function resetBoard(){
   stopAuto();
   initBoard();
   stepI=0; stepJ=-1;
+  doneCol0=false; doneRow0=false;
   phase='running';
   render();
 }
 
+function startDemo(){
+  stopAuto();
+  initBoard();
+  // Pre-compute col0 and row0
+  computeCol0();
+  computeRow0();
+  stepI=0; stepJ=0;
+  doneCol0=true; doneRow0=true;
+  phase='running';
+  btnNext.disabled=false; btnAuto.disabled=false;
+  render();
+}
+
 function render(){
-  // Grid
   const cols=m+1;
   let h='<div class="grid" style="grid-template-columns:repeat('+cols+',52px);">';
   for(let i=0;i<=n;i++){
     for(let j=0;j<=m;j++){
       let cls='gcell ';
       let valText='', srcText='';
-      const isBlocked=block[i][j];
+      const blocked=check(i,j);
       const isStart=(i===0&&j===0);
       const isEnd=(i===n&&j===m);
-      const isHorse=(i===hx&&j===hy);
+      const isHorse=(i===mx&&j===my);
 
-      if(isBlocked){
+      // Determine if cell has been computed
+      let computed=false;
+      if(phase==='idle') computed=false;
+      else {
+        if(doneCol0&&doneRow0){
+          if(i===0||j===0){
+            // row 0 / col 0: check if it's within the non-blocked region
+            let col0Ok=true, row0Ok=true;
+            for(let ii=0;ii<=i;ii++) if(check(ii,0)) col0Ok=false;
+            for(let jj=0;jj<=j;jj++) if(check(0,jj)) row0Ok=false;
+            if(i===0) computed=row0Ok;
+            else if(j===0) computed=col0Ok;
+            else computed=false;
+          }
+          if(i>0&&j>0){
+            const doneCells= (stepI>i||(stepI===i&&stepJ>=j));
+            computed=doneCells||phase==='done';
+          }
+        } else if(doneCol0){
+          // Only col0 done
+          if(j===0) computed=true;
+          else computed=false;
+        } else {
+          // Nothing done
+          computed=false;
+        }
+        // Override for phase=done
+        if(phase==='done') computed=true;
+      }
+
+      if(blocked){
         cls+='blocked';
         valText=isHorse?'🐴':'✗';
       } else if(isStart){
         cls+='start';
         valText='S';
         srcText='起点';
-      } else if(stepI>i||(stepI===i&&stepJ>=j)){
+      } else if(computed){
         cls+='computed';
-        valText=dp[i][j];
+        valText=f[i][j]!==0?f[i][j]:'';
       } else {
         cls+='empty';
         valText='';
       }
+      if(isEnd&&computed&&phase==='done') cls='gcell end';
 
-      if(isEnd&&dp[i][j]!==0&&phase==='done') cls='gcell end';
-      else if(isEnd&&(stepI===i&&stepJ===j)) cls+='';
-
-      const isCurrent=(i===stepI&&j===stepJ)&&(phase==='running');
+      const isCurrent=(i===stepI&&j===stepJ)&&phase==='running';
       if(isCurrent) cls+=' current';
 
       h+='<div class="'+cls+'">';
@@ -465,83 +581,70 @@ function render(){
   h+='</div>';
   gridC.innerHTML=h;
 
-  // Step info
   if(phase==='idle') stepInfo.textContent='设置后点「开始」';
   else if(phase==='running'){
-    const done=stepI*(m+1)+stepJ+1;
     const total=(n+1)*(m+1);
+    const done=stepI*(m+1)+stepJ+1;
     stepInfo.textContent='计算中 '+done+'/'+total+'  ('+stepI+','+stepJ+')';
   } else if(phase==='done'){
-    stepInfo.textContent='✅ 完成！dp['+n+']['+m+'] = '+dp[n][m];
+    stepInfo.textContent='✅ 完成！f['+n+']['+m+'] = '+f[n][m];
   }
 
-  // Info box
   let ih='';
   if(phase==='idle'){
-    ih='设置终点 <b>B('+n+','+m+')</b> 和马位置 <b>('+hx+','+hy+')</b>，点击「开始」。';
+    ih='设置终点 <b>B('+n+','+m+')</b> 和马位置 <b>('+mx+','+my+')</b>，点击「开始」。';
   } else if(phase==='running'){
-    const [ci,cj]=[stepI,stepJ];
-    if(block[ci][cj]){
-      ih='<b>('+ci+','+cj+')</b> 是马的控制点<br><span class="hl-r">dp['+ci+']['+cj+'] = 0</span>（不可达）';
+    const ci=stepI, cj=stepJ;
+    if(check(ci,cj)){
+      ih='<b>('+ci+','+cj+')</b> 是马的控制点<br><span class="hl-r">f['+ci+']['+cj+'] = 0</span>（不可达）';
     } else if(ci===0&&cj===0){
-      ih='<b>起点 (0,0)</b><br><span class="hl-g">dp[0][0] = 1</span>';
+      ih='<b>起点 (0,0)</b><br><span class="hl-g">f[0][0] = 1</span>';
+    } else if(ci===0){
+      ih='<b>第 0 行</b> f['+ci+']['+cj+']<br>';
+      ih+='← 从左方来（第 0 行只能向右走）<br>';
+      ih+='→ <span class="hl-y">f['+ci+']['+cj+'] = '+f[ci][cj]+'</span>';
+    } else if(cj===0){
+      ih='<b>第 0 列</b> f['+ci+']['+cj+']<br>';
+      ih+='↑ 从上方来（第 0 列只能向下走）<br>';
+      ih+='→ <span class="hl-y">f['+ci+']['+cj+'] = '+f[ci][cj]+'</span>';
     } else {
-      const fromTop=(ci>0)?dp[ci-1][cj]:0;
-      const fromLeft=(cj>0)?dp[ci][cj-1]:0;
-      ih='<b>计算 dp['+ci+']['+cj+']</b><br>';
-      if(ci>0) ih+='↑ 从上方来：dp['+(ci-1)+']['+cj+'] = <span class="hl-b">'+dp[ci-1][cj]+'</span><br>';
-      if(cj>0) ih+='← 从左方来：dp['+ci+']['+(cj-1)+'] = <span class="hl-b">'+dp[ci][cj-1]+'</span><br>';
-      if(ci===0) ih+='第一行，只能从左来<br>';
-      if(cj===0) ih+='第一列，只能从上来<br>';
-      ih+='→ <span class="hl-y">dp['+ci+']['+cj+'] = '+dp[ci][cj]+'</span>';
+      ih='<b>计算 f['+ci+']['+cj+']</b><br>';
+      if(ci>0) ih+='↑ 从上方来：f['+(ci-1)+']['+cj+'] = <span class="hl-b">'+f[ci-1][cj]+'</span><br>';
+      if(cj>0) ih+='← 从左方来：f['+ci+']['+(cj-1)+'] = <span class="hl-b">'+f[ci][cj-1]+'</span><br>';
+      ih+='→ <span class="hl-y">f['+ci+']['+cj+'] = '+f[ci][cj]+'</span>';
     }
     const done=stepI*(m+1)+stepJ+1;
     const total=(n+1)*(m+1);
     ih+='<br><span class="hl-gr">已完成 '+done+'/'+total+' 格</span>';
   } else if(phase==='done'){
     ih='<b>✅ 计算完成！</b><br>';
-    ih+='终点 dp['+n+']['+m+'] = <span class="hl-y">'+dp[n][m]+'</span><br>';
-    // Reconstruction of paths count note
+    ih+='终点 f['+n+']['+m+'] = <span class="hl-y">'+f[n][m]+'</span><br>';
     ih+='所有从 (0,0) 到 ('+n+','+m+') 避开马的控制点的路径总数。';
   }
   infoBox.innerHTML=ih;
 
-  // Answer
   if(phase==='done'){
     answerBox.style.display='block';
-    ansNum.textContent=dp[n][m];
+    ansNum.textContent=f[n][m];
     ansLabel.textContent=n+','+m;
-    ansValue.textContent=dp[n][m];
+    ansValue.textContent=f[n][m];
   } else {
     answerBox.style.display='none';
   }
 
-  // Steps panel
-  stepEls.forEach(el=>el.classList.remove('done'));
   stepEls.forEach(el=>el.classList.add('done'));
-  if(phase==='running'||phase==='done'){
-    if(dp[n][m]!==0||phase==='done'){
-      ansValue.textContent=phase==='done'?dp[n][m]:'?';
-    }
-  } else {
+  if(phase==='idle'){
     ansValue.textContent='?';
+  } else if(phase==='done'){
+    ansValue.textContent=f[n][m];
+  } else {
+    if(f[n][m]!==0||phase==='done'){
+      ansValue.textContent='?';
+    }
   }
 
-  // Buttons
-  const atStart=stepI===0&&stepJ===0;
-  const atEnd=phase==='done';
   btnPrev.disabled=phase==='idle'||(stepI===0&&stepJ===0);
-  btnNext.disabled=phase==='idle'||atEnd;
-}
-
-// ─── Start ───
-function startDemo(){
-  stopAuto();
-  initBoard();
-  stepI=0; stepJ=-1;
-  phase='running';
-  btnNext.disabled=false; btnAuto.disabled=false;
-  render();
+  btnNext.disabled=phase==='idle'||phase==='done';
 }
 
 function toggleAuto(){
@@ -558,19 +661,19 @@ function stopAuto(){
   btnAuto.textContent='▶'; btnAuto.classList.remove('playing');
 }
 
-// ─── Events ───
 btnGo.addEventListener('click',startDemo);
 btnNext.addEventListener('click',stepForward);
 btnPrev.addEventListener('click',stepBack);
-btnReset.addEventListener('click',()=>{ stopAuto(); phase='idle'; initBoard(); stepI=0; stepJ=-1; render(); });
+btnReset.addEventListener('click',()=>{ stopAuto(); phase='idle'; initBoard(); stepI=0; stepJ=-1; doneCol0=false; doneRow0=false; render(); });
 btnAuto.addEventListener('click',toggleAuto);
 
-[inpN,inpM,inpHx,inpHy].forEach(el=>{
+[inpN,inpM,inpMx,inpMy].forEach(el=>{
   el.addEventListener('change',()=>{
     stopAuto();
     phase='idle';
     initBoard();
     stepI=0; stepJ=-1;
+    doneCol0=false; doneRow0=false;
     render();
   });
 });
