@@ -166,6 +166,63 @@ header p { font-size:0.82rem; opacity:0.85; }
 .formula-box .fm { font-family:monospace; background:#e2e8f0; padding:1px 6px; border-radius:3px; }
 .formula-box .big { font-size:1.2rem; font-weight:700; color:#276749; }
 
+/* ─── DP 五步法 ─── */
+.dp-steps {
+  background:#fff; margin:0 auto 10px; padding:0; border-radius:10px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06); max-width:960px; overflow:hidden;
+}
+.dp-steps summary {
+  padding:10px 20px; font-size:0.88rem; font-weight:700; color:#1a365d;
+  cursor:pointer; user-select:none; display:flex; align-items:center; gap:8px;
+}
+.dp-steps summary:hover { background:#f7fafc; }
+.dp-steps .steps-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:0; border-top:1px solid #e2e8f0;
+}
+@media (max-width:600px){ .dp-steps .steps-grid{grid-template-columns:1fr;} }
+.dp-step {
+  padding:10px 16px; border-right:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0;
+  transition:background 0.3s;
+}
+.dp-step:nth-child(2n){ border-right:none; }
+.dp-step .snum {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:20px; height:20px; border-radius:50%; font-size:0.7rem; font-weight:700;
+  margin-right:6px; flex-shrink:0;
+}
+.dp-step .snum.n0 { background:#e2e8f0; color:#718096; }
+.dp-step .snum.n1 { background:#bee3f8; color:#2b6cb0; }
+.dp-step .snum.n2 { background:#c6f6d5; color:#276749; }
+.dp-step .stitle { font-weight:700; font-size:0.82rem; display:flex; align-items:center; margin-bottom:3px; }
+.dp-step .sbody { font-size:0.78rem; color:#4a5568; line-height:1.5; margin-left:26px; }
+.dp-step .sbody .eq { font-family:monospace; background:#edf2f7; padding:1px 5px; border-radius:3px; font-size:0.75rem; }
+.dp-step.done { background:#f0fff4; }
+.dp-step.done .stitle { color:#276749; }
+.dp-step.current { background:#fffff0; }
+.dp-step.current .stitle { color:#d69e2e; }
+
+/* ─── Code Panel ─── */
+.code-panel {
+  background:#1a202c; border-radius:10px; max-width:960px; margin:0 auto 10px; overflow:hidden;
+}
+.code-panel summary {
+  padding:10px 20px; font-size:0.88rem; font-weight:700; color:#e2e8f0;
+  cursor:pointer; user-select:none; display:flex; align-items:center; gap:8px;
+}
+.code-panel summary:hover { background:#2d3748; }
+.code-panel pre {
+  margin:0; padding:14px 20px; overflow-x:auto; font-size:0.82rem; line-height:1.6;
+  background:#0d1117; color:#e6edf3; border-top:1px solid #2d3748;
+}
+.code-panel code { font-family:'SF Mono','Fira Code','Courier New',monospace; }
+.code-panel .kw { color:#ff7b72; }
+.code-panel .fn { color:#d2a8ff; }
+.code-panel .str { color:#a5d6ff; }
+.code-panel .cm { color:#8b949e; }
+.code-panel .num { color:#79c0ff; }
+.code-panel .tp { color:#ffa657; }
+
 /* ─── Info Panel ─── */
 .info-panel {
   flex:1; background:#fff; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,0.06);
@@ -227,6 +284,67 @@ header p { font-size:0.82rem; opacity:0.85; }
       <button class="btn-reset" id="dpBtnReset">⟳ 重置</button>
     </div>
   </div>
+
+  <!-- DP 五步法 -->
+  <details class="dp-steps" id="dpSteps" open>
+    <summary>📋 动态规划五步法</summary>
+    <div class="steps-grid" id="dpStepsGrid">
+      <div class="dp-step" id="dpS1">
+        <div class="stitle"><span class="snum n1">①</span> 划分阶段</div>
+        <div class="sbody">按照当前字数 <span class="eq">i</span> 划分阶段，<span class="eq">1 ≤ i ≤ n</span></div>
+      </div>
+      <div class="dp-step" id="dpS2">
+        <div class="stitle"><span class="snum n1">②</span> 状态表示</div>
+        <div class="sbody"><span class="eq">dp[i]</span> = 达到 <span class="eq">i</span> 个字的最少操作次数</div>
+      </div>
+      <div class="dp-step" id="dpS3">
+        <div class="stitle"><span class="snum n1">③</span> 状态转移方程</div>
+        <div class="sbody">
+          <span class="eq">dp[i] = min(dp[i−1] + 1,</span><br>
+          <span class="eq" style="margin-left:1.2em;">i%2=0 ? dp[i/2] + 1 : ∞)</span>
+        </div>
+      </div>
+      <div class="dp-step" id="dpS4">
+        <div class="stitle"><span class="snum n1">④</span> 边界条件</div>
+        <div class="sbody"><span class="eq">dp[1] = 0</span>（已有 1 个字，无需操作）</div>
+      </div>
+      <div class="dp-step" id="dpS5">
+        <div class="stitle"><span class="snum n2">⑤</span> 答案</div>
+        <div class="sbody" id="dpAnsBody">
+          <span class="eq">dp[n] = </span><strong id="dpAnsValue">?</strong>
+          <span id="dpAnsExtra"></span>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- AC 参考代码 -->
+  <details class="code-panel" id="dpCode">
+    <summary>💻 AC 参考代码</summary>
+    <pre><code><span class="cm">// DP  O(n)  n ≤ 10⁶</span>
+<span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
+<span class="kw">using namespace std;</span>
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+  <span class="kw">int</span> n; <span class="fn">cin</span> &gt;&gt; n;
+  <span class="kw">int</span> dp[n+<span class="num">1</span>];
+  dp[<span class="num">1</span>] = <span class="num">0</span>;                              <span class="cm">// ④ 边界</span>
+  <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">2</span>; i &lt;= n; i++) {
+    dp[i] = dp[i<span class="num">-1</span>] + <span class="num">1</span>;                  <span class="cm">// ③ +1 操作</span>
+    <span class="kw">if</span> (i % <span class="num">2</span> == <span class="num">0</span>)
+      dp[i] = <span class="fn">min</span>(dp[i], dp[i/<span class="num">2</span>] + <span class="num">1</span>); <span class="cm">// ③ ×2 操作</span>
+  }
+  <span class="fn">cout</span> &lt;&lt; dp[n] &lt;&lt; <span class="str">'\n'</span>;                 <span class="cm">// ⑤ 答案</span>
+  <span class="kw">return</span> <span class="num">0</span>;
+}
+
+<span class="cm">// 贪心 + 位运算  O(log n)  n ≤ 10¹⁸</span>
+<span class="cm">// int bit_len = 64 - __builtin_clzll(n);</span>
+<span class="cm">// int pop = __builtin_popcountll(n);       </span>
+<span class="cm">// int steps = bit_len + pop - 2;          </span>
+</code></pre>
+  </details>
+
   <div class="main">
     <div class="dp-panel">
       <h3>🧮 DP 表 <span class="step-info" id="dpStepInfo">就绪</span></h3>
@@ -301,6 +419,9 @@ const nSlider = $('dpSlider'), nVal = $('dpNval');
 const btnPrev = $('dpBtnPrev'), btnNext = $('dpBtnNext'), btnAuto = $('dpBtnAuto'), btnReset = $('dpBtnReset');
 const stepInfo = $('dpStepInfo'), dpContainer = $('dpTableContainer');
 const infoBox = $('dpInfoBox'), answerBox = $('dpAnswerBox'), ansNum = $('dpAnsNum'), ansLabel = $('dpAnsLabel');
+const dpAnsValue = $('dpAnsValue'), dpAnsExtra = $('dpAnsExtra');
+const dpS1=$('dpS1'),dpS2=$('dpS2'),dpS3=$('dpS3'),dpS4=$('dpS4'),dpS5=$('dpS5');
+const dpStepEls=[dpS1,dpS2,dpS3,dpS4,dpS5];
 
 function cols(){ return n<=25?n:20; }
 function cw(){ return n<=25?54:n<=60?50:46; }
@@ -380,6 +501,24 @@ function render(){
     if(traceIdx<trace.length-1&&phase!=='tracing') ih+='<br>👆 点击「下一步」回溯';
   }
   infoBox.innerHTML=ih;
+
+  // ── Update DP 5-step panel ──
+  dpStepEls.forEach(el=>el.classList.remove('done','current'));
+  dpS1.classList.add('done'); dpS2.classList.add('done'); dpS3.classList.add('done'); dpS4.classList.add('done');
+  if(phase==='computing'||phase==='done'||phase==='tracing'){
+    const val=dp[n]!==undefined?dp[n]:'?';
+    dpAnsValue.textContent=val;
+    if(dp[n]!==undefined){
+      dpAnsExtra.textContent=' ('+n+' 个字，最少 '+dp[n]+' 步)';
+      dpS5.classList.add('done');
+    } else {
+      dpAnsExtra.textContent=' (正在计算…)';
+      dpS5.classList.add('current');
+    }
+  } else {
+    dpAnsValue.textContent='?';
+    dpAnsExtra.textContent='';
+  }
 
   if(phase==='done'||phase==='tracing'){ answerBox.style.display='block'; ansNum.textContent=dp[n]; ansLabel.textContent='步  (1 → '+n+')'; }
   else answerBox.style.display='none';
