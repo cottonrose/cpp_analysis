@@ -18,7 +18,6 @@ header h1 { font-size:1.5rem; font-weight:700; }
 header h1 span { color:#fde047; }
 header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 
-/* ─── Problem ─── */
 .problem {
   background:#fff; margin:14px 16px 0; padding:14px 20px; border-radius:12px;
   box-shadow:0 1px 4px rgba(0,0,0,0.06); max-width:960px; margin-inline:auto;
@@ -33,7 +32,6 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .problem .info .label { font-weight:600; color:#64748b; font-size:0.8rem; }
 .eq { font-family:monospace; background:#f0fdfa; padding:1px 5px; border-radius:3px; font-size:0.78rem; color:#0d9488; }
 
-/* ─── Controls ─── */
 .controls {
   background:#fff; border:1px solid #e2e8f0; border-radius:12px;
   padding:14px 20px; max-width:960px; margin:10px auto 0;
@@ -67,14 +65,10 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .btn-auto.playing:hover:not(:disabled) { background:#b91c1c; }
 .btn-reset { background:#e2e8f0; color:#475569; }
 .btn-reset:hover:not(:disabled) { background:#cbd5e1; }
-.btn-preset { background:#fef3c7; color:#92400e; }
-.btn-preset:hover { background:#fde68a; }
 
-/* ─── Main Area ─── */
 .main { display:flex; gap:12px; max-width:960px; margin:10px auto 0; padding:0 16px; }
 @media (max-width:700px){ .main{flex-direction:column;} }
 
-/* ─── Grid Panel ─── */
 .grid-panel {
   flex:2; background:#fff; border:1px solid #e2e8f0; border-radius:12px;
   padding:14px; overflow-x:auto; min-width:0; box-shadow:0 1px 4px rgba(0,0,0,0.04);
@@ -88,24 +82,51 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
   display:inline-grid; gap:2px; border-radius:6px; overflow:hidden;
 }
 .gcell {
-  width:56px; height:52px; display:flex; flex-direction:column;
+  width:60px; height:56px; display:flex; flex-direction:column;
   align-items:center; justify-content:center; position:relative;
-  transition:all 0.25s; cursor:default; border-radius:4px; border:1px solid transparent;
+  transition:all 0.25s; cursor:default; border-radius:4px; border:1px solid #e2e8f0;
 }
-.gcell .idx { font-size:0.45rem; color:#cbd5e1; position:absolute; top:1px; left:3px; }
-.gcell .ht {
-  font-size:0.95rem; font-weight:800; line-height:1.2;
-}
-.gcell .fv {
-  font-size:0.6rem; line-height:1; margin-top:1px; font-weight:600;
-}
+.gcell .idx { font-size:0.45rem; color:#cbd5e1; position:absolute; top:1px; left:3px; z-index:1; }
+.gcell .ht { font-size:1rem; font-weight:800; line-height:1.2; position:relative; z-index:1; }
+.gcell .fv { font-size:0.6rem; line-height:1; margin-top:1px; font-weight:600; position:relative; z-index:1; }
 .gcell .fv.done { color:#0d9488; }
 .gcell .fv.pending { color:#94a3b8; }
-.gcell .fv.zero { color:#94a3b8; }
+.gcell .step-badge {
+  position:absolute; top:1px; right:2px; z-index:2;
+  width:16px; height:16px; border-radius:50%;
+  background:#059669; color:#fff; font-size:0.5rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 1px 3px rgba(0,0,0,0.2);
+}
+.gcell .arrow {
+  position:absolute; font-size:0.7rem; z-index:2;
+}
+/* path trail — different backgrounds by step */
+.gcell.on-path { position:relative; }
+.gcell.on-path .ht { color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.3); }
+.gcell.on-path .fv { color:rgba(255,255,255,0.85); }
+.gcell.on-path .idx { color:rgba(255,255,255,0.4); }
+.gcell.on-path.s0 { background:#d97706; border-color:#d97706; } /* current = gold */
+.gcell.on-path.s1 { background:#059669; border-color:#059669; }
+.gcell.on-path.s2 { background:#0d9488; border-color:#0d9488; }
+.gcell.on-path.s3 { background:#0891b2; border-color:#0891b2; }
+.gcell.on-path.s4 { background:#2563eb; border-color:#2563eb; }
+.gcell.on-path.s5 { background:#7c3aed; border-color:#7c3aed; }
+.gcell.on-path.s6 { background:#6366f1; border-color:#6366f1; }
+.gcell.on-path.s7 { background:#8b5cf6; border-color:#8b5cf6; }
+.gcell.on-path.s8 { background:#a855f7; border-color:#a855f7; }
+.gcell.on-path.s9 { background:#d946ef; border-color:#d946ef; }
+.gcell.on-path.s10{ background:#ec4899; border-color:#ec4899; }
+.gcell.on-path.s11{ background:#f43f5e; border-color:#f43f5e; }
+.gcell.on-path.s12{ background:#e11d48; border-color:#e11d48; }
+.gcell.on-path.s13{ background:#be123c; border-color:#be123c; }
+.gcell.on-path.s14{ background:#9f1239; border-color:#9f1239; }
+.gcell.on-path.s15{ background:#881337; border-color:#881337; }
+.gcell.on-path.s16{ background:#4c0519; border-color:#4c0519; }
+/* fallback for >16 steps */
+.gcell.on-path.s16plus { background:#1e293b; border-color:#1e293b; }
+.gcell.on-path .ht { color:#fff; }
 
-.gcell.proc { border-color:#f59e0b; border-width:2px; transform:scale(1.06); z-index:1; }
-.gcell.proc .ht { color:#b45309; }
-.gcell.seen { border-color:#0d9488; border-width:2px; }
 .gcell.lower { background:#f0fdf4; border-color:#86efac; }
 .gcell.lower .ht { color:#16a34a; }
 .gcell.higher { background:#fef2f2; border-color:#fca5a5; }
@@ -118,10 +139,9 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .ls { width:12px; height:12px; border-radius:3px; display:inline-block; border:1px solid #e2e8f0; }
 .ls.lo { background:#f0fdf4; }
 .ls.hi { background:#fef2f2; }
-.ls.pr { border-color:#f59e0b; border-width:2px; background:#fffbeb; }
-.ls.se { border-color:#0d9488; border-width:2px; }
+.ls.path { background:#059669; border-color:#059669; }
+.ls.cur { background:#d97706; border-color:#d97706; }
 
-/* ─── Info Panel ─── */
 .info-panel {
   flex:1; background:#fff; border:1px solid #e2e8f0; border-radius:12px;
   padding:14px; min-width:170px; display:flex; flex-direction:column; gap:8px;
@@ -131,12 +151,15 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .info-box {
   background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;
   font-size:0.82rem; line-height:1.7; flex:1; min-height:90px;
+  max-height:360px; overflow-y:auto;
 }
 .hl-b { color:#0891b2; }
 .hl-g { color:#16a34a; }
 .hl-r { color:#dc2626; }
 .hl-y { color:#b45309; }
 .hl-gr { color:#64748b; }
+.hl-path { color:#059669; font-weight:700; }
+.path-chain { font-family:monospace; font-size:0.78rem; line-height:1.6; }
 
 .ans-box {
   background:linear-gradient(135deg,#0d9488,#0891b2); border-radius:8px; padding:10px; text-align:center; color:#fff;
@@ -144,7 +167,6 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .ans-box .ans-num { font-size:1.6rem; font-weight:800; font-family:monospace; }
 .ans-box .ans-label { font-size:0.72rem; opacity:0.75; }
 
-/* ─── DP Steps Panel ─── */
 .dp-steps {
   background:#fff; border:1px solid #e2e8f0; border-radius:12px;
   max-width:960px; margin:10px auto 0; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.04);
@@ -171,10 +193,7 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .dp-step.done { background:#f0fdf4; }
 .dp-step.done .stitle { color:#059669; }
 
-/* ─── Code Panel ─── */
-.code-wrap {
-  max-width:960px; margin:10px auto 16px;
-}
+.code-wrap { max-width:960px; margin:10px auto 16px; }
 .code-panel {
   background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;
   box-shadow:0 1px 4px rgba(0,0,0,0.04);
@@ -187,8 +206,7 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .code-panel summary:hover { background:#f8fafc; }
 .code-panel pre {
   margin:0; padding:12px 20px; overflow-x:auto; font-size:0.8rem; line-height:1.6;
-  background:#f8fafc; color:#1e293b; border-top:1px solid #e2e8f0;
-  tab-size:4;
+  background:#f8fafc; color:#1e293b; border-top:1px solid #e2e8f0; tab-size:4;
 }
 .code-panel code { font-family:'SF Mono','Fira Code','Courier New',monospace; }
 .cm { color:#6b7280; font-style:italic; }
@@ -197,16 +215,14 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 .str { color:#059669; }
 .num { color:#d97706; }
 
-/* sorting list */
-.sort-list {
-  margin-top:6px; display:flex; flex-wrap:wrap; gap:2px; font-size:0.6rem;
-}
+.sort-list { margin-top:6px; }
+.sort-list .items { display:flex; flex-wrap:wrap; gap:2px; font-size:0.6rem; }
 .sort-item {
   width:30px; height:20px; display:flex; align-items:center; justify-content:center;
   border-radius:3px; background:#f1f5f9; color:#94a3b8; font-weight:600;
   border:1px solid #e2e8f0; font-size:0.55rem;
 }
-.sort-item.active { background:#f59e0b; color:#fff; border-color:#f59e0b; }
+.sort-item.active { background:#d97706; color:#fff; border-color:#d97706; }
 .sort-item.done { background:#ccfbf1; color:#0d9488; border-color:#0d9488; }
 </style>
 </head>
@@ -214,7 +230,7 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 
 <header>
   <h1>P1434 <span>[SHOI2002] 滑雪</span></h1>
-  <p>排序 DP · 记忆化搜索 · 最长路径</p>
+  <p>排序 DP · 记忆化搜索 · 路径可视化</p>
 </header>
 
 <div class="problem">
@@ -223,17 +239,18 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
     <div><div class="label">🏔️ 地形</div><span class="eq">n × m</span> 网格，每个格子有高度</div>
     <div><div class="label">⛷️ 滑行规则</div>从高到低，四方向（上下左右）</div>
     <div><div class="label">🎯 目标</div>找最长的滑行路径长度（含起点）</div>
+    <div><div class="label">📊 样例</div>5×5 螺旋阵 → <span class="eq">ans = 25</span></div>
   </div>
 </div>
 
 <div class="mode active" id="modeDp">
   <div class="controls" id="ctrlBar">
     <label>n</label>
-    <input type="number" id="inpN" value="4" min="2" max="8">
+    <input type="number" id="inpN" value="5" min="2" max="8">
     <span class="sep">×</span>
-    <input type="number" id="inpM" value="4" min="2" max="10">
-    <button class="btn-gen" id="btnGen">🎲 生成</button>
-    <button class="btn-preset" id="btnPreset">📋 示例</button>
+    <input type="number" id="inpM" value="5" min="2" max="10">
+    <button class="btn-gen" id="btnGen">🎲 随机</button>
+    <button class="btn-gen" id="btnSample" style="background:#0891b2;">📋 样例</button>
     <div class="btns">
       <button class="btn-prev" id="btnPrev" disabled>◀ 上一步</button>
       <button class="btn-next" id="btnNext" disabled>下一步 ▶</button>
@@ -244,19 +261,22 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 
   <div class="main">
     <div class="grid-panel">
-      <h3>🗺️ 高度图 <span class="step-info" id="stepInfo">点击「生成」或「示例」</span></h3>
+      <h3>🗺️ 高度图 <span class="step-info" id="stepInfo">加载样例中…</span></h3>
       <div id="gridContainer" style="overflow-x:auto;"></div>
-      <div class="sort-list" id="sortList"></div>
+      <div class="sort-list">
+        <div style="font-size:0.65rem;color:#64748b;margin-bottom:2px;">处理顺序（按高度升序）：</div>
+        <div class="items" id="sortList"></div>
+      </div>
       <div class="legend">
-        <span class="legend-item"><span class="ls lo"></span> 更低邻居 (已算)</span>
-        <span class="legend-item"><span class="ls hi"></span> 更高邻居 (跳过)</span>
-        <span class="legend-item"><span class="ls pr"></span> 正在处理</span>
-        <span class="legend-item"><span class="ls se"></span> 用于计算的邻居</span>
+        <span class="legend-item"><span class="ls lo"></span> 更低邻居</span>
+        <span class="legend-item"><span class="ls hi"></span> 更高邻居</span>
+        <span class="legend-item"><span class="ls cur"></span> 当前格子</span>
+        <span class="legend-item"><span class="ls path"></span> 路径（编号=第几步）</span>
       </div>
     </div>
     <div class="info-panel">
       <h3>📝 说明</h3>
-      <div class="info-box" id="infoBox">设置网格大小，点击「生成」获得随机高度图，然后逐步观看排序 DP 计算过程。</div>
+      <div class="info-box" id="infoBox">加载样例中…</div>
       <div id="answerBox" style="display:none;" class="ans-box">
         <div class="ans-label">最长滑雪路径长度</div>
         <div class="ans-num" id="ansNum">0</div>
@@ -265,7 +285,6 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
     </div>
   </div>
 
-  <!-- DP 五步法 -->
   <details class="dp-steps" id="dpSteps" open>
     <summary>📋 动态规划五步法（排序 DP）</summary>
     <div class="steps-grid">
@@ -273,44 +292,33 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
         <div class="stitle"><span class="snum n1">①</span> 划分阶段</div>
         <div class="sbody">
           按<span class="eq">高度升序</span>处理每个格子。<br>
-          将所有格子按高度从小到大排序，保证处理当前格时，<span class="hl-g">更低的相邻格子 f 值已算好</span>。
+          排序保证处理当前格时，<span class="hl-g">更低的相邻格子 f 值已算好</span>。
         </div>
       </div>
       <div class="dp-step" id="s2">
         <div class="stitle"><span class="snum n1">②</span> 状态表示</div>
-        <div class="sbody"><span class="eq">f[i][j]</span> = 从 <span class="eq">(i,j)</span> 出发能获得的最长滑雪路径长度（包含自身）</div>
+        <div class="sbody"><span class="eq">f[i][j]</span> = 从 <span class="eq">(i,j)</span> 出发的最长滑雪路径长度（含自身）</div>
       </div>
       <div class="dp-step" id="s3">
-        <div class="stitle"><span class="snum n1">③</span> 状态转移方程</div>
+        <div class="stitle"><span class="snum n1">③</span> 状态转移</div>
         <div class="sbody">
-          <div style="margin-bottom:3px;">遍历上、下、左、右四个方向：</div>
-          <div style="margin-bottom:3px;font-family:monospace;padding-left:1em;font-size:0.74rem;">
-            若 a[nx][ny] &lt; a[x][y] 且 (nx,ny) 在界内：<br>
-            &nbsp;&nbsp;f[x][y] = max(f[x][y], f[nx][ny])
-          </div>
-          <div style="margin-bottom:3px;">处理完所有更低邻居后 <span class="eq">+1</span>（计入自身）：</div>
-          <div style="margin-bottom:3px;font-family:monospace;padding-left:1em;">f[x][y]++</div>
+          遍历上下左右四个方向：<br>
+          <span class="eq">a[nx][ny] &lt; a[x][y]</span> → <span class="eq">f[x][y] = max(f[x][y], f[nx][ny])</span><br>
+          遍历完后 <span class="eq">f[x][y]++</span>（计入自身）<br>
+          同时记录 <span class="eq">nxt[x][y]</span> 指向最优下一格，用于还原路径
         </div>
       </div>
       <div class="dp-step" id="s4">
         <div class="stitle"><span class="snum n1">④</span> 边界条件</div>
-        <div class="sbody">
-          <span class="eq">f</span> 数组初始化为 <span class="eq">0</span><br>
-          若四周都更高（局部最低点）：<br>
-          <span class="hl-y">f = 0 → ++ → 1</span>（只能待在原地）
-        </div>
+        <div class="sbody"><span class="eq">f</span> 初始 <span class="eq">0</span>。局部最低点：<span class="hl-y">f = 1</span>（只能原地）</div>
       </div>
       <div class="dp-step" id="s5">
         <div class="stitle"><span class="snum n2">⑤</span> 答案</div>
-        <div class="sbody">
-          <span class="eq">ans = max</span>(所有 <span class="eq">f[i][j]</span>)<br>
-          即所有可能起点中，能滑出的最长路径长度。
-        </div>
+        <div class="sbody"><span class="eq">ans = max(f[i][j])</span>，即所有起点中能滑出的最长路径长度。<br>样例答案：<span class="hl-y">25</span>（经过全部 25 个格子）</div>
       </div>
     </div>
   </details>
 
-  <!-- Code Panels -->
   <div class="code-wrap">
     <details class="code-panel">
       <summary>💻 DP 排序版参考代码</summary>
@@ -324,10 +332,8 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 <span class="kw">int</span> dy[<span class="num">4</span>] = {<span class="num">1</span>,<span class="num">-1</span>,<span class="num">0</span>,<span class="num">0</span>};
 
 <span class="kw">struct</span> <span class="fn">node</span> {
-    <span class="kw">int</span> h, x, y;             <span class="cm">// 高度，横坐标，纵坐标</span>
-    <span class="kw">bool operator&lt;</span>(<span class="kw">const</span> node &amp;x)<span class="kw">const</span> {
-        <span class="kw">return</span> h &lt; x.h;          <span class="cm">// 按高度升序</span>
-    }
+    <span class="kw">int</span> h, x, y;
+    <span class="kw">bool operator&lt;</span>(<span class="kw">const</span> node &amp;x)<span class="kw">const</span> { <span class="kw">return</span> h &lt; x.h; }
 } b[N * N];
 
 <span class="kw">int</span> <span class="fn">main</span>() {
@@ -335,19 +341,19 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
     <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= n; ++i)
         <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= m; ++j) {
             cin &gt;&gt; a[i][j];
-            b[++tot] = {a[i][j], i, j};     <span class="cm">// ① 收集所有格子</span>
+            b[++tot] = {a[i][j], i, j};
         }
 
-    sort(b + <span class="num">1</span>, b + <span class="num">1</span> + tot);           <span class="cm">// ① 按高度升序排序</span>
+    sort(b + <span class="num">1</span>, b + <span class="num">1</span> + tot);          <span class="cm">// ① 按高度升序</span>
 
-    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= tot; ++i) {     <span class="cm">// ① 按排序后顺序处理</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= tot; ++i) {
         <span class="kw">int</span> x = b[i].x, y = b[i].y;
-        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt;= <span class="num">3</span>; ++j) {    <span class="cm">// ③ 检查四个方向</span>
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">0</span>; j &lt;= <span class="num">3</span>; ++j) {       <span class="cm">// ③ 检查四方向</span>
             <span class="kw">int</span> _x = x + dx[j], _y = y + dy[j];
-            <span class="kw">if</span> (a[_x][_y] &lt; a[x][y])     <span class="cm">// 找到更低邻居</span>
+            <span class="kw">if</span> (a[_x][_y] &lt; a[x][y])
                 f[x][y] = max(f[x][y], f[_x][_y]);
         }
-        f[x][y]++;                         <span class="cm">// ③ 计入自身</span>
+        f[x][y]++;                         <span class="cm">// ③ +1</span>
         ans = max(ans, f[x][y]);           <span class="cm">// ⑤ 更新答案</span>
     }
 
@@ -357,12 +363,10 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
     </details>
 
     <details class="code-panel">
-      <summary>💪 记忆化搜索优化版参考代码</summary>
+      <summary>💪 记忆化搜索优化版</summary>
 <pre><code><span class="cm">// P1434 [SHOI2002] 滑雪 — 记忆化搜索  O(nm)</span>
-<span class="cm">/* 优化思路：
- *   DP 排序版需要排序 O(nm log nm)，且必须显式处理所有格子。
- *   记忆化搜索只需 O(nm)，只计算能到达的格子，代码更简洁。
- *   核心：f[x][y] != -1 表示已算过，直接返回，避免重复递归。
+<span class="cm">/* 优化：排序版需 O(nm log nm) 排序 + 显式处理全部格子。
+ * 记忆化搜索只需 O(nm)，只计算能到达的格子，代码更简洁。
  */</span>
 <span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
 <span class="kw">using namespace std;</span>
@@ -373,18 +377,15 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 <span class="kw">int</span> dy[<span class="num">4</span>] = {<span class="num">1</span>,<span class="num">-1</span>,<span class="num">0</span>,<span class="num">0</span>};
 
 <span class="kw">int</span> <span class="fn">dfs</span>(<span class="kw">int</span> x, <span class="kw">int</span> y) {
-    <span class="kw">if</span> (f[x][y] != <span class="num">-1</span>)             <span class="cm">// ③ 已算过，直接返回</span>
-        <span class="kw">return</span> f[x][y];
-
-    f[x][y] = <span class="num">0</span>;                     <span class="cm">// ④ 初始为 0</span>
+    <span class="kw">if</span> (f[x][y] != <span class="num">-1</span>) <span class="kw">return</span> f[x][y];
+    f[x][y] = <span class="num">0</span>;
     <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; <span class="num">4</span>; ++i) {
-        <span class="kw">int</span> _x = x + dx[i];
-        <span class="kw">int</span> _y = y + dy[i];
+        <span class="kw">int</span> _x = x + dx[i], _y = y + dy[i];
         <span class="kw">if</span> (_x &gt;= <span class="num">1</span> &amp;&amp; _x &lt;= n &amp;&amp; _y &gt;= <span class="num">1</span> &amp;&amp; _y &lt;= m
             &amp;&amp; a[_x][_y] &lt; a[x][y])
-            f[x][y] = max(f[x][y], dfs(_x, _y));  <span class="cm">// ③ 递归 + 取最大值</span>
+            f[x][y] = max(f[x][y], dfs(_x, _y));
     }
-    <span class="kw">return</span> ++f[x][y];                 <span class="cm">// ③ 计入自身后返回</span>
+    <span class="kw">return</span> ++f[x][y];
 }
 
 <span class="kw">int</span> <span class="fn">main</span>() {
@@ -392,13 +393,10 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
     <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= n; ++i)
         <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= m; ++j)
             cin &gt;&gt; a[i][j];
-
-    memset(f, <span class="num">-1</span>, <span class="kw">sizeof</span>(f));       <span class="cm">// ④ -1 表示未计算</span>
-
+    memset(f, <span class="num">-1</span>, <span class="kw">sizeof</span>(f));
     <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">1</span>; i &lt;= n; ++i)
         <span class="kw">for</span> (<span class="kw">int</span> j = <span class="num">1</span>; j &lt;= m; ++j)
-            ans = max(ans, dfs(i, j));           <span class="cm">// ⑤ 取最大值</span>
-
+            ans = max(ans, dfs(i, j));
     cout &lt;&lt; ans;
     <span class="kw">return</span> <span class="num">0</span>;
 }</code></pre>
@@ -410,7 +408,7 @@ header p { font-size:0.85rem; opacity:0.85; margin-top:4px; }
 (function(){
 const $ = id => document.getElementById(id);
 const inpN = $('inpN'), inpM = $('inpM');
-const btnGen = $('btnGen'), btnPreset = $('btnPreset');
+const btnGen = $('btnGen'), btnSample = $('btnSample');
 const btnPrev = $('btnPrev'), btnNext = $('btnNext');
 const btnAuto = $('btnAuto'), btnReset = $('btnReset');
 const stepInfo = $('stepInfo'), gridC = $('gridContainer');
@@ -421,49 +419,52 @@ const stepEls = [$('s1'),$('s2'),$('s3'),$('s4'),$('s5')];
 const dx = [0,0,1,-1], dy = [1,-1,0,0];
 const dirNames = ['→','←','↓','↑'];
 
-// ─── State ───
-let n=4,m=4;
-let a=[]; // heights [1..n][1..m]
-let f=[]; // dp values
-let cells=[]; // sorted cells [{h,x,y},...]
-let stepIdx=0; // index in cells that has been processed (next to process = stepIdx+1)
-let phase='idle'; // idle|running|done
-  let autoTimer=null;
-  let curX=0,curY=0; // current cell being shown in info
-  let lowerNeighbors=[]; // list of (x,y) of neighbors that are lower
-
-const PRESET = [
-  [5,2,8,3],
-  [9,4,7,6],
-  [12,10,11,1],
-  [16,14,13,15]
+const SAMPLE = [
+  [1,2,3,4,5],
+  [16,17,18,19,6],
+  [15,24,25,20,7],
+  [14,23,22,21,8],
+  [13,12,11,10,9]
 ];
+
+let n=5,m=5;
+let a=[];  // heights [1..n][1..m]
+let f=[];  // dp values
+let nxt=[]; // pathNext [1..n][1..m] = {x,y} or null
+let cells=[]; // sorted [{h,x,y},...]
+let stepIdx=0;
+let phase='idle';
+let autoTimer=null;
+let curX=1,curY=1;
+let lowerNeighbors=[]; // lower neighbors of current cell
+let curPath=[]; // [{x,y},...] full path from current cell
 
 function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 
-function generate(usePreset){
-  n=Math.min(8,Math.max(2,parseInt(inpN.value)||4));
-  m=Math.min(10,Math.max(2,parseInt(inpM.value)||4));
+function loadHeights(src){
+  n=Math.min(8,Math.max(2,parseInt(inpN.value)||5));
+  m=Math.min(10,Math.max(2,parseInt(inpM.value)||5));
   a=Array.from({length:n+2},()=>Array(m+2).fill(0));
-  if(usePreset){
-    for(let i=1;i<=Math.min(4,n);i++)
-      for(let j=1;j<=Math.min(4,m);j++)
-        a[i][j]=PRESET[i-1][j-1];
-    // fill extra cells with random
+  if(src==='sample'){
+    const sh=Math.min(5,n), sw=Math.min(5,m);
     for(let i=1;i<=n;i++)
-      for(let j=1;j<=m;j++)
-        if(a[i][j]===0) a[i][j]=randInt(1,20);
+      for(let j=1;j<=m;j++){
+        if(i<=sh&&j<=sw) a[i][j]=SAMPLE[i-1][j-1];
+        else a[i][j]=randInt(1,99);
+      }
   } else {
     for(let i=1;i<=n;i++)
       for(let j=1;j<=m;j++)
-        a[i][j]=randInt(1,20);
+        a[i][j]=randInt(1,99);
   }
+  // force top-left to be unique min so paths are interesting
   resetState();
 }
 
 function resetState(){
   stopAuto();
   f=Array.from({length:n+2},()=>Array(m+2).fill(0));
+  nxt=Array.from({length:n+2},()=>Array(m+2).fill(null));
   cells=[];
   for(let i=1;i<=n;i++)
     for(let j=1;j<=m;j++)
@@ -472,6 +473,7 @@ function resetState(){
   stepIdx=0;
   curX=cells[0]?.x||1; curY=cells[0]?.y||1;
   lowerNeighbors=[];
+  curPath=[];
   phase='idle';
   render();
   btnNext.disabled=false; btnAuto.disabled=false;
@@ -487,23 +489,40 @@ function getLowerNeighbors(x,y){
   return res;
 }
 
+function getPath(x,y){
+  const path=[];
+  let cx=x, cy=y;
+  while(cx&&cy){
+    path.push({x:cx,y:cy});
+    const nx=nxt[cx]?.[cy];
+    if(!nx) break;
+    cx=nx.x; cy=nx.y;
+  }
+  return path;
+}
+
 function stepForward(){
   if(phase==='done') return false;
   if(stepIdx>=cells.length){ phase='done'; render(); return false; }
-
   phase='running';
+
   const cell=cells[stepIdx];
   const {x,y}=cell;
-
-  // compute
   const lowers=getLowerNeighbors(x,y);
-  let best=0;
+
+  let best=0, bestNx=null, bestNy=null;
   for(const l of lowers){
-    best=Math.max(best,f[l.x][l.y]);
+    if(f[l.x][l.y]>best){
+      best=f[l.x][l.y];
+      bestNx=l.x; bestNy=l.y;
+    }
   }
   f[x][y]=best+1;
+  if(bestNx!==null) nxt[x][y]={x:bestNx,y:bestNy};
+
   curX=x; curY=y;
   lowerNeighbors=lowers;
+  curPath=getPath(x,y);
 
   stepIdx++;
   if(stepIdx>=cells.length) phase='done';
@@ -519,68 +538,86 @@ function stepBack(){
   stepIdx--;
   const cell=cells[stepIdx];
   const {x,y}=cell;
-  f[x][y]=0;
+  f[x][y]=0; nxt[x][y]=null;
   curX=x; curY=y;
   lowerNeighbors=getLowerNeighbors(x,y);
-  // recompute the one before (if any)
+  curPath=getPath(x,y);
+
+  // redo previous cell
   if(stepIdx>0){
     const prev=cells[stepIdx-1];
-    curX=prev.x; curY=prev.y;
-    // redo prev
     const pl=getLowerNeighbors(prev.x,prev.y);
-    let pb=0;
-    for(const l of pl) pb=Math.max(pb,f[l.x][l.y]);
+    let pb=0, pnx=null, pny=null;
+    for(const l of pl){
+      if(f[l.x][l.y]>pb){ pb=f[l.x][l.y]; pnx=l.x; pny=l.y; }
+    }
     f[prev.x][prev.y]=pb+1;
+    if(pnx!==null) nxt[prev.x][prev.y]={x:pnx,y:pny};
     curX=prev.x; curY=prev.y;
     lowerNeighbors=pl;
+    curPath=getPath(curX,curY);
   }
   render();
   return true;
 }
 
-// ─── Render ───
 function render(){
-  // grid
-  let g='<div class="grid" style="grid-template-columns:repeat('+m+',56px);">';
   const maxH=Math.max(...a.flat().filter(v=>v>0),1);
+
+  // ─── grid ───
+  let g='<div class="grid" style="grid-template-columns:repeat('+m+',60px);">';
   for(let i=1;i<=n;i++){
     for(let j=1;j<=m;j++){
-      const h=a[i][j];
-      const fv=f[i][j];
+      const h=a[i][j]; const fv=f[i][j];
       const isCur=(i===curX&&j===curY);
       const isLower=lowerNeighbors.some(l=>l.x===i&&l.y===j);
 
+      // path index
+      let pathIdx=-1;
+      for(let k=0;k<curPath.length;k++){
+        if(curPath[k].x===i&&curPath[k].y===j){ pathIdx=k; break; }
+      }
+
       let cls='gcell';
-      // height bg
       const t=h/maxH;
-      if(t<0.33) cls+=' ht-low';
-      else if(t<0.66) cls+=' ht-mid';
-      else cls+=' ht-high';
 
-      if(isCur&&phase==='running') cls+=' proc';
-      else if(isLower) cls+=' lower';
+      if(pathIdx>=0&&phase==='running'){
+        const si=Math.min(pathIdx,16);
+        cls+=' on-path s'+(si===16?'16plus':si);
+      } else if(isCur&&phase==='running'){
+        // nothing extra (path class handles it if on curPath)
+      } else if(isLower){
+        cls+=' lower';
+      } else {
+        // height-based bg
+        if(t<0.25) cls+=' ht-low';
+        else if(t<0.5) cls+=' ht-mid';
+        else if(t<0.75) cls+=' ht-high';
+        else cls+=' ht-high2';
+      }
 
-      // style background from height
-      const bg=htBg(t);
-      const txt=htColor(t);
+      const bg=pathIdx>=0&&phase==='running'?'transparent':htBg(t);
+      const txt=pathIdx>=0&&phase==='running'?'#fff':htColor(t);
 
       let fvText='', fvCls='';
       if(fv>0){ fvText='f='+fv; fvCls='done'; }
-      else if(isCur&&phase==='running'){ fvText='f=...'; fvCls='pending'; }
       else { fvText='?'; fvCls='pending'; }
 
       g+='<div class="'+cls+'" style="background:'+bg+';">';
-      g+='<div class="idx">'+i+','+j+'</div>';
+      g+='<div class="idx" style="color:'+(pathIdx>=0?'rgba(255,255,255,0.4)':'#cbd5e1')+';">'+i+','+j+'</div>';
       g+='<div class="ht" style="color:'+txt+';">'+h+'</div>';
-      g+='<div class="fv '+fvCls+'">'+fvText+'</div>';
+      g+='<div class="fv '+fvCls+'" style="color:'+(pathIdx>=0?'rgba(255,255,255,0.85)':'')+';">'+fvText+'</div>';
+      if(pathIdx>=0&&phase==='running'){
+        g+='<div class="step-badge">'+(pathIdx+1)+'</div>';
+      }
       g+='</div>';
     }
   }
   g+='</div>';
   gridC.innerHTML=g;
 
-  // sort list
-  let sl='<div style="font-size:0.65rem;color:#64748b;margin-top:6px;">处理顺序（按高度升序）：</div><div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:2px;">';
+  // ─── sort list ───
+  let sl='<div class="items">';
   for(let k=0;k<cells.length;k++){
     const c=cells[k];
     let cl='sort-item';
@@ -591,45 +628,70 @@ function render(){
   sl+='</div>';
   sortList.innerHTML=sl;
 
-  // step info
-  if(phase==='idle') stepInfo.textContent='已生成，点「下一步」开始计算';
-  else if(phase==='running') stepInfo.textContent='第 '+stepIdx+'/'+cells.length+' 个格子';
+  // ─── step info ───
+  if(phase==='idle') stepInfo.textContent='已生成，点「下一步」开始';
+  else if(phase==='running') stepInfo.textContent='第 '+stepIdx+'/'+cells.length+' 格';
   else if(phase==='done') stepInfo.textContent='✅ 完成！最长路径 = '+getAns();
 
-  // info box
+  // ─── info box ───
   let ih='';
   if(phase==='idle'){
-    ih='网格已生成，共 <b>'+cells.length+'</b> 个格子（'+n+'×'+m+'）。<br>';
-    ih+='单元格数字 = 高度，f = 路径长度。';
-    ih+='<br><span class="hl-gr">点击「下一步」开始排序 DP 计算。</span>';
+    ih='<b>网格已生成</b>（'+n+'×'+m+'，共 '+cells.length+' 格）<br>';
+    ih+='格子中的数字 = 高度<br>';
+    ih+='<span class="hl-gr">点击「下一步」开始排序 DP 计算。</span>';
   } else if(phase==='running'){
     const x=curX, y=curY;
-    ih='<b>处理第 '+stepIdx+'/'+cells.length+' 个格子</b><br>';
-    ih+='坐标 (<b>'+x+','+y+'</b>) &nbsp; 高度 <b>'+a[x][y]+'</b><br>';
+    ih='<b>第 '+stepIdx+'/'+cells.length+' 格</b> &nbsp; ';
+    ih+='<span class="eq">('+x+','+y+')</span> 高度 <b>'+a[x][y]+'</b><br>';
     ih+='— — — — —<br>';
+
     const lowers=getLowerNeighbors(x,y);
     if(lowers.length===0){
       ih+='<span class="hl-gr">四周无更低邻居（局部最低点）</span><br>';
-      ih+='→ <span class="hl-y">f['+x+']['+y+'] = '+(f[x][y]||1)+'</span>';
+      ih+='→ <span class="hl-y">f['+x+']['+y+'] = 1</span>';
     } else {
-      ih+='找到 <b>'+lowers.length+'</b> 个更低邻居：<br>';
+      ih+='<b>'+lowers.length+'</b> 个更低邻居：<br>';
       for(const l of lowers){
-        ih+='&nbsp;&nbsp;'+dirNames[l.dir]+' ('+l.x+','+l.y+') h='+a[l.x][l.y];
-        ih+=' f='+f[l.x][l.y]+'<br>';
+        const isBest=nxt[x][y]&&nxt[x][y].x===l.x&&nxt[x][y].y===l.y;
+        ih+='&nbsp;&nbsp;<span class="'+(isBest?'hl-path':'')+'">'
+          +dirNames[l.dir]+' ('+l.x+','+l.y+') h='+a[l.x][l.y]
+          +' f='+f[l.x][l.y]+(isBest?' ← 最优':'')+'</span><br>';
       }
       ih+='→ max(f[邻居]) = <span class="hl-b">'+(f[x][y]-1)+'</span><br>';
       ih+='→ <span class="hl-y">f['+x+']['+y+'] = '+f[x][y]+'</span>';
     }
-    ih+='<br><span class="hl-gr">当前最大 ans = '+getAns()+'</span>';
+    ih+='<br>— — — — —<br><span class="hl-path">⛷️ 路径（'+curPath.length+' 步）：</span><br>';
+    ih+='<div class="path-chain">';
+    for(let k=0;k<curPath.length;k++){
+      const p=curPath[k];
+      if(k>0) ih+=' <span style="color:#94a3b8;">→</span> ';
+      ih+=k+1!==1?'':'<b>';
+      ih+='('+p.x+','+p.y+')'+'<span style="font-size:0.65rem;color:#94a3b8;">h='+a[p.x][p.y]+'</span>';
+      ih+=k+1!==1?'':'</b>';
+    }
+    ih+='</div>';
+    ih+='<span class="hl-gr">当前最大 ans = '+getAns()+'</span>';
   } else if(phase==='done'){
-    ih='<b>✅ 所有格子计算完毕！</b><br>';
-    ih+'最长滑雪路径长度 = <span class="hl-y">'+getAns()+'</span><br>';
-    ih+'从最高点滑到最低点，每次只能往更低的相邻格走。<br>';
-    ih+'排序 DP 保证处理每个格时，所有更低邻居的 f 值都已确定。';
+    ih='<b>✅ 计算完成！</b><br>';
+    ih+='最长滑雪路径长度 = <span class="hl-y">'+getAns()+'</span><br>';
+    // find start of longest path
+    let bestX=1,bestY=1;
+    for(let i=1;i<=n;i++)
+      for(let j=1;j<=m;j++)
+        if(f[i][j]>f[bestX][bestY]){ bestX=i; bestY=j; }
+    const finalPath=getPath(bestX,bestY);
+    ih+='最长路径起点：<b>('+bestX+','+bestY+')</b><br>';
+    ih+='<span class="hl-path">⛷️ 路径（'+finalPath.length+' 步）：</span><br>';
+    ih+='<div class="path-chain">';
+    for(let k=0;k<finalPath.length;k++){
+      if(k>0) ih+=' <span style="color:#94a3b8;">→</span> ';
+      ih+='('+finalPath[k].x+','+finalPath[k].y+')'
+        +'<span style="font-size:0.65rem;color:#94a3b8;">h='+a[finalPath[k].x][finalPath[k].y]+'</span>';
+    }
+    ih+='</div>';
   }
   infoBox.innerHTML=ih;
 
-  // answer
   if(phase==='done'){
     answerBox.style.display='block';
     ansNum.textContent=getAns();
@@ -637,14 +699,11 @@ function render(){
     answerBox.style.display='none';
   }
 
-  // 五步法
-  if(phase==='idle'){
-    stepEls.forEach(el=>el.classList.remove('done'));
-  } else {
-    stepEls.forEach(el=>el.classList.add('done'));
-  }
+  stepEls.forEach(el=>{
+    if(phase==='idle') el.classList.remove('done');
+    else el.classList.add('done');
+  });
 
-  // buttons
   btnPrev.disabled=phase==='idle'||stepIdx===0;
   btnNext.disabled=phase==='idle'||phase==='done';
 }
@@ -670,13 +729,12 @@ function htColor(t){
   return '#dc2626';
 }
 
-// ─── Auto ───
 function toggleAuto(){
   if(autoTimer){ stopAuto(); return; }
-  if(phase==='done'){ resetState(); render(); }
+  if(phase==='done'){ loadHeights('sample'); render(); }
   autoTimer=setInterval(()=>{
     if(phase==='done'||!stepForward()) stopAuto();
-  },300);
+  },400);
   btnAuto.textContent='⏹'; btnAuto.classList.add('playing');
 }
 function stopAuto(){
@@ -684,13 +742,11 @@ function stopAuto(){
   btnAuto.textContent='▶'; btnAuto.classList.remove('playing');
 }
 
-// ─── Events ───
-btnGen.addEventListener('click',()=>{ generate(false); });
-btnPreset.addEventListener('click',()=>{ generate(true); });
+btnSample.addEventListener('click',()=>{ inpN.value=5; inpM.value=5; loadHeights('sample'); });
+btnGen.addEventListener('click',()=>loadHeights('random'));
 btnNext.addEventListener('click',stepForward);
 btnPrev.addEventListener('click',stepBack);
 btnReset.addEventListener('click',()=>{ resetState(); });
-
 btnAuto.addEventListener('click',toggleAuto);
 
 document.addEventListener('keydown',e=>{
@@ -700,7 +756,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='r'||e.key==='R'){ e.preventDefault(); btnReset.click(); }
 });
 
-generate(true);
+loadHeights('sample');
 })();
 </script>
 </body>
