@@ -796,15 +796,13 @@ const orderGrid=$('memoOrderGrid');
 const infoBox=$('memoInfo'),answerBox=$('memoAns');
 const ansNum=$('memoAnsNum'),callStackEl=$('memoCallStack');
 
-let n=5,m=5,a=[],f=[];
+let n=5,m=5,a=[];
 let phase='idle',autoTimer=null;
-// steps in DFS post-order from a chosen start cell
-let dfsSteps=[]; // [{x,y,type:'pre'|'post',depth,order},...]
+let dfsSteps=[]; // [{x,y,type,loopIdx,order,fv,..}]
 let stepIdx=0;
 let curX=1,curY=1;
 let memoF=[]; // computed f values during demo
-let startX=3,startY=3; // start DFS from peak by default
-let currentPath=[];
+let loopTotal=0; // total cells in outer loop (n*m)
 
 function load(src){
   n=Math.min(8,Math.max(2,parseInt(inpN.value)||5));
@@ -817,6 +815,7 @@ function load(src){
   } else {
     for(let i=1;i<=n;i++) for(let j=1;j<=m;j++) a[i][j]=randInt(1,99);
   }
+  loopTotal=n*m;
   reset();
 }
 
@@ -824,24 +823,24 @@ function reset(){
   stop();
   memoF=Array.from({length:n+2},()=>Array(m+2).fill(-1));
   dfsSteps=[]; stepIdx=0;
-  phase='idle'; curX=startX; curY=startY; currentPath=[];
-  // find peak for default start
-  let peakX=1,peakY=1;
-  for(let i=1;i<=n;i++) for(let j=1;j<=m;j++) if(a[i][j]>a[peakX][peakY]){ peakX=i; peakY=j; }
-  startX=peakX; startY=peakY; curX=peakX; curY=peakY;
+  phase='idle'; curX=1; curY=1;
   render(); renderOrderGrid();
   btnNext.disabled=false; btnAuto.disabled=false;
 }
 
-function buildDfsSteps(sx,sy){
+function buildAllSteps(){
   const visited=Array.from({length:n+2},()=>Array(m+2).fill(false));
+  const cache=Array.from({length:n+2},()=>Array(m+2).fill(-1));
   const steps=[];
   let order=0;
-  const cache=Array.from({length:n+2},()=>Array(m+2).fill(-1));
+  let loopIdx=0;
   function dfs(x,y,depth){
-    if(visited[x][y]) return;
+    if(visited[x][y]){
+      steps.push({x,y,type:'cache_hit',depth,order:++order,fv:cache[x][y],loopIdx});
+      return;
+    }
     visited[x][y]=true;
-    steps.push({x,y,type:'pre',depth,order:++order});
+    steps.push({x,y,type:'pre',depth,order:++order,loopIdx});
     for(let d=0;d<4;d++){
       const nx=x+dx[d],ny=y+dy[d];
       if(nx>=1&&nx<=n&&ny>=1&&ny<=m&&a[nx][ny]<a[x][y]) dfs(nx,ny,depth+1);
@@ -852,39 +851,43 @@ function buildDfsSteps(sx,sy){
       if(nx>=1&&nx<=n&&ny>=1&&ny<=m&&a[nx][ny]<a[x][y]) best=Math.max(best,cache[nx][ny]);
     }
     cache[x][y]=best+1;
-    steps.push({x,y,type:'post',depth,order:++order,fv:best+1});
+    steps.push({x,y,type:'post',depth,order:++order,fv:best+1,loopIdx});
   }
-  dfs(sx,sy,0);
+  for(let i=1;i<=n;i++){
+    for(let j=1;j<=m;j++){
+      loopIdx++;
+      steps.push({x:i,y:j,type:'loop_call',depth:0,order:++order,loopIdx});
+      dfs(i,j,0);
+    }
+  }
   return steps;
 }
 
 function startDfs(){
   stop();
-  dfsSteps=buildDfsSteps(startX,startY);
-  // reset f
+  dfsSteps=buildAllSteps();
   memoF=Array.from({length:n+2},()=>Array(m+2).fill(-1));
   stepIdx=0; phase='running';
-  render(); renderOrderGrid(); stepInfo.textContent='DFS 进行中…';
+  render(); renderOrderGrid();
+  stepInfo.textContent='遍历中…';
   btnNext.disabled=false; btnAuto.disabled=false;
+}
+
+function processStep(idx){
+  const s=dfsSteps[idx];
+  curX=s.x; curY=s.y;
+  if(s.type==='post') memoF[s.x][s.y]=s.fv;
+  if(s.type==='cache_hit'||s.type==='loop_call'){ /* no memoF update needed */ }
 }
 
 function stepForward(){
   if(phase==='idle'){
     startDfs();
-    // step to first
-    if(dfsSteps.length>0){
-      const s=dfsSteps[0];
-      curX=s.x; curY=s.y;
-      if(s.type==='post'){ memoF[s.x][s.y]=s.fv; }
-      stepIdx=1;
-      render(); renderOrderGrid();
-    }
+    if(dfsSteps.length>0){ processStep(0); stepIdx=1; render(); renderOrderGrid(); }
     return true;
   }
   if(phase==='done'||stepIdx>=dfsSteps.length){ phase='done'; render(); renderOrderGrid(); return false; }
-  const s=dfsSteps[stepIdx];
-  curX=s.x; curY=s.y;
-  if(s.type==='post'){ memoF[s.x][s.y]=s.fv; }
+  processStep(stepIdx);
   stepIdx++;
   if(stepIdx>=dfsSteps.length) phase='done';
   render(); renderOrderGrid();
@@ -900,7 +903,7 @@ function stepBack(){
     if(ss.type==='post') memoF[ss.x][ss.y]=-1;
   }
   if(stepIdx>0){ const ls=dfsSteps[stepIdx-1]; curX=ls.x; curY=ls.y; }
-  else { curX=startX; curY=startY; }
+  else { curX=1; curY=1; }
   render(); renderOrderGrid();
   return true;
 }
@@ -908,66 +911,64 @@ function stepBack(){
 function render(){
   const maxH=Math.max(...a.flat().filter(v=>v>0),1);
   let g='<div class="grid" style="grid-template-columns:repeat('+m+',60px);">';
-  // get call stack info
   const inStack=new Set();
   for(let i=0;i<stepIdx&&i<dfsSteps.length;i++){
     const s=dfsSteps[i];
     if(s.type==='pre') inStack.add(s.x+','+s.y);
     else if(s.type==='post') inStack.delete(s.x+','+s.y);
   }
-
   for(let i=1;i<=n;i++) for(let j=1;j<=m;j++){
     const h=a[i][j]; const fv=memoF[i][j];
     const isCur=(i===curX&&j===curY);
     const isCached=fv>=0;
     const isOnStack=inStack.has(i+','+j);
-    const isPre=(isOnStack&&!isCached);
-
     let cls='gcell'; const t=h/maxH;
     if(isCur&&phase==='running'&&isCached) cls+=' memo-current';
     else if(isCur&&phase==='running') cls+=' visiting';
     else if(isCached) cls+=' memo-done';
     else if(isOnStack) cls+=' in-stack';
-    else { cls+= (t<0.25?' ht-low':t<0.5?' ht-mid':t<0.75?' ht-high':' ht-high2'); }
-
     const bg=isCur||isCached||isOnStack?'transparent':htBg(t);
     const txt=isCur||isCached||isOnStack?'#1a202c':htColor(t);
-
     let fvText='',fvCls='';
     if(fv>=0){ fvText='f='+fv; fvCls='done'; } else if(isOnStack){ fvText='…'; fvCls='pending'; } else { fvText='?'; fvCls='pending'; }
-
     g+='<div class="'+cls+'" style="background:'+bg+';">';
     g+='<div class="idx" style="color:'+(isCur||isCached||isOnStack?'rgba(26,32,44,0.35)':'#cbd5e1')+';">'+i+','+j+'</div>';
     g+='<div class="ht" style="color:'+txt+';">'+h+'</div>';
     g+='<div class="fv '+fvCls+'" style="color:'+(isCur||isCached||isOnStack?'#1a202c':'')+';">'+fvText+'</div>';
-    if(isCur&&phase==='running'&&!isCached) g+='<div class="step-badge" style="background:#f59e0b;color:#fff;">↓</div>';
+    if(isCur&&phase==='running'&&!isCached&&!isOnStack) g+='<div class="step-badge" style="background:#f59e0b;color:#fff;">↓</div>';
     g+='</div>';
   }
   g+='</div>'; gridC.innerHTML=g;
 
-  // info box
   let ih='';
   if(phase==='idle'){
-    ih='<b>DFS 演示</b>：从最高点 <span class="eq">('+startX+','+startY+')</span>（高度 '+a[startX][startY]+'）开始递归。<br>';
-    ih+='<span class="hl-gr">点击「下一步」观察记忆化搜索过程。</span>';
+    ih='<b>记忆化搜索演示</b><br>';
+    ih+='遍历 <span class="eq">'+n+'×'+m+'='+loopTotal+'</span> 个格子，对每个格子调用 <span class="eq">dfs(i,j)</span><br>';
+    ih+='<span class="hl-gr">已缓存的结果直接返回，未缓存的递归计算。</span><br>';
+    ih+='<span class="hl-gr">点击「下一步」开始。</span>';
   } else if(phase==='running'||phase==='done'){
-    const x=curX,y=curY;
-    const s=stepIdx<=dfsSteps.length?dfsSteps[Math.min(stepIdx-1,dfsSteps.length-1)]:null;
+    const s=stepIdx>0&&stepIdx<=dfsSteps.length?dfsSteps[Math.min(stepIdx-1,dfsSteps.length-1)]:null;
     if(s){
+      const x=curX,y=curY;
       ih='<b>第 '+stepIdx+'/'+dfsSteps.length+' 步</b><br>';
-      if(s.type==='pre'){
+      if(s.type==='loop_call'){
+        ih+='🔄 <span class="hl-y">外层循环</span> 第 <b>'+s.loopIdx+'/'+loopTotal+'</b> 次<br>';
+        ih+='调用 <span class="eq">dfs('+x+','+y+')</span> 高度 '+a[x][y]+'<br>';
+      } else if(s.type==='pre'){
         ih+='📞 <span class="hl-y">递归进入</span> <span class="eq">('+x+','+y+')</span> 高度 '+a[x][y]+'<br>';
-        ih+='深度 <b>'+s.depth+'</b>，准备检查四个方向的更低邻居…<br>';
+        ih+='深度 <b>'+s.depth+'</b><br>';
         const lowers=[];
         for(let d=0;d<4;d++){ const nx=x+dx[d],ny=y+dy[d]; if(nx>=1&&nx<=n&&ny>=1&&ny<=m&&a[nx][ny]<a[x][y]) lowers.push({x:nx,y:ny,dir:d}); }
         if(lowers.length>0){
           ih+='找到 <b>'+lowers.length+'</b> 个更低邻居：';
           for(const l of lowers) ih+=' <span class="hl-g">'+dirNames[l.dir]+'('+l.x+','+l.y+')</span>';
-        } else ih+='<span class="hl-gr">四周无更低邻居，将直接返回 1</span>';
-      } else {
+        } else ih+='<span class="hl-gr">四周无更低邻居，将返回 1</span>';
+      } else if(s.type==='cache_hit'){
+        ih+='⚡ <span class="hl-path">缓存命中</span> <span class="eq">('+x+','+y+')</span><br>';
+        ih+='f['+x+']['+y+'] = <span class="hl-y">'+s.fv+'</span>，直接返回（无需递归）';
+      } else if(s.type==='post'){
         ih+='✅ <span class="hl-path">递归返回</span> <span class="eq">('+x+','+y+')</span> 高度 '+a[x][y]+'<br>';
         ih+='f['+x+']['+y+'] = <span class="hl-y">'+s.fv+'</span>（已缓存）<br>';
-        // path from this cell
         const path=getMemoPath(x,y);
         if(path.length>1){
           ih+='<span class="hl-path">⛷️ 路径：</span>';
@@ -978,18 +979,17 @@ function render(){
           if(path.length>10) ih+=' …';
         }
       }
-      ih+='<br><span class="hl-gr">已缓存 '+countCached()+' 个格子</span>';
+      ih+='<br><span class="hl-gr">已缓存 '+countCached()+'/'+loopTotal+' 格</span>';
     }
   }
   infoBox.innerHTML=ih;
   if(phase==='done'){
     answerBox.style.display='block';
-    ansNum.textContent=memoF[startX][startY];
+    const ansVal=countCached()>0?Math.max(...memoF.flat().filter(v=>v>=0)):0;
+    ansNum.textContent=ansVal;
   } else answerBox.style.display='none';
   btnPrev.disabled=phase==='idle'||stepIdx===0;
   btnNext.disabled=phase==='idle'||phase==='done';
-
-  // call stack
   renderCallStack();
 }
 
@@ -997,16 +997,17 @@ function renderCallStack(){
   let html='';
   if(phase==='idle'){ html='<span class="hl-gr">点击「下一步」开始 DFS 演示。</span>'; }
   else {
+    let currentLoop=0;
     const stack=[];
     for(let i=0;i<stepIdx&&i<dfsSteps.length;i++){
       const s=dfsSteps[i];
-      if(s.type==='pre') stack.push(s);
+      if(s.type==='loop_call') currentLoop=s.loopIdx;
+      else if(s.type==='pre') stack.push(s);
       else if(s.type==='post'&&stack.length>0){
         const top=stack.pop();
         html+= '<div style="color:#059669;">↩ dfs('+top.x+','+top.y+') → <b>f='+s.fv+'</b></div>';
       }
     }
-    // remaining stack
     if(stack.length>0){
       html+='<div style="border-top:1px dashed #e2e8f0;margin:2px 0;padding-top:2px;color:#b45309;font-weight:600;">调用栈（'+stack.length+' 层）：</div>';
       for(let i=stack.length-1;i>=0;i--){
@@ -1015,37 +1016,33 @@ function renderCallStack(){
     } else if(phase!=='idle'&&dfsSteps.length>0){
       html+='<span class="hl-gr">所有递归已返回。</span>';
     }
+    if(currentLoop>0) html='<div style="color:#b45309;font-weight:600;">外层循环第 '+currentLoop+'/'+loopTotal+' 次</div>'+html;
   }
   callStackEl.innerHTML=html||'<span class="hl-gr">（栈为空）</span>';
 }
 
 function renderOrderGrid(){
+  const maxH=Math.max(...a.flat().filter(v=>v>0),1);
   if(!dfsSteps||dfsSteps.length===0){
-    // show height-only grid
-    const maxH=Math.max(...a.flat().filter(v=>v>0),1);
     let g='<div class="grid" style="grid-template-columns:repeat('+m+',60px);">';
     for(let i=1;i<=n;i++) for(let j=1;j<=m;j++){
       const h=a[i][j]; const t=h/maxH;
       g+='<div class="gcell" style="background:'+htBg(t)+';"><div class="idx">'+i+','+j+'</div><div class="ht" style="color:'+htColor(t)+';">'+h+'</div></div>';
     }
-    g+='</div>'; orderGrid.innerHTML=g;
-    return;
+    g+='</div>'; orderGrid.innerHTML=g; return;
   }
-  // order map: pre-order number, post-order number
   const preMap={},postMap={};
   let preIdx=0,postIdx=0;
   for(let k=0;k<dfsSteps.length;k++){
     const s=dfsSteps[k];
     const key=s.x+','+s.y;
     if(s.type==='pre'){ preIdx++; preMap[key]=preIdx; }
-    else { postIdx++; postMap[key]=postIdx; }
+    else if(s.type==='post'){ postIdx++; postMap[key]=postIdx; }
   }
   const doneSet=new Set();
   for(let k=0;k<stepIdx&&k<dfsSteps.length;k++){ const s=dfsSteps[k]; if(s.type==='post') doneSet.add(s.x+','+s.y); }
   const stackSet=new Set();
   for(let k=0;k<stepIdx&&k<dfsSteps.length;k++){ const s=dfsSteps[k]; if(s.type==='pre') stackSet.add(s.x+','+s.y); else if(s.type==='post') stackSet.delete(s.x+','+s.y); }
-
-  const maxH=Math.max(...a.flat().filter(v=>v>0),1);
   let g='<div class="grid" style="grid-template-columns:repeat('+m+',60px);">';
   for(let i=1;i<=n;i++) for(let j=1;j<=m;j++){
     const h=a[i][j]; const t=h/maxH;
@@ -1056,7 +1053,6 @@ function renderOrderGrid(){
     let cls='gcell';
     if(isDone) cls+=' memo-done';
     else if(isOnStack) cls+=' in-stack';
-    else if(pn) cls+=''; // visited in pre but not yet returned
     const bg=isDone||isOnStack?'transparent':htBg(t);
     const txt=isDone||isOnStack?'#1a202c':htColor(t);
     g+='<div class="'+cls+'" style="background:'+bg+';">';
@@ -1070,7 +1066,6 @@ function renderOrderGrid(){
 }
 
 function getMemoPath(x,y){
-  // reconstruct from memoF
   const p=[]; let cx=x,cy=y;
   while(cx&&cy){
     p.push({x:cx,y:cy});
