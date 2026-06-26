@@ -285,6 +285,28 @@ header p { font-size:0.82rem; opacity:0.85; }
     </div>
   </div>
 
+  <div class="main">
+    <div class="dp-panel">
+      <h3>🧮 DP 表 <span class="step-info" id="dpStepInfo">就绪</span></h3>
+      <div id="dpTableContainer" style="overflow-x:auto;"></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:0.7rem;">
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#edf2f7;vertical-align:middle;"></span> 未计算</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#bee3f8;vertical-align:middle;"></span> +1 转移</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#fed7d7;vertical-align:middle;"></span> ×2 转移</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#c6f6d5;vertical-align:middle;"></span> 最优路径</span>
+      </div>
+    </div>
+    <div class="info-panel">
+      <h3>📝 说明</h3>
+      <div class="info-box" id="dpInfoBox">拖动滑块设置 n，点击「下一步」观察 DP 填表。</div>
+      <div id="dpAnswerBox" style="display:none;" class="ans-box">
+        <div class="ans-label">最少操作次数</div>
+        <div class="ans-num" id="dpAnsNum">0</div>
+        <div class="ans-label" id="dpAnsLabel">步</div>
+      </div>
+    </div>
+  </div>
+
   <!-- DP 五步法 -->
   <details class="dp-steps" id="dpSteps" open>
     <summary>📋 动态规划五步法</summary>
@@ -300,8 +322,11 @@ header p { font-size:0.82rem; opacity:0.85; }
       <div class="dp-step" id="dpS3">
         <div class="stitle"><span class="snum n1">③</span> 状态转移方程</div>
         <div class="sbody">
-          <span class="eq">dp[i] = min(dp[i−1] + 1,</span><br>
-          <span class="eq" style="margin-left:1.2em;">i%2=0 ? dp[i/2] + 1 : ∞)</span>
+          <div style="margin-bottom:4px;">📌 情况 A（打字 <span class="eq">+1</span>）：适用于任何 <span class="eq">i</span></div>
+          <div style="margin-bottom:4px;font-family:monospace;padding-left:1.2em;">&nbsp; dp[i] = dp[i−1] + 1</div>
+          <div style="margin-bottom:4px;">📌 情况 B（复制 <span class="eq">×2</span>）：仅当 <span class="eq">i</span> 为偶数</div>
+          <div style="margin-bottom:4px;font-family:monospace;padding-left:1.2em;">&nbsp; dp[i] = dp[i/2] + 1</div>
+          <div>✅ 取最小值：<span class="eq">dp[i] = min(情况A, 情况B)</span></div>
         </div>
       </div>
       <div class="dp-step" id="dpS4">
@@ -330,9 +355,9 @@ header p { font-size:0.82rem; opacity:0.85; }
   <span class="kw">int</span> dp[n+<span class="num">1</span>];
   dp[<span class="num">1</span>] = <span class="num">0</span>;                              <span class="cm">// ④ 边界</span>
   <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">2</span>; i &lt;= n; i++) {
-    dp[i] = dp[i<span class="num">-1</span>] + <span class="num">1</span>;                  <span class="cm">// ③ +1 操作</span>
+    dp[i] = dp[i<span class="num">-1</span>] + <span class="num">1</span>;                  <span class="cm">// ③ 情况A: +1</span>
     <span class="kw">if</span> (i % <span class="num">2</span> == <span class="num">0</span>)
-      dp[i] = <span class="fn">min</span>(dp[i], dp[i/<span class="num">2</span>] + <span class="num">1</span>); <span class="cm">// ③ ×2 操作</span>
+      dp[i] = <span class="fn">min</span>(dp[i], dp[i/<span class="num">2</span>] + <span class="num">1</span>); <span class="cm">// ③ 情况B: ×2</span>
   }
   <span class="fn">cout</span> &lt;&lt; dp[n] &lt;&lt; <span class="str">'\n'</span>;                 <span class="cm">// ⑤ 答案</span>
   <span class="kw">return</span> <span class="num">0</span>;
@@ -345,27 +370,6 @@ header p { font-size:0.82rem; opacity:0.85; }
 </code></pre>
   </details>
 
-  <div class="main">
-    <div class="dp-panel">
-      <h3>🧮 DP 表 <span class="step-info" id="dpStepInfo">就绪</span></h3>
-      <div id="dpTableContainer" style="overflow-x:auto;"></div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:0.7rem;">
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#edf2f7;vertical-align:middle;"></span> 未计算</span>
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#bee3f8;vertical-align:middle;"></span> +1 转移</span>
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#fed7d7;vertical-align:middle;"></span> ×2 转移</span>
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#c6f6d5;vertical-align:middle;"></span> 最优路径</span>
-      </div>
-    </div>
-    <div class="info-panel">
-      <h3>📝 说明</h3>
-      <div class="info-box" id="dpInfoBox">拖动滑块设置 n，点击「下一步」观察 DP 填表。</div>
-      <div id="dpAnswerBox" style="display:none;" class="ans-box">
-        <div class="ans-label">最少操作次数</div>
-        <div class="ans-num" id="dpAnsNum">0</div>
-        <div class="ans-label" id="dpAnsLabel">步</div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- ════════════════ GREEDY MODE ════════════════ -->
