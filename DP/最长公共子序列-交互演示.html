@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>最长公共子序列（LCS）— 交互演示</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8; color: #2d3748;
+  min-height: 100vh;
+}
+header {
+  background: linear-gradient(135deg, #1a365d, #553c9a);
+  color: #fff; padding: 20px 32px;
+  display: flex; align-items: center; gap: 16px;
+}
+header h1 { font-size: 1.5rem; font-weight: 700; }
+header .badge { background: #38a169; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; }
+.container { max-width: 1200px; margin: 0 auto; padding: 20px 24px; }
+.card {
+  background: #fff; border-radius: 12px; padding: 20px 24px;
+  margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card h2 { font-size: 1.1rem; margin-bottom: 10px; color: #1a365d; }
+.card p { line-height: 1.7; font-size: 0.92rem; color: #4a5568; }
+
+.controls {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px;
+}
+.controls label { font-size: 0.85rem; font-weight: 600; color: #4a5568; }
+.controls input[type="text"] {
+  padding: 7px 10px; border: 1px solid #cbd5e0; border-radius: 6px;
+  font-size: 0.9rem; font-family: "SF Mono", "Fira Code", monospace;
+}
+.controls input:focus { border-color: #5a67d8; outline: none; box-shadow: 0 0 0 3px rgba(90,103,216,0.15); }
+.controls input[type="range"] { width: 100px; vertical-align: middle; }
+
+.btn {
+  padding: 7px 16px; border: none; border-radius: 6px; font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: #2b6cb0; color: #fff; }
+.btn-primary:hover { background: #2c5282; }
+.btn-success { background: #38a169; color: #fff; }
+.btn-success:hover { background: #2f855a; }
+.btn-warning { background: #dd6b20; color: #fff; }
+.btn-warning:hover { background: #c05621; }
+.btn-gray { background: #a0aec0; color: #fff; }
+.btn-gray:hover { background: #718096; }
+.btn-purple { background: #5a67d8; color: #fff; }
+.btn-purple:hover { background: #4c51bf; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-sm { padding: 4px 10px; font-size: 0.78rem; }
+
+.demo-area {
+  padding: 16px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;
+  min-height: 200px; overflow-x: auto;
+}
+.status-bar {
+  display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem;
+  padding: 10px 16px; background: #edf2f7; border-radius: 8px; margin-top: 8px;
+}
+.status-item strong { color: #1a365d; }
+
+.step-list {
+  max-height: 420px; overflow-y: auto; font-size: 0.8rem;
+}
+.step-list .step {
+  padding: 5px 8px; border-left: 3px solid transparent; margin-bottom: 2px; cursor: pointer;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.step-list .step.active { background: #ebf8ff; border-left-color: #3182ce; }
+.step-list .step .step-num { font-weight: 700; color: #2b6cb0; flex-shrink: 0; min-width: 28px; }
+.step-list .step .step-desc { color: #4a5568; }
+
+.code-block {
+  background: #1a202c; color: #e2e8f0; padding: 16px; border-radius: 8px;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 0.78rem;
+  line-height: 1.6; overflow-x: auto; white-space: pre;
+}
+.code-block .kw { color: #9f7aea; }
+.code-block .type { color: #68d391; }
+.code-block .num { color: #fbd38d; }
+.code-block .str { color: #fc8181; }
+.code-block .cmt { color: #718096; font-style: italic; }
+.code-block .fn { color: #63b3ed; }
+.code-block .op { color: #f6ad55; }
+.code-block .macro { color: #63b3ed; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.two-col.derive-layout { grid-template-columns: 2.2fr 1fr; }
+@media (max-width: 800px) { .two-col { grid-template-columns: 1fr !important; } }
+
+/* DP Table */
+.dp-table {
+  border-collapse: collapse; font-size: 0.82rem; font-family: "SF Mono", monospace;
+  margin: 0 auto;
+}
+.dp-table th, .dp-table td {
+  border: 1px solid #cbd5e0; text-align: center; padding: 5px 9px;
+  min-width: 36px; transition: all 0.25s;
+  position: relative;
+}
+.dp-table th { background: #e2e8f0; font-weight: 700; color: #2d3748; }
+.dp-table th.row-header { background: #cbd5e0; }
+.dp-table td.zero { background: #f7fafc; color: #a0aec0; }
+.dp-table td.filled { background: #ebf8ff; }
+.dp-table td.current {
+  background: #fefcbf; transform: scale(1.1); font-weight: 700;
+  box-shadow: 0 0 0 2px #d69e2e; z-index: 2;
+}
+.dp-table th.current {
+  background: #fefcbf; font-weight: 700;
+  box-shadow: inset 0 0 0 2px #d69e2e; z-index: 2;
+}
+.dp-table td.match-source { background: #c6f6d5; font-weight: 700; }
+.dp-table td.match-cell { background: #9ae6b4; font-weight: 700; }
+.dp-table td.answer {
+  background: linear-gradient(135deg, #9f7aea, #805ad5);
+  color: #fff; font-weight: 700; transform: scale(1.15);
+}
+
+/* Arrow overlays for DP table */
+.dp-table td .arrow {
+  position: absolute; font-size: 1rem; line-height: 1;
+}
+.dp-table td .arrow.diag { top: -2px; left: -2px; color: #38a169; }
+.dp-table td .arrow.up { top: -2px; left: 50%; transform: translateX(-50%); color: #dd6b20; }
+.dp-table td .arrow.left { top: 50%; left: -2px; transform: translateY(-50%); color: #3182ce; }
+.dp-table td .arrow.both { top: -2px; left: -2px; color: #9f7aea; font-size: 0.75rem; }
+
+/* Subproblem labels on table */
+.dp-table th .sub-label {
+  font-weight: 400; font-size: 0.65rem; color: #718096; display: block;
+}
+
+/* Intuition box */
+.intuition-box {
+  padding: 12px 16px; margin-bottom: 12px;
+  background: #fffbeb; border-left: 4px solid #d69e2e;
+  border-radius: 6px; font-size: 0.88rem; line-height: 1.7;
+  color: #744210;
+}
+.intuition-box strong { color: #2b6cb0; }
+
+/* Explanation card in demo */
+.explain-step {
+  padding: 8px 4px;
+}
+.explain-step .topic-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+.explain-step .topic-header .step-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #2b6cb0; color: #fff; font-size: 0.78rem; font-weight: 700; flex-shrink: 0;
+}
+.explain-step .topic-header .topic-title {
+  font-size: 1.05rem; font-weight: 700; color: #1a365d;
+}
+.explain-step .topic-header .topic-sub {
+  font-size: 0.78rem; color: #718096; margin-left: auto;
+}
+.explain-step .body { font-size: 0.92rem; color: #4a5568; line-height: 1.8; }
+.explain-step .body p { margin-bottom: 8px; }
+.explain-step .highlight-box {
+  background: #fffbeb; border-left: 4px solid #d69e2e;
+  padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 12px 0;
+  font-size: 0.9rem; color: #744210; line-height: 1.7;
+}
+.explain-step .info-row {
+  display: flex; gap: 16px; flex-wrap: wrap; margin: 10px 0;
+}
+.explain-step .info-card {
+  flex: 1; min-width: 140px;
+  background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+  padding: 10px 14px; text-align: center;
+}
+.explain-step .info-card .label { font-size: 0.75rem; color: #718096; }
+.explain-step .info-card .value {
+  font-size: 1rem; font-weight: 700; font-family: "SF Mono", monospace;
+  margin-top: 2px;
+}
+.explain-step .info-card .value.xv { color: #2b6cb0; }
+.explain-step .info-card .value.yv { color: #c53030; }
+.explain-step .recurrence {
+  display: block; text-align: left;
+  background: #1a202c; color: #e2e8f0; padding: 14px 20px; border-radius: 8px;
+  font-family: "SF Mono", monospace; font-size: 0.85rem; line-height: 1.8;
+  margin: 12px 0;
+}
+.explain-step .recurrence .case-label { font-weight: 700; }
+.explain-step .recurrence .arrow-hint { color: #a0aec0; font-size: 0.78rem; }
+.explain-step .bullet-list {
+  margin: 10px 0 10px 20px; list-style: none;
+}
+.explain-step .bullet-list li {
+  position: relative; padding-left: 20px; margin-bottom: 8px; line-height: 1.6;
+}
+.explain-step .bullet-list li::before {
+  content: "▸"; position: absolute; left: 0; color: #2b6cb0; font-weight: 700;
+}
+.explain-step .eq-block {
+  display: flex; align-items: center; justify-content: center; gap: 24px;
+  margin: 14px 0; flex-wrap: wrap;
+}
+.explain-step .eq-block .eq-item {
+  background: #edf2f7; border-radius: 8px; padding: 10px 18px;
+  text-align: center; min-width: 120px;
+}
+.explain-step .eq-block .eq-item .eq-label { font-size: 0.75rem; color: #718096; }
+.explain-step .eq-block .eq-item .eq-expr {
+  font-family: "SF Mono", monospace; font-size: 0.95rem; font-weight: 700;
+  margin-top: 2px;
+}
+.explain-step .divider { border: none; border-top: 1px dashed #e2e8f0; margin: 14px 0; }
+
+.comparison-box {
+  display: flex; align-items: center; justify-content: center; gap: 20px;
+  padding: 10px 16px; margin-bottom: 10px; font-size: 1rem;
+  background: #fff; border-radius: 8px; border: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+.comparison-box .char-box {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 8px;
+  font-family: "SF Mono", monospace; font-size: 1.3rem; font-weight: 700;
+}
+.comparison-box .char-box.x-char { background: #ebf4ff; color: #2b6cb0; border: 2px solid #5a67d8; }
+.comparison-box .char-box.y-char { background: #fff5f5; color: #c53030; border: 2px solid #fc8181; }
+.comparison-box .op-sign { font-size: 1.5rem; font-weight: 700; color: #4a5568; }
+.comparison-box .op-sign.match { color: #38a169; }
+.comparison-box .op-sign.mismatch { color: #e53e3e; }
+.comparison-box .pos-label { font-size: 0.75rem; color: #718096; margin-top: 2px; }
+.comparison-box .intuition-text { font-size: 0.82rem; color: #553c9a; max-width: 300px; }
+
+.formula-box {
+  text-align: center; padding: 8px 16px; margin-bottom: 10px;
+  background: #1a202c; color: #e2e8f0; border-radius: 6px;
+  font-family: "SF Mono", monospace; font-size: 0.85rem;
+  line-height: 1.6;
+}
+.formula-box .hl-match { color: #68d391; font-weight: 700; }
+.formula-box .hl-mismatch { color: #fc8181; font-weight: 700; }
+.formula-box .hl-val { color: #fbd38d; font-weight: 700; }
+.formula-box .hl-dir { color: #f6ad55; }
+
+.hint kbd {
+  background: #edf2f7; padding: 1px 5px; border-radius: 3px;
+  border: 1px solid #cbd5e0; font-family: inherit;
+}
+
+.subproblem-label {
+  text-align: center; font-size: 0.82rem; padding: 4px 0 8px;
+  color: #4a5568;
+}
+.subproblem-label strong { color: #2b6cb0; }
+
+/* LCS result display */
+.lcs-result {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px; font-size: 1.2rem; font-weight: 700;
+  background: #faf5ff; border-radius: 8px; border: 2px solid #9f7aea;
+  margin-bottom: 10px;
+}
+.lcs-result .lcs-char {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; background: #9f7aea; color: #fff;
+  border-radius: 6px; font-family: "SF Mono", monospace;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>最长公共子序列 <span style="font-weight:400;font-size:1rem;opacity:0.85;">(Longest Common Subsequence)</span></h1>
+  <span class="badge">二年级也能懂的 LCS 🎯</span>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>题目（小朋友版 🧸）</h2>
+    <p>有两排小朋友，分别叫 X 队和 Y 队。请你从两排中选出<strong>最多</strong>的小朋友，要求：</p>
+    <ul style="margin:8px 0 8px 24px;line-height:1.7;font-size:0.92rem;color:#4a5568;">
+      <li>选出来的人在原来队伍里的<strong>顺序不能变</strong>（不能插队）</li>
+      <li>选出来的人<strong>同时出现在 X 队和 Y 队里</strong></li>
+    </ul>
+    <p>问最多能选出几个人？这个数就叫 <strong>LCS 长度</strong>。</p>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <label>序列 X：</label>
+      <input id="inputX" type="text" value="ABCBDAB" placeholder="如 ABCBDAB" style="width:180px;">
+      <label>序列 Y：</label>
+      <input id="inputY" type="text" value="BDCABA" placeholder="如 BDCABA" style="width:180px;">
+      <button class="btn btn-primary" onclick="startDemo()">逐步演示</button>
+      <button class="btn btn-success" id="btnAuto" onclick="autoPlay()">自动演示</button>
+      <button class="btn btn-gray" onclick="resetDemo()">重置</button>
+    </div>
+    <div class="controls" style="margin-bottom:0;">
+      <span style="font-size:0.82rem;color:#718096;">
+        速度：<input id="speedSlider" type="range" min="300" max="2500" value="700" step="100">
+        <span id="speedLabel">700ms</span>
+      </span>
+      <span class="hint" style="margin-left:12px;font-size:0.82rem;color:#718096;">
+        <kbd>→</kbd> 下一步 &nbsp; <kbd>←</kbd> 上一步 &nbsp; <kbd>Space</kbd> 播放/暂停
+      </span>
+    </div>
+  </div>
+
+  <div class="two-col derive-layout" style="align-items:start;">
+    <div class="card" style="overflow:hidden;">
+      <h2>算法推导过程</h2>
+      <div style="margin-bottom:10px;">
+        <button class="btn btn-warning btn-sm" id="btnStep" onclick="stepForward()" disabled>下一步</button>
+        <button class="btn btn-gray btn-sm" id="btnReset" onclick="resetSteps()" disabled>重置步骤</button>
+        <span style="margin-left:10px;font-size:0.85rem;font-weight:600;">
+          步骤 <span id="stepNum">0</span> / <span id="stepTotal">0</span>
+        </span>
+      </div>
+      <div id="explainBox" style="display:none;"></div>
+      <div id="intuitionBox" class="intuition-box" style="display:none;"></div>
+      <div id="comparisonBox" class="comparison-box" style="display:none;"></div>
+      <div id="formulaBox" class="formula-box" style="display:none;"></div>
+      <div id="subproblemLabel" class="subproblem-label" style="display:none;"></div>
+      <div class="demo-area" id="demoArea">
+        <div style="text-align:center;color:#a0aec0;padding:40px 0;">
+          输入两个序列，点击「逐步演示」或「自动演示」开始
+        </div>
+      </div>
+      <div class="status-bar">
+        <div class="status-item"><strong>当前：</strong><span id="status1">—</span></div>
+        <div class="status-item"><strong>比较：</strong><span id="status2">—</span></div>
+        <div class="status-item"><strong>方向：</strong><span id="status3">—</span></div>
+        <div class="status-item"><strong>f值：</strong><span id="status4">—</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>步骤历史</h2>
+      <div class="step-list" id="stepList">
+        <div style="color:#a0aec0;">等待开始...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>给小朋友的总结 📖</h2>
+    <p><strong>问题</strong>：两队小朋友（X 队和 Y 队），选出最多的<strong>相同的人</strong>，<strong>顺序不能乱</strong>。</p>
+    <p><strong>方法</strong>：画一张表格，一行一行填数字。</p>
+    <ul style="margin:8px 0 8px 24px;line-height:1.7;font-size:0.92rem;color:#4a5568;">
+      <li><strong>f[i][j]</strong> = 只看 X 队前 i 个人 和 Y 队前 j 个人，最多能选几个</li>
+      <li>看两个队伍<strong>最后一个人</strong>：
+        <ul style="margin:4px 0 4px 20px;">
+          <li>✅ <strong>一样</strong> → 这个人一定能选上！f[i][j] = f[i-1][j-1] + 1</li>
+          <li>❌ <strong>不一样</strong> → 选一个更长的方案：f[i][j] = max(f[i-1][j], f[i][j-1])</li>
+        </ul>
+      </li>
+      <li>一直填到右下角 <strong>f[n][m]</strong> 就是答案啦！</li>
+    </ul>
+    <p style="margin-top:6px;font-size:0.85rem;color:#718096;">
+      💡 边界：如果某个队一个小朋友都没有（空队），结果就是 0。
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>参考代码 (C++)</h2>
+    <div class="code-block" id="codeBlock">
+      <span class="macro">#include</span> <span class="str">&lt;iostream&gt;</span>
+      <span class="macro">#include</span> <span class="str">&lt;cstring&gt;</span>
+      <span class="macro">#include</span> <span class="str">&lt;algorithm&gt;</span>
+      <span class="kw">using namespace</span> std;
+
+      <span class="kw">const int</span> N = <span class="num">1005</span>;
+      <span class="type">int</span> n, m;
+      <span class="type">int</span> f[N][N];
+      <span class="type">char</span> x[N], y[N];
+
+      <span class="type">int</span> <span class="fn">main</span>() {
+          cin &gt;&gt; (x + <span class="num">1</span>) &gt;&gt; (y + <span class="num">1</span>);
+          n = <span class="fn">strlen</span>(x + <span class="num">1</span>);
+          m = <span class="fn">strlen</span>(y + <span class="num">1</span>);
+
+          <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">1</span>; i &lt;= n; i++) {
+              <span class="kw">for</span> (<span class="type">int</span> j = <span class="num">1</span>; j &lt;= m; j++) {
+                  <span class="kw">if</span> (x[i] == y[j]) {
+                      f[i][j] = f[i-<span class="num">1</span>][j-<span class="num">1</span>] + <span class="num">1</span>;
+                  } <span class="kw">else</span> {
+                      f[i][j] = <span class="fn">max</span>(f[i-<span class="num">1</span>][j], f[i][j-<span class="num">1</span>]);
+                  }
+              }
+          }
+
+          cout &lt;&lt; f[n][m] &lt;&lt; endl;
+          <span class="kw">return</span> <span class="num">0</span>;
+      }
+    </div>
+  </div>
+
+</div>
+
+<script>
+let steps = [];
+let currentStep = -1;
+let autoTimer = null;
+
+function generateSteps(x, y) {
+  const s = [];
+  const n = x.length, m = y.length;
+  const f = Array.from({length: n + 1}, () => Array(m + 1).fill(0));
+  const dir = Array.from({length: n + 1}, () => Array(m + 1).fill(''));
+
+  // Step 0: Init
+  s.push({
+    type: 'init',
+    desc: `准备开始 ✨ X 队="${x}"(${n})，Y 队="${y}"(${m})`,
+    x, y, n, m
+  });
+
+  // Step 1: Problem understanding
+  s.push({
+    type: 'explain',
+    topic: 'problem',
+    desc: '🧸 什么是"子序列"？',
+    x, y, n, m
+  });
+
+  // Step 2: Optimal substructure
+  s.push({
+    type: 'explain',
+    topic: 'substructure',
+    desc: '🔍 把大问题变小',
+    x, y, n, m
+  });
+
+  // Step 3: Recurrence relation
+  s.push({
+    type: 'explain',
+    topic: 'recurrence',
+    desc: '📏 两条规则',
+    x, y, n, m
+  });
+
+  // Step 4: Fill boundary
+  for (let i = 0; i <= n; i++) {
+    for (let j = 0; j <= m; j++) {
+      if (i === 0 || j === 0) {
+        if (i === 0 && j === 0) continue;
+        s.push({
+          type: 'boundary',
+          desc: `📌 边界 f[${i}][${j}] = 0`,
+          i, j, val: 0,
+          f: f.map(r => [...r]),
+          dir: dir.map(r => [...r]),
+          x, y, n, m
+        });
+      }
+    }
+  }
+
+  // Step 5~: Fill DP table
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      if (x[i - 1] === y[j - 1]) {
+        f[i][j] = f[i - 1][j - 1] + 1;
+        dir[i][j] = 'diag';
+        s.push({
+          type: 'cell', matchType: 'match',
+          desc: `✅ f[${i}][${j}] = ${f[i][j]}  — 一样！(X[${i}]='${x[i-1]}' == Y[${j}]='${y[j-1]}')`,
+          i, j, val: f[i][j],
+          xi: x[i-1], yj: y[j-1],
+          from_i: i-1, from_j: j-1, from_val: f[i-1][j-1],
+          f: f.map(r => [...r]),
+          dir: dir.map(r => [...r]),
+          x, y, n, m
+        });
+      } else {
+        const fromTop = f[i-1][j];
+        const fromLeft = f[i][j-1];
+        if (fromTop >= fromLeft) {
+          f[i][j] = fromTop;
+          dir[i][j] = 'up';
+        } else {
+          f[i][j] = fromLeft;
+          dir[i][j] = 'left';
+        }
+        const dirName = dir[i][j] === 'up' ? '上方' : '左方';
+        s.push({
+          type: 'cell', matchType: 'mismatch',
+          desc: `❌ f[${i}][${j}] = ${f[i][j]}  — 不一样，选${dirName}较大的(${dirName==='上方'?fromTop:fromLeft})`,
+          i, j, val: f[i][j],
+          xi: x[i-1], yj: y[j-1],
+          fromTop, fromLeft,
+          dirChoice: dir[i][j],
+          f: f.map(r => [...r]),
+          dir: dir.map(r => [...r]),
+          x, y, n, m
+        });
+      }
+    }
+  }
+
+  s.push({
+    type: 'done',
+    desc: `🎉 答案：最多能选出 ${f[n][m]} 个相同的小朋友！`,
+    val: f[n][m],
+    f: f.map(r => [...r]),
+    dir: dir.map(r => [...r]),
+    x, y, n, m
+  });
+
+  return s;
+}
+
+function renderStep(stepIndex) {
+  const area = document.getElementById('demoArea');
+  const comp = document.getElementById('comparisonBox');
+  const formula = document.getElementById('formulaBox');
+  const intuition = document.getElementById('intuitionBox');
+  const explain = document.getElementById('explainBox');
+  const sub = document.getElementById('subproblemLabel');
+  const st1 = document.getElementById('status1');
+  const st2 = document.getElementById('status2');
+  const st3 = document.getElementById('status3');
+  const st4 = document.getElementById('status4');
+
+  [comp, formula, intuition, explain, sub].forEach(el => el.style.display = 'none');
+  st1.textContent = '—'; st2.textContent = '—'; st3.textContent = '—'; st4.textContent = '—';
+
+  if (stepIndex < 0 || stepIndex >= steps.length) {
+    area.innerHTML = '<div style="text-align:center;color:#a0aec0;padding:40px 0;">等待开始...</div>';
+    return;
+  }
+
+  const step = steps[stepIndex];
+  const { x, y, n, m } = step;
+
+  if (step.type === 'init') {
+    st1.textContent = '准备开始 ✨';
+    st2.textContent = `X 队="${x}", Y 队="${y}"`;
+    area.innerHTML = renderInitTable(x, y, n, m);
+    return;
+  }
+
+  if (step.type === 'explain') {
+    area.innerHTML = renderExplain(step);
+    explain.style.display = 'block';
+    st1.textContent = '讲解';
+    return;
+  }
+
+  if (step.type === 'boundary') {
+    st1.textContent = `边界 f[${step.i}][${step.j}] = 0`;
+    st4.textContent = '0';
+    formula.style.display = 'block';
+    formula.innerHTML = `📌 f[${step.i}][${step.j}] = 0（某个队一个小朋友都没有 → 选不出人）`;
+    area.innerHTML = renderTable(step.f, step.dir, x, y, n, m, step.i, step.j);
+    return;
+  }
+
+  if (step.type === 'cell') {
+    const { i, j, val, f: ff, dir: dd } = step;
+    st1.textContent = `f[${i}][${j}]`;
+    st4.textContent = `${val}`;
+
+    if (step.matchType === 'match') {
+      comp.style.display = 'flex';
+      comp.innerHTML = `
+        <div style="text-align:center;">
+          <div class="char-box x-char">${step.xi}</div>
+          <div class="pos-label">X[${step.i}]</div>
+        </div>
+        <div class="op-sign match">=</div>
+        <div style="text-align:center;">
+          <div class="char-box y-char">${step.yj}</div>
+          <div class="pos-label">Y[${step.j}]</div>
+        </div>
+        <div class="intuition-text">
+          两个小朋友<strong>不一样</strong>，不能同时选
+        </div>
+      `;
+      const dirText = step.dirChoice === 'up' ? '↑ 来自上方（不管 X 队最后一个）' : '← 来自左方（不管 Y 队最后一个）';
+      st2.textContent = `${step.xi} != ${step.yj} 不一样`;
+      st3.textContent = dirText;
+
+      formula.style.display = 'block';
+      formula.innerHTML = `<span class="hl-mismatch">❌ 不一样！f[${i}][${j}] = max(f[${i-1}][${j}]=${step.fromTop}, f[${i}][${j-1}]=${step.fromLeft}) = ${val}</span>`;
+
+      intuition.style.display = 'block';
+      const dirInt = step.dirChoice === 'up'
+        ? `不管 X 队最后一个人（<strong>${step.xi}</strong>），用 X 队前 ${i-1} 个人和 Y 队全部 ${j} 个人的结果`
+        : `不管 Y 队最后一个人（<strong>${step.yj}</strong>），用 X 队全部 ${i} 个人和 Y 队前 ${j-1} 个人的结果`;
+      intuition.innerHTML = `<strong>为什么不一样要选大的？</strong><br>
+      两个队最后一个人不同，不能两个都要。<br>
+      方案一：看 ${dirInt} = ${step.dirChoice === 'up' ? step.fromTop : step.fromLeft}<br>
+      哪个方案选的人多？选大的那个！<br>
+      <span style="font-size:0.82rem;color:#718096;">另一个方案的结果：${step.dirChoice === 'up' ? step.fromLeft : step.fromTop}</span>`;
+
+      sub.style.display = 'block';
+      sub.innerHTML = `👉 正在看：X 队前 ${i} 人 vs Y 队前 ${j} 人`;
+
+      area.innerHTML = renderTable(ff, dd, x, y, n, m, i, j, null, step);
+      return;
+    }
+
+    area.innerHTML = renderTable(ff, dd, x, y, n, m, i, j, null, step);
+    return;
+  }
+
+  if (step.type === 'done') {
+    st1.textContent = '🎉 完成！';
+    st2.textContent = `最长能选出 ${step.val} 个相同的小朋友`;
+    st4.textContent = `${step.val}`;
+    formula.style.display = 'block';
+    formula.innerHTML = `<span class="hl-val">🎯 答案：最多能选出 ${step.val} 个相同的小朋友！</span>`;
+
+    intuition.style.display = 'block';
+    intuition.innerHTML = `<strong>🎉 太棒了！</strong><br>
+    X 队和 Y 队最多有 <strong>${step.val}</strong> 个相同的小朋友，顺序可以完全对上！`;
+
+    area.innerHTML = renderTable(step.f, step.dir, x, y, n, m, -1, -1, null, null, true);
+    return;
+  }
+}
+
+function renderInitTable(x, y, n, m) {
+  let html = '<table class="dp-table"><thead><tr><th></th><th>f[i][j]</th>';
+  for (let j = 1; j <= m; j++) {
+    html += `<th>${y[j-1]}<span class="sub-label">j=${j}</span></th>`;
+  }
+  html += '</tr></thead><tbody>';
+  for (let i = 0; i <= n; i++) {
+    html += '<tr>';
+    if (i === 0) {
+      html += '<th class="row-header">f[0]</th><th>0</th>';
+    } else {
+      html += `<th class="row-header">${x[i-1]}<span class="sub-label">i=${i}</span></th><th>0</th>`;
+    }
+    for (let j = 1; j <= m; j++) {
+      html += '<td class="zero" style="background:#f7fafc;">0</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function renderExplain(step) {
+  const { x, y, n, m } = step;
+  if (step.topic === 'problem') {
+    return `
+      <div class="explain-step">
+        <div class="topic-header">
+          <span class="step-badge">1</span>
+          <span class="topic-title">什么是"子序列"？举个🌰</span>
+          <span class="topic-sub">1 / 3</span>
+        </div>
+        <div class="body">
+          <div class="info-row">
+            <div class="info-card">
+              <div class="label">X 队</div>
+              <div class="value xv">${x}</div>
+              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">${n} 个小朋友</div>
+            </div>
+            <div class="info-card">
+              <div class="label">Y 队</div>
+              <div class="value yv">${y}</div>
+              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">${m} 个小朋友</div>
+            </div>
+            <div class="info-card">
+              <div class="label">要找出</div>
+              <div class="value" style="color:#553c9a;">最长相同序列</div>
+              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">顺序不能乱！</div>
+            </div>
+          </div>
+          <div class="highlight-box">
+            <strong>🎮 小游戏</strong>：X = <strong>${x}</strong>，Y = <strong>${y}</strong><br>
+            你能从两个队伍里找出<strong>一样</strong>的小朋友，而且<strong>顺序相同</strong>吗？<br>
+            试试看！最多能找到 <strong>4</strong> 个（比如 B→C→B→A）
+          </div>
+          <p style="font-size:0.85rem;color:#718096;text-align:center;">
+            💡 子序列就是"挑一些人出来，但不能插队"
+          </p>
+        </div>
+      </div>`;
+  }
+  if (step.topic === 'substructure') {
+    return `
+      <div class="explain-step">
+        <div class="topic-header">
+          <span class="step-badge">2</span>
+          <span class="topic-title">把大问题变小小小！🔍</span>
+          <span class="topic-sub">2 / 3</span>
+        </div>
+        <div class="body">
+          <p>如果我们想知道两个<strong>长队伍</strong>的最长共同排列，不用一次看完——</p>
+          <p>先看<strong>短一点的队伍</strong>，再慢慢往后加人。</p>
+          <div class="highlight-box">
+            <strong>🧠 聪明的方法</strong>：<br>
+            看 X 队的前 i 个人 和 Y 队的前 j 个人<br>
+            记作 <strong>f[i][j]</strong> = 这两排人最多能选出几个相同的小朋友
+          </div>
+          <p style="margin-top:10px;"><strong>想算 f[i][j]，只需要看三个更短的队伍：</strong></p>
+          <div class="eq-block">
+            <div class="eq-item">
+              <div class="eq-label">f[i-1][j-1]</div>
+              <div style="font-size:0.78rem;color:#555;margin-top:4px;">两队最后一个人<br><strong>都不看</strong></div>
+            </div>
+            <div class="eq-item">
+              <div class="eq-label">f[i-1][j]</div>
+              <div style="font-size:0.78rem;color:#555;margin-top:4px;">只看 X 队去掉<br><strong>最后一个人</strong></div>
+            </div>
+            <div class="eq-item">
+              <div class="eq-label">f[i][j-1]</div>
+              <div style="font-size:0.78rem;color:#555;margin-top:4px;">只看 Y 队去掉<br><strong>最后一个人</strong></div>
+            </div>
+          </div>
+          <p style="text-align:center;font-size:0.85rem;color:#718096;">
+            🤔 接下来我们就看 X[i] 和 Y[j]（两队最后一个人）是不是一样的
+          </p>
+        </div>
+      </div>`;
+  }
+  if (step.topic === 'recurrence') {
+    return `
+      <div class="explain-step">
+        <div class="topic-header">
+          <span class="step-badge">3</span>
+          <span class="topic-title">只有两条规则！📏</span>
+          <span class="topic-sub">3 / 3</span>
+        </div>
+        <div class="body">
+          <p>比较两个队伍<strong>最后一个</strong>小朋友：</p>
+
+          <div class="recurrence">
+            <span class="case-label" style="color:#68d391;">✅ 规则一：两个最后一个人 <strong>一样</strong></span>
+            <span class="arrow-hint" style="float:right;">↖ 往左上角看</span><br>
+            &nbsp;&nbsp;f[i][j] = <span style="color:#fbd38d;">f[i-1][j-1] + 1</span><br>
+            &nbsp;&nbsp;<span style="color:#a0aec0;font-size:0.8rem;">
+            · 这个小朋友两边都有！把他加到之前已经排好的队伍最后面<br>
+            · 所以 = 两队都少看一个人时的结果 + 1</span>
+            <br><br>
+            <span class="case-label" style="color:#fc8181;">❌ 规则二：两个最后一个人 <strong>不一样</strong></span>
+            <span class="arrow-hint" style="float:right;">↑ 或 ← 看哪个方向更大</span><br>
+            &nbsp;&nbsp;f[i][j] = <span style="color:#fbd38d;">max( f[i-1][j] , f[i][j-1] )</span><br>
+            &nbsp;&nbsp;<span style="color:#a0aec0;font-size:0.8rem;">
+            · 不能同时选这两个人，只能选一边<br>
+            · 方案 A：不管 X 队最后这个人 → 看 f[i-1][j]<br>
+            · 方案 B：不管 Y 队最后这个人 → 看 f[i][j-1]<br>
+            · 哪个方案选出来的人更多？选更大的那个！</span>
+          </div>
+
+          <div class="highlight-box">
+            <strong>📌 起点</strong>：f[0][j] = f[i][0] = 0<br>
+            如果某个队伍一个小朋友都没有 → 只能选 0 个人
+          </div>
+
+          <div style="text-align:center;padding:8px;font-size:1rem;">
+            🎯 一直填到表格右下角 f[n][m] — 就是答案！
+          </div>
+        </div>
+      </div>`;
+  }
+  return '';
+}
+
+function renderTable(f, dir, x, y, n, m, curI, curJ, answerVal, cellStep, isAnswerFinal) {
+  let html = '<table class="dp-table"><thead><tr><th></th><th>f[i][j]</th>';
+  for (let j = 1; j <= m; j++) {
+    html += `<th>${y[j-1]}<span class="sub-label">j=${j}</span></th>`;
+  }
+  html += '</tr></thead><tbody>';
+
+  for (let i = 0; i <= n; i++) {
+    html += '<tr>';
+    const zeroCls = (curI === i && curJ === 0) ? ' current' : '';
+    if (i === 0) {
+      html += `<th class="row-header">f[0]</th><th${zeroCls ? ' class="' + zeroCls.trim() + '"' : ''}>0</th>`;
+    } else {
+      html += `<th class="row-header">${x[i-1]}<span class="sub-label">i=${i}</span></th><th${zeroCls ? ' class="' + zeroCls.trim() + '"' : ''}>0</th>`;
+    }
+    for (let j = 1; j <= m; j++) {
+      let cls = '';
+      const val = f[i][j];
+      const d = dir && dir[i] ? dir[i][j] : '';
+
+      if (curI === i && curJ === j) {
+        cls = 'current';
+      } else if (i === 0 || j === 0) {
+        cls = 'zero';
+      } else {
+        cls = 'filled';
+      }
+
+      if (isAnswerFinal && i === n && j === m) {
+        cls = 'answer';
+      }
+
+      let arrow = '';
+      if (d === 'diag' && !(i === curI && j === curJ)) {
+        arrow = '<span class="arrow diag">↖</span>';
+      } else if (d === 'up' && !(i === curI && j === curJ)) {
+        arrow = '<span class="arrow up">↑</span>';
+      } else if (d === 'left' && !(i === curI && j === curJ)) {
+        arrow = '<span class="arrow left">←</span>';
+      }
+
+      html += `<td class="${cls}">${arrow}${val}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function renderStepList() {
+  const list = document.getElementById('stepList');
+  list.innerHTML = '';
+  steps.forEach((step, idx) => {
+    const div = document.createElement('div');
+    div.className = 'step' + (idx === currentStep ? ' active' : '');
+    let icon = '';
+    if (step.type === 'init') icon = '';
+    else if (step.type === 'explain') icon = '';
+    else if (step.type === 'boundary') icon = '';
+    else if (step.type === 'cell') icon = step.matchType === 'match' ? '' : '';
+    else if (step.type === 'done') icon = '';
+    div.innerHTML = `<span class="step-num">#${idx+1}</span><span class="step-desc">${icon}${step.desc}</span>`;
+    div.onclick = () => jumpToStep(idx);
+    list.appendChild(div);
+  });
+  if (currentStep >= 0) {
+    const active = list.querySelector('.step.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function renderAll() {
+  const total = steps.length;
+  document.getElementById('stepNum').textContent = total > 0 ? currentStep + 1 : 0;
+  document.getElementById('stepTotal').textContent = total;
+  document.getElementById('btnStep').disabled = (currentStep >= total - 1);
+  document.getElementById('btnReset').disabled = (total === 0);
+  renderStep(currentStep);
+  renderStepList();
+}
+
+function startDemo() {
+  stopAuto();
+  const x = document.getElementById('inputX').value.trim().toUpperCase();
+  const y = document.getElementById('inputY').value.trim().toUpperCase();
+  if (!x || !y) { alert('请输入两个序列！'); return; }
+  if (x.length > 10 || y.length > 10) {
+    alert('为演示效果，建议长度不超过 10。当前 X=' + x.length + ', Y=' + y.length);
+  }
+  steps = generateSteps(x, y);
+  currentStep = 0;
+  renderAll();
+}
+
+function stepForward() {
+  if (steps.length === 0) { startDemo(); return; }
+  if (currentStep < steps.length - 1) { currentStep++; renderAll(); }
+}
+
+function prevStep() {
+  if (currentStep > 0) { currentStep--; renderAll(); }
+}
+
+function jumpToStep(idx) {
+  if (idx < 0 || idx >= steps.length) return;
+  currentStep = idx;
+  renderAll();
+}
+
+function resetSteps() { stopAuto(); currentStep = 0; renderAll(); }
+
+function resetDemo() {
+  stopAuto();
+  steps = []; currentStep = -1; renderAll();
+  document.getElementById('demoArea').innerHTML =
+    '<div style="text-align:center;color:#a0aec0;padding:40px 0;">输入两个序列，点击「逐步演示」或「自动演示」开始</div>';
+  document.getElementById('stepList').innerHTML = '<div style="color:#a0aec0;">等待开始...</div>';
+  document.getElementById('stepNum').textContent = '0';
+  document.getElementById('stepTotal').textContent = '0';
+  ['explainBox','intuitionBox','comparisonBox','formulaBox','subproblemLabel'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  ['status1','status2','status3','status4'].forEach(id => {
+    document.getElementById(id).textContent = '—';
+  });
+}
+
+function autoPlay() {
+  if (autoTimer) { stopAuto(); return; }
+  if (steps.length === 0 || currentStep >= steps.length - 1) { startDemo(); if (steps.length === 0) return; currentStep = -1; }
+  const speed = parseInt(document.getElementById('speedSlider').value) || 700;
+  document.getElementById('btnAuto').textContent = '暂停';
+  document.getElementById('btnStep').disabled = true;
+  function tick() {
+    if (currentStep < steps.length - 1) {
+      currentStep++; renderAll();
+      if (currentStep < steps.length - 1) { autoTimer = setTimeout(tick, speed); } else { stopAuto(); }
+    }
+  }
+  autoTimer = setTimeout(tick, speed);
+}
+
+function stopAuto() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  document.getElementById('btnAuto').textContent = '自动演示';
+  document.getElementById('btnStep').disabled = (currentStep >= steps.length - 1 && steps.length > 0);
+}
+
+document.getElementById('speedSlider').addEventListener('input', function () {
+  document.getElementById('speedLabel').textContent = this.value + 'ms';
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'ArrowRight') { e.preventDefault(); stepForward(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
+  else if (e.key === ' ') { e.preventDefault(); autoTimer ? stopAuto() : autoPlay(); }
+});
+
+document.getElementById('inputX').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') document.getElementById('inputY').focus();
+});
+document.getElementById('inputY').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') startDemo();
+});
+</script>
+</body>
+</html>

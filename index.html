@@ -17,6 +17,11 @@ header {
 header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 6px; }
 header p { font-size: 0.95rem; opacity: 0.85; }
 .container { max-width: 960px; margin: 0 auto; padding: 24px; }
+.section-title {
+  font-size: 1.1rem; font-weight: 700; color: #1a365d;
+  padding: 12px 0 8px; margin-top: 8px;
+  border-bottom: 2px solid #e2e8f0; display: flex; align-items: center; gap: 8px;
+}
 .card {
   background: #fff; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06); transition: box-shadow 0.2s;
@@ -31,8 +36,9 @@ header p { font-size: 0.95rem; opacity: 0.85; }
 }
 .card .tag.green { background: #f0fff4; color: #276749; }
 .card .tag.orange { background: #fffaf0; color: #c05621; }
+.card .tag.purple { background: #faf5ff; color: #6b46c1; }
 .card p { font-size: 0.88rem; color: #4a5568; line-height: 1.6; }
-.card .actions { margin-top: 10px; display: flex; gap: 8px; }
+.card .actions { margin-top: 10px; }
 .card .btn {
   padding: 5px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: 600;
   text-decoration: none; display: inline-block;
@@ -79,102 +85,69 @@ header p { font-size: 0.95rem; opacity: 0.85; }
 
 <header>
   <h1>🧪 C++ 编程题 · 交互演示</h1>
-  <p>点击题目进入交互式步进演示，适合课堂讲解和自主理解</p>
+  <p>按知识点分类，点击进入步进演示</p>
 </header>
 
 <div class="container">
 
-  <a class="card" href="和式求和-交互演示.html">
-    <h2>📊 和式求和</h2>
-    <div class="tags">
-      <span class="tag">和式化简</span>
-      <span class="tag green">分配律</span>
-      <span class="tag orange">O(n²) → O(n)</span>
-    </div>
-    <p>双重求和 ΣΣ(aᵢ+aⱼ) 的可视化推导。逐步展示每个 (i,j) 数对，观察每个元素出现 (n-1) 次的规律。</p>
-    <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
-  </a>
+  <!-- ===== 数论 ===== -->
+  <div class="section-title">🔢 数论</div>
 
-  <a class="card" href="逆元之和-交互演示.html">
+  <a class="card" href="数论/逆元之和-交互演示.html">
     <h2>🔢 逆元之和</h2>
     <div class="tags">
       <span class="tag">数论</span>
       <span class="tag green">乘法逆元</span>
       <span class="tag orange">线性递推</span>
     </div>
-    <p>线性求逆元模板题。步进展示 inv[i] = p − ⌊p/i⌋ × inv[p%i] 的递推过程，三种方法对比（50分 / 80分 / 100分）。</p>
+    <p>线性求逆元模板题。步进展示 inv[i] = p − ⌊p/i⌋ × inv[p%i] 的递推过程。</p>
     <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
   </a>
 
-  <a class="card" href="九九归一-交互演示.html">
+  <a class="card" href="数论/九九归一-交互演示.html">
     <h2>🔄 九九归一</h2>
     <div class="tags">
       <span class="tag">数论</span>
       <span class="tag green">数字根</span>
       <span class="tag orange">模 9 性质</span>
     </div>
-    <p>数字根与模 9 同余的可视化推导。逐步展示大数各位求和直到一位数的过程，直观理解「弃九法」原理。</p>
+    <p>数字根与模 9 同余的可视化推导。直观理解「弃九法」原理。</p>
     <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
   </a>
 
-  <!-- ===== 题解 HTML ===== -->
-  <div class="card" style="cursor:default;">
-    <h2 style="font-size:0.95rem;color:#718096;">📂 题解案例</h2>
-  </div>
+  <!-- ===== 和式化简 ===== -->
+  <div class="section-title">📊 和式化简</div>
 
-  <a class="card" href="CornMazeS.html">
-    <h2>🌽 Corn Maze S</h2>
+  <a class="card" href="和式化简/和式求和-交互演示.html">
+    <h2>📊 和式求和</h2>
     <div class="tags">
-      <span class="tag">BFS</span>
-      <span class="tag green">迷宫</span>
-      <span class="tag orange">USACO</span>
+      <span class="tag">和式化简</span>
+      <span class="tag green">分配律</span>
+      <span class="tag orange">O(n²) → O(n)</span>
     </div>
-    <p>USACO 玉米迷宫问题。BFS 搜索 + 传送门处理，逐步展示队列扩展和传送逻辑。</p>
+    <p>双重求和 ΣΣ(aᵢ+aⱼ) 的可视化推导，观察每个元素出现 (n-1) 次的规律。</p>
     <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
   </a>
 
-  <a class="card" href="MeteorShowerS.html">
-    <h2>☄️ Meteor Shower S</h2>
+  <!-- ===== 动态规划 ===== -->
+  <div class="section-title">📈 动态规划</div>
+
+  <a class="card" href="DP/最长公共子序列-交互演示.html">
+    <h2>🧩 最长公共子序列（LCS）</h2>
     <div class="tags">
-      <span class="tag">BFS</span>
-      <span class="tag green">最短路</span>
-      <span class="tag orange">USACO</span>
+      <span class="tag">动态规划</span>
+      <span class="tag green">二维DP</span>
+      <span class="tag purple">👶 小学生版</span>
+      <span class="tag orange">O(n×m)</span>
     </div>
-    <p>USACO 流星雨问题。BFS 求安全位置的最短时间，逐步展示陨石坠落和逃生路径。</p>
+    <p>两排小朋友排队问题——用"小朋友"类比讲解 LCS。三步讲清 DP 表怎么填、为什么这么填。</p>
     <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
   </a>
 
-  <a class="card" href="马的遍历.html">
-    <h2>🐴 马的遍历</h2>
-    <div class="tags">
-      <span class="tag">BFS</span>
-      <span class="tag green">棋盘</span>
-      <span class="tag orange">日字跳</span>
-    </div>
-    <p>中国象棋马在棋盘上的最短路径问题。BFS 逐步展示马从起点到各点的最少步数。</p>
-    <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
-  </a>
-
-  <a class="card" href="奇怪的电梯.html">
-    <h2>🛗 奇怪的电梯</h2>
-    <div class="tags">
-      <span class="tag">BFS</span>
-      <span class="tag green">最短路</span>
-      <span class="tag orange">楼层跳跃</span>
-    </div>
-    <p>每层楼只能向上或向下走固定步数。BFS 求从起点到终点的最少按键次数。</p>
-    <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
-  </a>
-
-  <!-- ===== B3636 文字工作 ===== -->
-  <div class="card" style="cursor:default;">
-    <h2 style="font-size:0.95rem;color:#718096;">📂 B3636 文字工作</h2>
-  </div>
-
-  <a class="card" href="B3636文字工作-交互演示.html">
+  <a class="card" href="DP/B3636文字工作-交互演示.html">
     <h2>📝 文字工作</h2>
     <div class="tags">
-      <span class="tag">DP</span>
+      <span class="tag">动态规划</span>
       <span class="tag green">入门DP</span>
       <span class="tag orange">递推</span>
     </div>
@@ -182,35 +155,72 @@ header p { font-size: 0.95rem; opacity: 0.85; }
     <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
   </a>
 
-  <!-- ===== P1002 过河卒 ===== -->
-  <div class="card" style="cursor:default;">
-    <h2 style="font-size:0.95rem;color:#718096;">📂 P1002 过河卒</h2>
-  </div>
-
-  <a class="card" href="P1002过河卒-交互演示.html">
+  <a class="card" href="DP/P1002过河卒-交互演示.html">
     <h2>🀄 过河卒</h2>
     <div class="tags">
-      <span class="tag">DP</span>
+      <span class="tag">动态规划</span>
       <span class="tag green">二维DP</span>
       <span class="tag orange">NOIP 2002</span>
     </div>
-    <p>NOIP 2002 普及组。卒从 (0,0) 走到 B(n,m)，只能右/下，马控制点不可达。逐步填充 DP 表计算路径条数。</p>
+    <p>NOIP 2002 普及组。卒从 (0,0) 走到 B(n,m)，只能右/下，马控制点不可达。</p>
     <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
   </a>
 
-  <!-- ===== P1434 滑雪 ===== -->
-  <div class="card" style="cursor:default;">
-    <h2 style="font-size:0.95rem;color:#718096;">📂 P1434 滑雪</h2>
-  </div>
-
-  <a class="card" href="P1434滑雪-交互演示.html">
+  <a class="card" href="DP/P1434滑雪-交互演示.html">
     <h2>🏔️ 滑雪</h2>
     <div class="tags">
-      <span class="tag">DP</span>
+      <span class="tag">动态规划</span>
       <span class="tag green">排序DP</span>
       <span class="tag orange">记忆化搜索</span>
     </div>
-    <p>SHOI 2002。n×m 高度图中找最长滑行路径。逐步演示排序 DP（按高度升序处理）和记忆化搜索优化。</p>
+    <p>SHOI 2002。n×m 高度图中找最长滑行路径。</p>
+    <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
+  </a>
+
+  <!-- ===== BFS ===== -->
+  <div class="section-title">🧭 BFS（广度优先搜索）</div>
+
+  <a class="card" href="BFS/CornMazeS.html">
+    <h2>🌽 Corn Maze S</h2>
+    <div class="tags">
+      <span class="tag">BFS</span>
+      <span class="tag green">迷宫</span>
+      <span class="tag orange">USACO</span>
+    </div>
+    <p>USACO 玉米迷宫问题。BFS 搜索 + 传送门处理。</p>
+    <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
+  </a>
+
+  <a class="card" href="BFS/MeteorShowerS.html">
+    <h2>☄️ Meteor Shower S</h2>
+    <div class="tags">
+      <span class="tag">BFS</span>
+      <span class="tag green">最短路</span>
+      <span class="tag orange">USACO</span>
+    </div>
+    <p>USACO 流星雨问题。BFS 求安全位置的最短时间。</p>
+    <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
+  </a>
+
+  <a class="card" href="BFS/马的遍历.html">
+    <h2>🐴 马的遍历</h2>
+    <div class="tags">
+      <span class="tag">BFS</span>
+      <span class="tag green">棋盘</span>
+      <span class="tag orange">日字跳</span>
+    </div>
+    <p>中国象棋马在棋盘上的最短路径问题。</p>
+    <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
+  </a>
+
+  <a class="card" href="BFS/奇怪的电梯.html">
+    <h2>🛗 奇怪的电梯</h2>
+    <div class="tags">
+      <span class="tag">BFS</span>
+      <span class="tag green">最短路</span>
+      <span class="tag orange">楼层跳跃</span>
+    </div>
+    <p>每层楼只能向上或向下走固定步数。BFS 求最少按键次数。</p>
     <div class="actions"><span class="btn btn-demo">▶ 打开演示</span></div>
   </a>
 
@@ -222,7 +232,7 @@ header p { font-size: 0.95rem; opacity: 0.85; }
 
 <script>
 (function(){
-  const PW = 'HetaoNeixun666'; // ← 在这里修改密码
+  const PW = 'HetaoNeixun666';
   const overlay = document.getElementById('pw-overlay');
   const input = document.getElementById('pw-input');
   const errEl = document.getElementById('pw-err');
