@@ -93,7 +93,6 @@ header .badge { background: #38a169; padding: 3px 10px; border-radius: 4px; font
 .two-col.derive-layout { grid-template-columns: 2.2fr 1fr; }
 @media (max-width: 800px) { .two-col { grid-template-columns: 1fr !important; } }
 
-/* DP Table */
 .dp-table {
   border-collapse: collapse; font-size: 0.82rem; font-family: "SF Mono", monospace;
   margin: 0 auto;
@@ -115,28 +114,21 @@ header .badge { background: #38a169; padding: 3px 10px; border-radius: 4px; font
   background: #fefcbf; font-weight: 700;
   box-shadow: inset 0 0 0 2px #d69e2e; z-index: 2;
 }
-.dp-table td.match-source { background: #c6f6d5; font-weight: 700; }
 .dp-table td.match-cell { background: #9ae6b4; font-weight: 700; }
 .dp-table td.answer {
   background: linear-gradient(135deg, #9f7aea, #805ad5);
   color: #fff; font-weight: 700; transform: scale(1.15);
 }
-
-/* Arrow overlays for DP table */
 .dp-table td .arrow {
   position: absolute; font-size: 1rem; line-height: 1;
 }
 .dp-table td .arrow.diag { top: -2px; left: -2px; color: #38a169; }
 .dp-table td .arrow.up { top: -2px; left: 50%; transform: translateX(-50%); color: #dd6b20; }
 .dp-table td .arrow.left { top: 50%; left: -2px; transform: translateY(-50%); color: #3182ce; }
-.dp-table td .arrow.both { top: -2px; left: -2px; color: #9f7aea; font-size: 0.75rem; }
-
-/* Subproblem labels on table */
 .dp-table th .sub-label {
   font-weight: 400; font-size: 0.65rem; color: #718096; display: block;
 }
 
-/* Intuition box */
 .intuition-box {
   padding: 12px 16px; margin-bottom: 12px;
   background: #fffbeb; border-left: 4px solid #d69e2e;
@@ -145,7 +137,6 @@ header .badge { background: #38a169; padding: 3px 10px; border-radius: 4px; font
 }
 .intuition-box strong { color: #2b6cb0; }
 
-/* Explanation card in demo */
 .explain-step {
   padding: 8px 4px;
 }
@@ -172,6 +163,11 @@ header .badge { background: #38a169; padding: 3px 10px; border-radius: 4px; font
   padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 12px 0;
   font-size: 0.9rem; color: #744210; line-height: 1.7;
 }
+.explain-step .proof-box {
+  background: #f0fff4; border-left: 4px solid #38a169;
+  padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0;
+  font-size: 0.9rem; color: #22543d; line-height: 1.7;
+}
 .explain-step .info-row {
   display: flex; gap: 16px; flex-wrap: wrap; margin: 10px 0;
 }
@@ -195,15 +191,6 @@ header .badge { background: #38a169; padding: 3px 10px; border-radius: 4px; font
 }
 .explain-step .recurrence .case-label { font-weight: 700; }
 .explain-step .recurrence .arrow-hint { color: #a0aec0; font-size: 0.78rem; }
-.explain-step .bullet-list {
-  margin: 10px 0 10px 20px; list-style: none;
-}
-.explain-step .bullet-list li {
-  position: relative; padding-left: 20px; margin-bottom: 8px; line-height: 1.6;
-}
-.explain-step .bullet-list li::before {
-  content: "▸"; position: absolute; left: 0; color: #2b6cb0; font-weight: 700;
-}
 .explain-step .eq-block {
   display: flex; align-items: center; justify-content: center; gap: 24px;
   margin: 14px 0; flex-wrap: wrap;
@@ -236,7 +223,7 @@ header .badge { background: #38a169; padding: 3px 10px; border-radius: 4px; font
 .comparison-box .op-sign.match { color: #38a169; }
 .comparison-box .op-sign.mismatch { color: #e53e3e; }
 .comparison-box .pos-label { font-size: 0.75rem; color: #718096; margin-top: 2px; }
-.comparison-box .intuition-text { font-size: 0.82rem; color: #553c9a; max-width: 300px; }
+.comparison-box .intuition-text { font-size: 0.82rem; color: #553c9a; max-width: 320px; }
 
 .formula-box {
   text-align: center; padding: 8px 16px; margin-bottom: 10px;
@@ -247,7 +234,6 @@ header .badge { background: #38a169; padding: 3px 10px; border-radius: 4px; font
 .formula-box .hl-match { color: #68d391; font-weight: 700; }
 .formula-box .hl-mismatch { color: #fc8181; font-weight: 700; }
 .formula-box .hl-val { color: #fbd38d; font-weight: 700; }
-.formula-box .hl-dir { color: #f6ad55; }
 
 .hint kbd {
   background: #edf2f7; padding: 1px 5px; border-radius: 3px;
@@ -259,38 +245,23 @@ header .badge { background: #38a169; padding: 3px 10px; border-radius: 4px; font
   color: #4a5568;
 }
 .subproblem-label strong { color: #2b6cb0; }
-
-/* LCS result display */
-.lcs-result {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 12px; font-size: 1.2rem; font-weight: 700;
-  background: #faf5ff; border-radius: 8px; border: 2px solid #9f7aea;
-  margin-bottom: 10px;
-}
-.lcs-result .lcs-char {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 38px; height: 38px; background: #9f7aea; color: #fff;
-  border-radius: 6px; font-family: "SF Mono", monospace;
-}
 </style>
 </head>
 <body>
 
 <header>
   <h1>最长公共子序列 <span style="font-weight:400;font-size:1rem;opacity:0.85;">(Longest Common Subsequence)</span></h1>
-  <span class="badge">二年级也能懂的 LCS 🎯</span>
+  <span class="badge">动态规划 · O(n×m)</span>
 </header>
 
 <div class="container">
 
   <div class="card">
-    <h2>题目（小朋友版 🧸）</h2>
-    <p>有两排小朋友，分别叫 X 队和 Y 队。请你从两排中选出<strong>最多</strong>的小朋友，要求：</p>
-    <ul style="margin:8px 0 8px 24px;line-height:1.7;font-size:0.92rem;color:#4a5568;">
-      <li>选出来的人在原来队伍里的<strong>顺序不能变</strong>（不能插队）</li>
-      <li>选出来的人<strong>同时出现在 X 队和 Y 队里</strong></li>
-    </ul>
-    <p>问最多能选出几个人？这个数就叫 <strong>LCS 长度</strong>。</p>
+    <h2>题目描述</h2>
+    <p>给定两个序列 X 和 Y，求 X 和 Y 的最长公共子序列（LCS）的<strong>长度</strong>。</p>
+    <p style="margin-top:6px;font-size:0.85rem;color:#718096;">
+      子序列：在原序列中删去若干元素（可以不删）后得到的序列，不要求连续，但元素间相对顺序不能改变。
+    </p>
   </div>
 
   <div class="card">
@@ -350,22 +321,16 @@ header .badge { background: #38a169; padding: 3px 10px; border-radius: 4px; font
   </div>
 
   <div class="card">
-    <h2>给小朋友的总结 📖</h2>
-    <p><strong>问题</strong>：两队小朋友（X 队和 Y 队），选出最多的<strong>相同的人</strong>，<strong>顺序不能乱</strong>。</p>
-    <p><strong>方法</strong>：画一张表格，一行一行填数字。</p>
+    <h2>解题思路</h2>
+    <p><strong>核心思想：</strong>把原问题拆成更小的子问题。</p>
+    <p>要求 X[1..i] 和 Y[1..j] 的 LCS，观察最后一个字符：</p>
     <ul style="margin:8px 0 8px 24px;line-height:1.7;font-size:0.92rem;color:#4a5568;">
-      <li><strong>f[i][j]</strong> = 只看 X 队前 i 个人 和 Y 队前 j 个人，最多能选几个</li>
-      <li>看两个队伍<strong>最后一个人</strong>：
-        <ul style="margin:4px 0 4px 20px;">
-          <li>✅ <strong>一样</strong> → 这个人一定能选上！f[i][j] = f[i-1][j-1] + 1</li>
-          <li>❌ <strong>不一样</strong> → 选一个更长的方案：f[i][j] = max(f[i-1][j], f[i][j-1])</li>
-        </ul>
-      </li>
-      <li>一直填到右下角 <strong>f[n][m]</strong> 就是答案啦！</li>
+      <li>如果 <strong>X[i] == Y[j]</strong>，说明这个字符可以成为 LCS 的一部分 → 长度 = X[1..i-1] 和 Y[1..j-1] 的 LCS 长度 + 1（即 f[i-1][j-1] + 1）</li>
+      <li>如果 <strong>X[i] != Y[j]</strong>，则 X[i] 和 Y[j] 至少有一个不在 LCS 中 → 答案在 f[i-1][j] 和 f[i][j-1] 中取较大者</li>
     </ul>
-    <p style="margin-top:6px;font-size:0.85rem;color:#718096;">
-      💡 边界：如果某个队一个小朋友都没有（空队），结果就是 0。
-    </p>
+    <p><strong>边界条件：</strong>空串的 LCS = 0，即 f[0][j] = f[i][0] = 0</p>
+    <p><strong>最终答案：</strong>f[n][m]</p>
+    <p style="margin-top:6px;font-size:0.85rem;color:#718096;">时间复杂度 O(n×m)，空间复杂度 O(n×m)。</p>
   </div>
 
   <div class="card">
@@ -415,45 +380,52 @@ function generateSteps(x, y) {
   const f = Array.from({length: n + 1}, () => Array(m + 1).fill(0));
   const dir = Array.from({length: n + 1}, () => Array(m + 1).fill(''));
 
-  // Step 0: Init
   s.push({
     type: 'init',
-    desc: `准备开始 ✨ X 队="${x}"(${n})，Y 队="${y}"(${m})`,
+    desc: `初始化。X="${x}"(${n})，Y="${y}"(${m})`,
     x, y, n, m
   });
 
-  // Step 1: Problem understanding
+  // Step 1: Proof of optimal substructure
+  s.push({
+    type: 'explain',
+    topic: 'proof',
+    desc: '最优性证明：为什么这两条规则是正确的？',
+    x, y, n, m
+  });
+
+  // Step 2: Problem understanding
   s.push({
     type: 'explain',
     topic: 'problem',
-    desc: '🧸 什么是"子序列"？',
+    desc: '理解问题：什么是公共子序列？',
     x, y, n, m
   });
 
-  // Step 2: Optimal substructure
+  // Step 3: Optimal substructure
   s.push({
     type: 'explain',
     topic: 'substructure',
-    desc: '🔍 把大问题变小',
+    desc: '关键思想：最优子结构',
     x, y, n, m
   });
 
-  // Step 3: Recurrence relation
+  // Step 4: Recurrence relation
   s.push({
     type: 'explain',
     topic: 'recurrence',
-    desc: '📏 两条规则',
+    desc: '状态转移方程推导',
     x, y, n, m
   });
 
-  // Step 4: Fill boundary
+  // Fill boundary
   for (let i = 0; i <= n; i++) {
     for (let j = 0; j <= m; j++) {
       if (i === 0 || j === 0) {
         if (i === 0 && j === 0) continue;
         s.push({
           type: 'boundary',
-          desc: `📌 边界 f[${i}][${j}] = 0`,
+          desc: `边界 f[${i}][${j}] = 0`,
           i, j, val: 0,
           f: f.map(r => [...r]),
           dir: dir.map(r => [...r]),
@@ -463,7 +435,7 @@ function generateSteps(x, y) {
     }
   }
 
-  // Step 5~: Fill DP table
+  // Fill DP table
   for (let i = 1; i <= n; i++) {
     for (let j = 1; j <= m; j++) {
       if (x[i - 1] === y[j - 1]) {
@@ -471,7 +443,7 @@ function generateSteps(x, y) {
         dir[i][j] = 'diag';
         s.push({
           type: 'cell', matchType: 'match',
-          desc: `✅ f[${i}][${j}] = ${f[i][j]}  — 一样！(X[${i}]='${x[i-1]}' == Y[${j}]='${y[j-1]}')`,
+          desc: `匹配！X[${i}]='${x[i-1]}' == Y[${j}]='${y[j-1]}' → f[${i}][${j}] = f[${i-1}][${j-1}] + 1 = ${f[i][j]}`,
           i, j, val: f[i][j],
           xi: x[i-1], yj: y[j-1],
           from_i: i-1, from_j: j-1, from_val: f[i-1][j-1],
@@ -492,7 +464,7 @@ function generateSteps(x, y) {
         const dirName = dir[i][j] === 'up' ? '上方' : '左方';
         s.push({
           type: 'cell', matchType: 'mismatch',
-          desc: `❌ f[${i}][${j}] = ${f[i][j]}  — 不一样，选${dirName}较大的(${dirName==='上方'?fromTop:fromLeft})`,
+          desc: `不匹配 → 取 max(上方=${fromTop}, 左方=${fromLeft}) = ${f[i][j]}（来自${dirName}）`,
           i, j, val: f[i][j],
           xi: x[i-1], yj: y[j-1],
           fromTop, fromLeft,
@@ -507,7 +479,7 @@ function generateSteps(x, y) {
 
   s.push({
     type: 'done',
-    desc: `🎉 答案：最多能选出 ${f[n][m]} 个相同的小朋友！`,
+    desc: `完成！LCS 长度 = ${f[n][m]}`,
     val: f[n][m],
     f: f.map(r => [...r]),
     dir: dir.map(r => [...r]),
@@ -541,8 +513,8 @@ function renderStep(stepIndex) {
   const { x, y, n, m } = step;
 
   if (step.type === 'init') {
-    st1.textContent = '准备开始 ✨';
-    st2.textContent = `X 队="${x}", Y 队="${y}"`;
+    st1.textContent = '初始化';
+    st2.textContent = `X="${x}", Y="${y}"`;
     area.innerHTML = renderInitTable(x, y, n, m);
     return;
   }
@@ -558,7 +530,7 @@ function renderStep(stepIndex) {
     st1.textContent = `边界 f[${step.i}][${step.j}] = 0`;
     st4.textContent = '0';
     formula.style.display = 'block';
-    formula.innerHTML = `📌 f[${step.i}][${step.j}] = 0（某个队一个小朋友都没有 → 选不出人）`;
+    formula.innerHTML = `边界条件：f[${step.i}][${step.j}] = 0（空串与任意串的 LCS 为 0）`;
     area.innerHTML = renderTable(step.f, step.dir, x, y, n, m, step.i, step.j);
     return;
   }
@@ -581,28 +553,51 @@ function renderStep(stepIndex) {
           <div class="pos-label">Y[${step.j}]</div>
         </div>
         <div class="intuition-text">
-          两个小朋友<strong>不一样</strong>，不能同时选
+          字符相同 → 拼接到更短子序列的末尾
         </div>
       `;
-      const dirText = step.dirChoice === 'up' ? '↑ 来自上方（不管 X 队最后一个）' : '← 来自左方（不管 Y 队最后一个）';
-      st2.textContent = `${step.xi} != ${step.yj} 不一样`;
+      st2.textContent = `${step.xi} == ${step.yj} 匹配`;
+      st3.textContent = `↖ 来自 f[${step.from_i}][${step.from_j}]=${step.from_val}`;
+
+      formula.style.display = 'block';
+      formula.innerHTML = `<span class="hl-match">匹配：f[${i}][${j}] = f[${i-1}][${j-1}] + 1 = ${step.from_val} + 1 = ${val}</span>`;
+
+      intuition.style.display = 'block';
+      intuition.innerHTML = `<strong>为什么匹配就 +1？</strong> X[${i}]='${step.xi}' 和 Y[${j}]='${step.yj}' 相同，说明这个字符可以成为 LCS 的一部分。<br>
+      那么只需要看 X[1..${i-1}] 和 Y[1..${j-1}] 的最长公共子序列，再把这个字符接在后面即可。`;
+
+      sub.style.display = 'block';
+      sub.innerHTML = `当前子问题：X[1..${i}] → f[${i}][*]`;
+    } else {
+      const dirText = step.dirChoice === 'up' ? '↑ 来自上方（不看 X[i]）' : '← 来自左方（不看 Y[j]）';
+      comp.style.display = 'flex';
+      comp.innerHTML = `
+        <div style="text-align:center;">
+          <div class="char-box x-char">${step.xi}</div>
+          <div class="pos-label">X[${step.i}]</div>
+        </div>
+        <div class="op-sign mismatch">≠</div>
+        <div style="text-align:center;">
+          <div class="char-box y-char">${step.yj}</div>
+          <div class="pos-label">Y[${step.j}]</div>
+        </div>
+        <div class="intuition-text">
+          字符不同 → 不能同时出现在 LCS 中，取 max
+        </div>
+      `;
+      st2.textContent = `${step.xi} != ${step.yj} 不匹配`;
       st3.textContent = dirText;
 
       formula.style.display = 'block';
-      formula.innerHTML = `<span class="hl-mismatch">❌ 不一样！f[${i}][${j}] = max(f[${i-1}][${j}]=${step.fromTop}, f[${i}][${j-1}]=${step.fromLeft}) = ${val}</span>`;
+      formula.innerHTML = `<span class="hl-mismatch">不匹配：f[${i}][${j}] = max(f[${i-1}][${j}]=${step.fromTop}, f[${i}][${j-1}]=${step.fromLeft}) = ${val}</span>`;
 
       intuition.style.display = 'block';
-      const dirInt = step.dirChoice === 'up'
-        ? `不管 X 队最后一个人（<strong>${step.xi}</strong>），用 X 队前 ${i-1} 个人和 Y 队全部 ${j} 个人的结果`
-        : `不管 Y 队最后一个人（<strong>${step.yj}</strong>），用 X 队全部 ${i} 个人和 Y 队前 ${j-1} 个人的结果`;
-      intuition.innerHTML = `<strong>为什么不一样要选大的？</strong><br>
-      两个队最后一个人不同，不能两个都要。<br>
-      方案一：看 ${dirInt} = ${step.dirChoice === 'up' ? step.fromTop : step.fromLeft}<br>
-      哪个方案选的人多？选大的那个！<br>
-      <span style="font-size:0.82rem;color:#718096;">另一个方案的结果：${step.dirChoice === 'up' ? step.fromLeft : step.fromTop}</span>`;
+      intuition.innerHTML = `<strong>为什么不匹配要取 max？</strong> 因为 X[${i}] 和 Y[${j}] 不同，所以 LCS 不可能同时包含这两个字符。<br>
+      因此答案要么是「不看 X[${i}]」（即 X[1..${i-1}] 和 Y[1..${j}] 的 LCS = ${step.fromTop}），<br>
+      要么是「不看 Y[${j}]」（即 X[1..${i}] 和 Y[1..${j-1}] 的 LCS = ${step.fromLeft}），取较大者。`;
 
       sub.style.display = 'block';
-      sub.innerHTML = `👉 正在看：X 队前 ${i} 人 vs Y 队前 ${j} 人`;
+      sub.innerHTML = `当前子问题：X[1..${i}] vs Y[1..${j}]`;
 
       area.innerHTML = renderTable(ff, dd, x, y, n, m, i, j, null, step);
       return;
@@ -613,15 +608,14 @@ function renderStep(stepIndex) {
   }
 
   if (step.type === 'done') {
-    st1.textContent = '🎉 完成！';
-    st2.textContent = `最长能选出 ${step.val} 个相同的小朋友`;
+    st1.textContent = '完成！';
+    st2.textContent = `长度 = ${step.val}`;
     st4.textContent = `${step.val}`;
     formula.style.display = 'block';
-    formula.innerHTML = `<span class="hl-val">🎯 答案：最多能选出 ${step.val} 个相同的小朋友！</span>`;
+    formula.innerHTML = `<span class="hl-val">答案：LCS 长度 = ${step.val}</span>`;
 
     intuition.style.display = 'block';
-    intuition.innerHTML = `<strong>🎉 太棒了！</strong><br>
-    X 队和 Y 队最多有 <strong>${step.val}</strong> 个相同的小朋友，顺序可以完全对上！`;
+    intuition.innerHTML = `<strong>最终结果：</strong>最长公共子序列长度为 <strong>${step.val}</strong>。`;
 
     area.innerHTML = renderTable(step.f, step.dir, x, y, n, m, -1, -1, null, null, true);
     return;
@@ -652,39 +646,80 @@ function renderInitTable(x, y, n, m) {
 
 function renderExplain(step) {
   const { x, y, n, m } = step;
-  if (step.topic === 'problem') {
+  if (step.topic === 'proof') {
     return `
       <div class="explain-step">
         <div class="topic-header">
           <span class="step-badge">1</span>
-          <span class="topic-title">什么是"子序列"？举个🌰</span>
-          <span class="topic-sub">1 / 3</span>
+          <span class="topic-title">最优性证明：为什么动态规划是正确的？</span>
+          <span class="topic-sub">1 / 4</span>
+        </div>
+        <div class="body">
+          <p>我们需要证明：<strong>最优解一定可以通过子问题的最优解构造出来</strong>。设 Z = &lt;z₁,…,zₖ&gt; 是 X 和 Y 的任一 LCS。</p>
+
+          <div class="proof-box">
+            <strong>情况一：X[m] == Y[n]</strong><br>
+            如果 zₖ ≠ X[m]，我们可以把 X[m] 接到 Z 末尾，得到一个长度 k+1 的公共子序列，<br>
+            与「Z 是最长的」矛盾。<strong>故必有 zₖ = X[m] = Y[n]</strong>。<br>
+            去掉这个公共字符后，Zₖ₋₁ 必是 Xₘ₋₁ 和 Yₙ₋₁ 的 LCS。<br>
+            <span style="font-size:0.82rem;color:#555;">
+              （如果存在更长的 W，则 W + X[m] 比 Z 更长，矛盾）
+            </span>
+          </div>
+
+          <div class="proof-box">
+            <strong>情况二：X[m] != Y[n]</strong><br>
+            此时 Z 不可能同时包含 X[m] 和 Y[n]，所以 Z 最多只可能是以下二者之一：<br>
+            · Xₘ₋₁ 和 Y 的公共子序列（不含 X[m]）<br>
+            · X 和 Yₙ₋₁ 的公共子序列（不含 Y[n]）<br>
+            <strong>故 Z 一定是 f[m-1][n] 和 f[m][n-1] 中较大的那个。</strong><br>
+            <span style="font-size:0.82rem;color:#555;">
+              （反证：若 Z 不是 f[m-1][n] 的 LCS 且不含 X[m]，则可找到更长的公共子序列，矛盾）
+            </span>
+          </div>
+
+          <div class="highlight-box">
+            <strong>结论：</strong>两个规则都不会漏掉最优解。<br>
+            · 匹配 → 该字符必在 LCS 中，直接 +1<br>
+            · 不匹配 → 最优解必然在去掉一个字符后的两个子问题中，取最大值即可
+          </div>
+        </div>
+      </div>`;
+  }
+  if (step.topic === 'problem') {
+    return `
+      <div class="explain-step">
+        <div class="topic-header">
+          <span class="step-badge">2</span>
+          <span class="topic-title">理解问题：什么是公共子序列？</span>
+          <span class="topic-sub">2 / 4</span>
         </div>
         <div class="body">
           <div class="info-row">
             <div class="info-card">
-              <div class="label">X 队</div>
+              <div class="label">序列 X</div>
               <div class="value xv">${x}</div>
-              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">${n} 个小朋友</div>
+              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">长度 ${n}</div>
             </div>
             <div class="info-card">
-              <div class="label">Y 队</div>
+              <div class="label">序列 Y</div>
               <div class="value yv">${y}</div>
-              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">${m} 个小朋友</div>
+              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">长度 ${m}</div>
             </div>
             <div class="info-card">
-              <div class="label">要找出</div>
-              <div class="value" style="color:#553c9a;">最长相同序列</div>
-              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">顺序不能乱！</div>
+              <div class="label">目标</div>
+              <div class="value" style="color:#553c9a;">LCS</div>
+              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">最长公共子序列</div>
             </div>
           </div>
+          <p><strong>子序列</strong>：在原序列中删去若干元素后得到的新序列，<strong>元素间的相对顺序不变</strong>。</p>
+          <p>例：X = <strong>A B C B D A B</strong>，下标 2,3,5,7 → 子序列 <strong>B C D B</strong></p>
           <div class="highlight-box">
-            <strong>🎮 小游戏</strong>：X = <strong>${x}</strong>，Y = <strong>${y}</strong><br>
-            你能从两个队伍里找出<strong>一样</strong>的小朋友，而且<strong>顺序相同</strong>吗？<br>
-            试试看！最多能找到 <strong>4</strong> 个（比如 B→C→B→A）
+            <strong>公共子序列</strong>：同时是 X 的子序列、又是 Y 的子序列。<br>
+            要求找出<strong>最长</strong>的那一个的长度。
           </div>
           <p style="font-size:0.85rem;color:#718096;text-align:center;">
-            💡 子序列就是"挑一些人出来，但不能插队"
+            本例答案：LCS 可以是 "BCBA"、"BDAB"、"BCAB" 等，长度均为 4
           </p>
         </div>
       </div>`;
@@ -693,35 +728,49 @@ function renderExplain(step) {
     return `
       <div class="explain-step">
         <div class="topic-header">
-          <span class="step-badge">2</span>
-          <span class="topic-title">把大问题变小小小！🔍</span>
-          <span class="topic-sub">2 / 3</span>
+          <span class="step-badge">3</span>
+          <span class="topic-title">关键思想：最优子结构</span>
+          <span class="topic-sub">3 / 4</span>
         </div>
         <div class="body">
-          <p>如果我们想知道两个<strong>长队伍</strong>的最长共同排列，不用一次看完——</p>
-          <p>先看<strong>短一点的队伍</strong>，再慢慢往后加人。</p>
+          <p>要计算 <strong>X[1..i]</strong> 和 <strong>Y[1..j]</strong> 的 LCS，<strong>不要从头开始算</strong>——</p>
+          <p>而是看<strong>更短的前缀</strong>的 LCS，再通过比较末尾字符来递推。</p>
           <div class="highlight-box">
-            <strong>🧠 聪明的方法</strong>：<br>
-            看 X 队的前 i 个人 和 Y 队的前 j 个人<br>
-            记作 <strong>f[i][j]</strong> = 这两排人最多能选出几个相同的小朋友
+            <strong>核心思想：</strong>大问题 → 拆成小问题 → 小问题的解组合成大问题的解
           </div>
-          <p style="margin-top:10px;"><strong>想算 f[i][j]，只需要看三个更短的队伍：</strong></p>
+          <hr class="divider">
+          <p style="text-align:center;font-size:0.95rem;">
+            定义 <strong style="font-family:SF Mono;font-size:1.05rem;color:#2b6cb0;">f[i][j]</strong>
+            = X[1..i] 和 Y[1..j] 的 <strong>LCS 长度</strong>
+          </p>
+          <p style="text-align:center;font-size:0.85rem;color:#718096;margin-top:8px;">
+            要求 f[i][j]，只需要看三个更小的子问题：
+          </p>
           <div class="eq-block">
             <div class="eq-item">
               <div class="eq-label">f[i-1][j-1]</div>
-              <div style="font-size:0.78rem;color:#555;margin-top:4px;">两队最后一个人<br><strong>都不看</strong></div>
+              <div class="eq-expr" style="font-size:0.8rem;font-weight:400;color:#555;">
+                X[1..i-1] 与 Y[1..j-1] 的 LCS
+              </div>
+              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">两边各去掉一个字符</div>
             </div>
             <div class="eq-item">
               <div class="eq-label">f[i-1][j]</div>
-              <div style="font-size:0.78rem;color:#555;margin-top:4px;">只看 X 队去掉<br><strong>最后一个人</strong></div>
+              <div class="eq-expr" style="font-size:0.8rem;font-weight:400;color:#555;">
+                X[1..i-1] 与 Y[1..j] 的 LCS
+              </div>
+              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">只去掉 X 的最后一个字符</div>
             </div>
             <div class="eq-item">
               <div class="eq-label">f[i][j-1]</div>
-              <div style="font-size:0.78rem;color:#555;margin-top:4px;">只看 Y 队去掉<br><strong>最后一个人</strong></div>
+              <div class="eq-expr" style="font-size:0.8rem;font-weight:400;color:#555;">
+                X[1..i] 与 Y[1..j-1] 的 LCS
+              </div>
+              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">只去掉 Y 的最后一个字符</div>
             </div>
           </div>
-          <p style="text-align:center;font-size:0.85rem;color:#718096;">
-            🤔 接下来我们就看 X[i] 和 Y[j]（两队最后一个人）是不是一样的
+          <p style="text-align:center;font-size:0.82rem;color:#718096;">
+            接下来我们看 X[i] 和 Y[j] 是否相等，来决定用哪个子问题
           </p>
         </div>
       </div>`;
@@ -730,38 +779,36 @@ function renderExplain(step) {
     return `
       <div class="explain-step">
         <div class="topic-header">
-          <span class="step-badge">3</span>
-          <span class="topic-title">只有两条规则！📏</span>
-          <span class="topic-sub">3 / 3</span>
+          <span class="step-badge">4</span>
+          <span class="topic-title">状态转移方程推导</span>
+          <span class="topic-sub">4 / 4</span>
         </div>
         <div class="body">
-          <p>比较两个队伍<strong>最后一个</strong>小朋友：</p>
+          <p>比较 X[i] 和 Y[j]（两个序列的<strong>最后一个字符</strong>），只有两种可能：</p>
 
           <div class="recurrence">
-            <span class="case-label" style="color:#68d391;">✅ 规则一：两个最后一个人 <strong>一样</strong></span>
-            <span class="arrow-hint" style="float:right;">↖ 往左上角看</span><br>
+            <span class="case-label" style="color:#68d391;">情况一：X[i] == Y[j]（匹配）</span>
+            <span class="arrow-hint" style="float:right;">↖ 斜向</span><br>
             &nbsp;&nbsp;f[i][j] = <span style="color:#fbd38d;">f[i-1][j-1] + 1</span><br>
             &nbsp;&nbsp;<span style="color:#a0aec0;font-size:0.8rem;">
-            · 这个小朋友两边都有！把他加到之前已经排好的队伍最后面<br>
-            · 所以 = 两队都少看一个人时的结果 + 1</span>
+            f[i-1][j-1] 是 X[1..i-1] 与 Y[1..j-1] 的 LCS（两边末尾都去掉）<br>
+            &nbsp;&nbsp;既然 X[i]==Y[j]，就把这个公共字符拼在后面 → 长度 +1</span>
             <br><br>
-            <span class="case-label" style="color:#fc8181;">❌ 规则二：两个最后一个人 <strong>不一样</strong></span>
-            <span class="arrow-hint" style="float:right;">↑ 或 ← 看哪个方向更大</span><br>
+            <span class="case-label" style="color:#fc8181;">情况二：X[i] != Y[j]（不匹配）</span>
+            <span class="arrow-hint" style="float:right;">↑ 上方 或 ← 左方</span><br>
             &nbsp;&nbsp;f[i][j] = <span style="color:#fbd38d;">max( f[i-1][j] , f[i][j-1] )</span><br>
             &nbsp;&nbsp;<span style="color:#a0aec0;font-size:0.8rem;">
-            · 不能同时选这两个人，只能选一边<br>
-            · 方案 A：不管 X 队最后这个人 → 看 f[i-1][j]<br>
-            · 方案 B：不管 Y 队最后这个人 → 看 f[i][j-1]<br>
-            · 哪个方案选出来的人更多？选更大的那个！</span>
+            f[i-1][j] = X[1..i-1] 与 Y[1..j] 的 LCS（不看 X[i]）<br>
+            &nbsp;&nbsp;f[i][j-1] = X[1..i] 与 Y[1..j-1] 的 LCS（不看 Y[j]）<br>
+            &nbsp;&nbsp;X[i] 和 Y[j] 不能同时用上 → 取两种方案中 LCS 更长的那个</span>
           </div>
 
           <div class="highlight-box">
-            <strong>📌 起点</strong>：f[0][j] = f[i][0] = 0<br>
-            如果某个队伍一个小朋友都没有 → 只能选 0 个人
-          </div>
-
-          <div style="text-align:center;padding:8px;font-size:1rem;">
-            🎯 一直填到表格右下角 f[n][m] — 就是答案！
+            <strong>边界条件：</strong>f[0][j] = f[i][0] = 0<br>
+            <span style="font-size:0.85rem;">
+              f[0][j]：X 是空串，Y 是任意串 → 公共子序列只能为空 → 长度为 0<br>
+              f[i][0]：Y 是空串，X 是任意串 → 同理为 0
+            </span>
           </div>
         </div>
       </div>`;
