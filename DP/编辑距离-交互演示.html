@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>编辑距离（Edit Distance）— 交互演示</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8; color: #2d3748;
+  min-height: 100vh;
+}
+header {
+  background: linear-gradient(135deg, #1a365d, #553c9a);
+  color: #fff; padding: 20px 32px;
+  display: flex; align-items: center; gap: 16px;
+}
+header h1 { font-size: 1.5rem; font-weight: 700; }
+header .badge { background: #38a169; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; }
+.container { max-width: 1200px; margin: 0 auto; padding: 20px 24px; }
+.card {
+  background: #fff; border-radius: 12px; padding: 20px 24px;
+  margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card h2 { font-size: 1.1rem; margin-bottom: 10px; color: #1a365d; }
+.card p { line-height: 1.7; font-size: 0.92rem; color: #4a5568; }
+
+.controls {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px;
+}
+.controls label { font-size: 0.85rem; font-weight: 600; color: #4a5568; }
+.controls input[type="text"] {
+  padding: 7px 10px; border: 1px solid #cbd5e0; border-radius: 6px;
+  font-size: 0.9rem; font-family: "SF Mono", "Fira Code", monospace;
+}
+.controls input:focus { border-color: #5a67d8; outline: none; box-shadow: 0 0 0 3px rgba(90,103,216,0.15); }
+.controls input[type="range"] { width: 100px; vertical-align: middle; }
+
+.btn {
+  padding: 7px 16px; border: none; border-radius: 6px; font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: #2b6cb0; color: #fff; }
+.btn-primary:hover { background: #2c5282; }
+.btn-success { background: #38a169; color: #fff; }
+.btn-success:hover { background: #2f855a; }
+.btn-warning { background: #dd6b20; color: #fff; }
+.btn-warning:hover { background: #c05621; }
+.btn-gray { background: #a0aec0; color: #fff; }
+.btn-gray:hover { background: #718096; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-sm { padding: 4px 10px; font-size: 0.78rem; }
+
+.demo-area {
+  padding: 16px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;
+  min-height: 200px; overflow-x: auto;
+}
+.status-bar {
+  display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem;
+  padding: 10px 16px; background: #edf2f7; border-radius: 8px; margin-top: 8px;
+}
+.status-item strong { color: #1a365d; }
+
+.step-list {
+  max-height: 420px; overflow-y: auto; font-size: 0.8rem;
+}
+.step-list .step {
+  padding: 5px 8px; border-left: 3px solid transparent; margin-bottom: 2px; cursor: pointer;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.step-list .step.active { background: #ebf8ff; border-left-color: #3182ce; }
+.step-list .step .step-num { font-weight: 700; color: #2b6cb0; flex-shrink: 0; min-width: 28px; }
+.step-list .step .step-desc { color: #4a5568; }
+
+.code-block {
+  background: #1a202c; color: #e2e8f0; padding: 16px; border-radius: 8px;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 0.78rem;
+  line-height: 1.6; overflow-x: auto; white-space: pre;
+}
+.code-block .kw { color: #9f7aea; }
+.code-block .type { color: #68d391; }
+.code-block .num { color: #fbd38d; }
+.code-block .str { color: #fc8181; }
+.code-block .cmt { color: #718096; font-style: italic; }
+.code-block .fn { color: #63b3ed; }
+.code-block .op { color: #f6ad55; }
+.code-block .macro { color: #63b3ed; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.two-col.derive-layout { grid-template-columns: 2.2fr 1fr; }
+@media (max-width: 800px) { .two-col { grid-template-columns: 1fr !important; } }
+
+.dp-table {
+  border-collapse: collapse; font-size: 0.82rem; font-family: "SF Mono", monospace;
+  margin: 0 auto;
+}
+.dp-table th, .dp-table td {
+  border: 1px solid #cbd5e0; text-align: center; padding: 5px 9px;
+  min-width: 36px; transition: all 0.25s;
+  position: relative;
+}
+.dp-table th { background: #e2e8f0; font-weight: 700; color: #2d3748; }
+.dp-table th.row-header { background: #cbd5e0; }
+.dp-table td.zero { background: #f7fafc; color: #a0aec0; }
+.dp-table td.filled { background: #ebf8ff; }
+.dp-table td.current {
+  background: #fefcbf; transform: scale(1.1); font-weight: 700;
+  box-shadow: 0 0 0 2px #d69e2e; z-index: 2;
+}
+.dp-table th.current {
+  background: #fefcbf; font-weight: 700;
+  box-shadow: inset 0 0 0 2px #d69e2e; z-index: 2;
+}
+.dp-table td.match-cell { background: #c6f6d5; font-weight: 700; }
+.dp-table td.del-choice { background: #fed7d5; }
+.dp-table td.ins-choice { background: #feebc8; }
+.dp-table td.rep-choice { background: #e9d8fd; }
+.dp-table td.answer {
+  background: linear-gradient(135deg, #9f7aea, #805ad5);
+  color: #fff; font-weight: 700; transform: scale(1.15);
+}
+.dp-table td .arrow {
+  position: absolute; font-size: 0.9rem; line-height: 1;
+}
+.dp-table td .arrow.diag-eq { top: -2px; left: -2px; color: #38a169; }
+.dp-table td .arrow.del { top: -2px; left: 50%; transform: translateX(-50%); color: #e53e3e; }
+.dp-table td .arrow.ins { top: 50%; left: -2px; transform: translateY(-50%); color: #dd6b20; }
+.dp-table td .arrow.rep { top: -2px; left: -2px; color: #805ad5; }
+.dp-table th .sub-label { font-weight: 400; font-size: 0.65rem; color: #718096; display: block; }
+
+.intuition-box {
+  padding: 12px 16px; margin-bottom: 12px;
+  background: #fffbeb; border-left: 4px solid #d69e2e;
+  border-radius: 6px; font-size: 0.88rem; line-height: 1.7;
+  color: #744210;
+}
+.intuition-box strong { color: #2b6cb0; }
+
+.explain-step {
+  padding: 8px 4px;
+}
+.explain-step .topic-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+.explain-step .topic-header .step-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #2b6cb0; color: #fff; font-size: 0.78rem; font-weight: 700; flex-shrink: 0;
+}
+.explain-step .topic-header .topic-title {
+  font-size: 1.05rem; font-weight: 700; color: #1a365d;
+}
+.explain-step .topic-header .topic-sub {
+  font-size: 0.78rem; color: #718096; margin-left: auto;
+}
+.explain-step .body { font-size: 0.92rem; color: #4a5568; line-height: 1.8; }
+.explain-step .body p { margin-bottom: 8px; }
+.explain-step .highlight-box {
+  background: #fffbeb; border-left: 4px solid #d69e2e;
+  padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 12px 0;
+  font-size: 0.9rem; color: #744210; line-height: 1.7;
+}
+.explain-step .info-row {
+  display: flex; gap: 16px; flex-wrap: wrap; margin: 10px 0;
+}
+.explain-step .info-card {
+  flex: 1; min-width: 140px;
+  background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+  padding: 10px 14px; text-align: center;
+}
+.explain-step .info-card .label { font-size: 0.75rem; color: #718096; }
+.explain-step .info-card .value {
+  font-size: 1rem; font-weight: 700; font-family: "SF Mono", monospace;
+  margin-top: 2px;
+}
+.explain-step .info-card .value.av { color: #2b6cb0; }
+.explain-step .info-card .value.bv { color: #c53030; }
+.explain-step .recurrence {
+  display: block; text-align: left;
+  background: #1a202c; color: #e2e8f0; padding: 14px 20px; border-radius: 8px;
+  font-family: "SF Mono", monospace; font-size: 0.85rem; line-height: 1.8;
+  margin: 12px 0;
+}
+.explain-step .recurrence .case-label { font-weight: 700; }
+.explain-step .recurrence .arrow-hint { color: #a0aec0; font-size: 0.78rem; }
+
+.comparison-box {
+  display: flex; align-items: center; justify-content: center; gap: 20px;
+  padding: 10px 16px; margin-bottom: 10px; font-size: 1rem;
+  background: #fff; border-radius: 8px; border: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+.comparison-box .char-box {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 8px;
+  font-family: "SF Mono", monospace; font-size: 1.3rem; font-weight: 700;
+}
+.comparison-box .char-box.a-char { background: #ebf4ff; color: #2b6cb0; border: 2px solid #5a67d8; }
+.comparison-box .char-box.b-char { background: #fff5f5; color: #c53030; border: 2px solid #fc8181; }
+.comparison-box .op-sign { font-size: 1.5rem; font-weight: 700; color: #4a5568; }
+.comparison-box .op-sign.match { color: #38a169; }
+.comparison-box .op-sign.mismatch { color: #e53e3e; }
+.comparison-box .pos-label { font-size: 0.75rem; color: #718096; margin-top: 2px; }
+.comparison-box .intuition-text { font-size: 0.82rem; color: #553c9a; max-width: 320px; }
+
+.formula-box {
+  text-align: center; padding: 8px 16px; margin-bottom: 10px;
+  background: #1a202c; color: #e2e8f0; border-radius: 6px;
+  font-family: "SF Mono", monospace; font-size: 0.85rem;
+  line-height: 1.6;
+}
+.formula-box .hl-match { color: #68d391; font-weight: 700; }
+.formula-box .hl-mismatch { color: #fc8181; font-weight: 700; }
+.formula-box .hl-val { color: #fbd38d; font-weight: 700; }
+.formula-box .hl-op { color: #f6ad55; font-weight: 700; }
+
+.hint kbd {
+  background: #edf2f7; padding: 1px 5px; border-radius: 3px;
+  border: 1px solid #cbd5e0; font-family: inherit;
+}
+.subproblem-label {
+  text-align: center; font-size: 0.82rem; padding: 4px 0 8px;
+  color: #4a5568;
+}
+.subproblem-label strong { color: #2b6cb0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>编辑距离 <span style="font-weight:400;font-size:1rem;opacity:0.85;">(Edit Distance / Levenshtein Distance)</span></h1>
+  <span class="badge">动态规划 · O(n×m)</span>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>题目描述</h2>
+    <p>给定两个字符串 A 和 B，通过三种操作（<strong>删除</strong>、<strong>插入</strong>、<strong>替换</strong>）将 A 变成 B，求最少操作次数。</p>
+    <p style="margin-top:6px;font-size:0.85rem;color:#718096;">
+      操作：①删除一个字符 ②插入一个字符 ③将一个字符替换为另一个字符
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <label>字符串 A：</label>
+      <input id="inputA" type="text" value="sftqdwq" placeholder="如 sftqdwq" style="width:180px;">
+      <label>字符串 B：</label>
+      <input id="inputB" type="text" value="gfdq" placeholder="如 gfdq" style="width:180px;">
+      <button class="btn btn-primary" onclick="startDemo()">逐步演示</button>
+      <button class="btn btn-success" id="btnAuto" onclick="autoPlay()">自动演示</button>
+      <button class="btn btn-gray" onclick="resetDemo()">重置</button>
+    </div>
+    <div class="controls" style="margin-bottom:0;">
+      <span style="font-size:0.82rem;color:#718096;">
+        速度：<input id="speedSlider" type="range" min="300" max="2500" value="700" step="100">
+        <span id="speedLabel">700ms</span>
+      </span>
+      <span class="hint" style="margin-left:12px;font-size:0.82rem;color:#718096;">
+        <kbd>→</kbd> 下一步 &nbsp; <kbd>←</kbd> 上一步 &nbsp; <kbd>Space</kbd> 播放/暂停
+      </span>
+    </div>
+  </div>
+
+  <div class="two-col derive-layout" style="align-items:start;">
+    <div class="card" style="overflow:hidden;">
+      <h2>算法推导过程</h2>
+      <div style="margin-bottom:10px;">
+        <button class="btn btn-warning btn-sm" id="btnStep" onclick="stepForward()" disabled>下一步</button>
+        <button class="btn btn-gray btn-sm" id="btnReset" onclick="resetSteps()" disabled>重置步骤</button>
+        <span style="margin-left:10px;font-size:0.85rem;font-weight:600;">
+          步骤 <span id="stepNum">0</span> / <span id="stepTotal">0</span>
+        </span>
+      </div>
+      <div id="explainBox" style="display:none;"></div>
+      <div id="intuitionBox" class="intuition-box" style="display:none;"></div>
+      <div id="comparisonBox" class="comparison-box" style="display:none;"></div>
+      <div id="formulaBox" class="formula-box" style="display:none;"></div>
+      <div id="subproblemLabel" class="subproblem-label" style="display:none;"></div>
+      <div class="demo-area" id="demoArea">
+        <div style="text-align:center;color:#a0aec0;padding:40px 0;">
+          输入两个字符串，点击「逐步演示」或「自动演示」开始
+        </div>
+      </div>
+      <div class="status-bar">
+        <div class="status-item"><strong>当前：</strong><span id="status1">—</span></div>
+        <div class="status-item"><strong>比较：</strong><span id="status2">—</span></div>
+        <div class="status-item"><strong>操作：</strong><span id="status3">—</span></div>
+        <div class="status-item"><strong>f值：</strong><span id="status4">—</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>步骤历史</h2>
+      <div class="step-list" id="stepList">
+        <div style="color:#a0aec0;">等待开始...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>解题思路</h2>
+    <p><strong>状态定义：</strong>f[i][j] 表示将 A 的前 i 个字符转换为 B 的前 j 个字符所需的最少操作次数。</p>
+    <p><strong>边界：</strong></p>
+    <ul style="margin:8px 0 8px 24px;line-height:1.7;font-size:0.92rem;color:#4a5568;">
+      <li>f[0][j] = j：空串变成 B 的前 j 个字符需要插入 j 次</li>
+      <li>f[i][0] = i：A 的前 i 个字符变成空串需要删除 i 次</li>
+    </ul>
+    <p><strong>状态转移：</strong></p>
+    <ul style="margin:8px 0 8px 24px;line-height:1.7;font-size:0.92rem;color:#4a5568;">
+      <li>如果 <strong>A[i] == B[j]</strong>，不需要操作：f[i][j] = f[i-1][j-1]</li>
+      <li>如果 <strong>A[i] != B[j]</strong>，取三种操作的最小值：
+        <ul style="margin:4px 0 4px 20px;">
+          <li>删除 A[i]：f[i-1][j] + 1</li>
+          <li>插入 B[j]：f[i][j-1] + 1</li>
+          <li>替换 A[i] 为 B[j]：f[i-1][j-1] + 1</li>
+        </ul>
+      </li>
+    </ul>
+    <p><strong>最终答案：</strong>f[n][m]</p>
+    <p style="margin-top:6px;font-size:0.85rem;color:#718096;">时间复杂度 O(n×m)，空间复杂度 O(n×m)。</p>
+  </div>
+
+  <div class="card">
+    <h2>参考代码 (C++)</h2>
+    <div class="code-block" id="codeBlock">
+      <span class="macro">#include</span> <span class="str">&lt;iostream&gt;</span>
+      <span class="macro">#include</span> <span class="str">&lt;string&gt;</span>
+      <span class="macro">#include</span> <span class="str">&lt;algorithm&gt;</span>
+      <span class="kw">using namespace</span> std;
+
+      <span class="kw">const int</span> N = <span class="num">2005</span>;
+      <span class="type">int</span> f[N][N];
+
+      <span class="type">int</span> <span class="fn">main</span>() {
+          <span class="type">string</span> A, B;
+          cin &gt;&gt; A &gt;&gt; B;
+          <span class="type">int</span> n = A.<span class="fn">size</span>(), m = B.<span class="fn">size</span>();
+
+          <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i &lt;= n; i++) f[i][<span class="num">0</span>] = i;
+          <span class="kw">for</span> (<span class="type">int</span> j = <span class="num">0</span>; j &lt;= m; j++) f[<span class="num">0</span>][j] = j;
+
+          <span class="kw">for</span> (<span class="type">int</span> i = <span class="num">1</span>; i &lt;= n; i++) {
+              <span class="kw">for</span> (<span class="type">int</span> j = <span class="num">1</span>; j &lt;= m; j++) {
+                  <span class="kw">if</span> (A[i-<span class="num">1</span>] == B[j-<span class="num">1</span>]) {
+                      f[i][j] = f[i-<span class="num">1</span>][j-<span class="num">1</span>];
+                  } <span class="kw">else</span> {
+                      f[i][j] = <span class="fn">min</span>(f[i-<span class="num">1</span>][j] + <span class="num">1</span>,
+                                  <span class="fn">min</span>(f[i][j-<span class="num">1</span>] + <span class="num">1</span>,
+                                      f[i-<span class="num">1</span>][j-<span class="num">1</span>] + <span class="num">1</span>));
+                  }
+              }
+          }
+
+          cout &lt;&lt; f[n][m] &lt;&lt; endl;
+          <span class="kw">return</span> <span class="num">0</span>;
+      }
+    </div>
+  </div>
+
+</div>
+
+<script>
+let steps = [];
+let currentStep = -1;
+let autoTimer = null;
+
+function generateSteps(a, b) {
+  const s = [];
+  const n = a.length, m = b.length;
+  const f = Array.from({length: n + 1}, () => Array(m + 1).fill(0));
+  const dir = Array.from({length: n + 1}, () => Array(m + 1).fill(''));
+
+  s.push({
+    type: 'init',
+    desc: `初始化。A="${a}"(${n})，B="${b}"(${m})`,
+    a, b, n, m
+  });
+
+  // Step 1: Problem understanding
+  s.push({
+    type: 'explain', topic: 'problem',
+    desc: '理解问题：三种操作',
+    a, b, n, m
+  });
+
+  // Step 2: Substructure
+  s.push({
+    type: 'explain', topic: 'substructure',
+    desc: '关键思想：最优子结构',
+    a, b, n, m
+  });
+
+  // Step 3: Recurrence
+  s.push({
+    type: 'explain', topic: 'recurrence',
+    desc: '状态转移方程',
+    a, b, n, m
+  });
+
+  // Boundary: f[0][j] and f[i][0]
+  for (let i = 0; i <= n; i++) {
+    for (let j = 0; j <= m; j++) {
+      if (i === 0 || j === 0) {
+        if (i === 0 && j === 0) continue;
+        const val = i === 0 ? j : i;
+        f[i][j] = val;
+        dir[i][j] = i === 0 ? 'ins' : 'del';
+        s.push({
+          type: 'boundary',
+          desc: i === 0 ? `边界 f[0][${j}] = ${j}（空→B，插入${j}次）` : `边界 f[${i}][0] = ${i}（A→空，删除${i}次）`,
+          i, j, val,
+          f: f.map(r => [...r]),
+          dir: dir.map(r => [...r]),
+          a, b, n, m
+        });
+      }
+    }
+  }
+
+  // Fill DP table
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      if (a[i - 1] === b[j - 1]) {
+        f[i][j] = f[i - 1][j - 1];
+        dir[i][j] = 'diag-eq';
+        s.push({
+          type: 'cell', matchType: 'match',
+          desc: `A[${i}]='${a[i-1]}' == B[${j}]='${b[j-1]}' → 不需要操作，继承 f[${i-1}][${j-1}] = ${f[i][j]}`,
+          i, j, val: f[i][j],
+          ai: a[i-1], bj: b[j-1],
+          from_val: f[i-1][j-1],
+          f: f.map(r => [...r]),
+          dir: dir.map(r => [...r]),
+          a, b, n, m
+        });
+      } else {
+        const del = f[i-1][j] + 1;
+        const ins = f[i][j-1] + 1;
+        const rep = f[i-1][j-1] + 1;
+        const minVal = Math.min(del, ins, rep);
+        f[i][j] = minVal;
+
+        let choice = 'del';
+        if (minVal === ins) choice = 'ins';
+        else if (minVal === rep) choice = 'rep';
+        // tie-break: del > ins > rep for consistency
+        if (minVal === del && minVal === ins) choice = 'del';
+        if (minVal === del && minVal === rep) choice = 'del';
+        if (minVal === ins && minVal === rep) choice = 'ins';
+
+        dir[i][j] = choice;
+        const opNames = { del: '删除 A[i]', ins: '插入 B[j]', rep: '替换' };
+        s.push({
+          type: 'cell', matchType: 'mismatch',
+          desc: `A[${i}]='${a[i-1]}' != B[${j}]='${b[j-1]}' → min(${del},${ins},${rep}) = ${minVal}（${opNames[choice]}）`,
+          i, j, val: minVal,
+          ai: a[i-1], bj: b[j-1],
+          del, ins, rep, choice,
+          f: f.map(r => [...r]),
+          dir: dir.map(r => [...r]),
+          a, b, n, m
+        });
+      }
+    }
+  }
+
+  s.push({
+    type: 'done',
+    desc: `完成！最少操作次数 = ${f[n][m]}`,
+    val: f[n][m],
+    f: f.map(r => [...r]),
+    dir: dir.map(r => [...r]),
+    a, b, n, m
+  });
+
+  return s;
+}
+
+function renderStep(stepIndex) {
+  const area = document.getElementById('demoArea');
+  const comp = document.getElementById('comparisonBox');
+  const formula = document.getElementById('formulaBox');
+  const intuition = document.getElementById('intuitionBox');
+  const explain = document.getElementById('explainBox');
+  const sub = document.getElementById('subproblemLabel');
+  const st1 = document.getElementById('status1');
+  const st2 = document.getElementById('status2');
+  const st3 = document.getElementById('status3');
+  const st4 = document.getElementById('status4');
+
+  [comp, formula, intuition, explain, sub].forEach(el => el.style.display = 'none');
+  st1.textContent = '—'; st2.textContent = '—'; st3.textContent = '—'; st4.textContent = '—';
+
+  if (stepIndex < 0 || stepIndex >= steps.length) {
+    area.innerHTML = '<div style="text-align:center;color:#a0aec0;padding:40px 0;">等待开始...</div>';
+    return;
+  }
+
+  const step = steps[stepIndex];
+  const { a, b, n, m } = step;
+
+  if (step.type === 'init') {
+    st1.textContent = '初始化';
+    st2.textContent = `A="${a}", B="${b}"`;
+    area.innerHTML = renderInitTable(a, b, n, m);
+    return;
+  }
+
+  if (step.type === 'explain') {
+    area.innerHTML = renderExplain(step);
+    explain.style.display = 'block';
+    st1.textContent = '讲解';
+    return;
+  }
+
+  if (step.type === 'boundary') {
+    const isRow = step.i === 0;
+    st1.textContent = `边界 f[${step.i}][${step.j}] = ${step.val}`;
+    st4.textContent = `${step.val}`;
+    formula.style.display = 'block';
+    formula.innerHTML = isRow
+      ? `空串 → B[1..${step.j}]：需要插入 ${step.j} 次 → f[0][${step.j}] = ${step.j}`
+      : `A[1..${step.i}] → 空串：需要删除 ${step.i} 次 → f[${step.i}][0] = ${step.i}`;
+    area.innerHTML = renderTable(step.f, step.dir, a, b, n, m, step.i, step.j);
+    return;
+  }
+
+  if (step.type === 'cell') {
+    const { i, j, val, f: ff, dir: dd } = step;
+    st1.textContent = `f[${i}][${j}]`;
+    st4.textContent = `${val}`;
+
+    if (step.matchType === 'match') {
+      comp.style.display = 'flex';
+      comp.innerHTML = `
+        <div style="text-align:center;">
+          <div class="char-box a-char">${step.ai}</div>
+          <div class="pos-label">A[${step.i}]</div>
+        </div>
+        <div class="op-sign match">=</div>
+        <div style="text-align:center;">
+          <div class="char-box b-char">${step.bj}</div>
+          <div class="pos-label">B[${step.j}]</div>
+        </div>
+        <div class="intuition-text">
+          字符相同 → 无需任何操作，直接继承左上角
+        </div>
+      `;
+      st2.textContent = `${step.ai} == ${step.bj} 相同`;
+      st3.textContent = `↖ 继承 f[${i-1}][${j-1}]`;
+
+      formula.style.display = 'block';
+      formula.innerHTML = `<span class="hl-match">相同：f[${i}][${j}] = f[${i-1}][${j-1}] = ${step.from_val}</span>`;
+
+      intuition.style.display = 'block';
+      intuition.innerHTML = `A[${i}] 和 B[${j}] 一样，不需要做任何修改。<br>
+      所以操作次数 = 两个字符串都少看一个字符时的结果。`;
+
+      sub.style.display = 'block';
+      sub.innerHTML = `当前子问题：A[1..${i}] → B[1..${j}]`;
+    } else {
+      const opLabels = {
+        del: { text: '删除 A[i]', arrow: '↑', color: '#e53e3e', cls: 'del', hint: '删除 A[i]' },
+        ins: { text: '插入 B[j]', arrow: '←', color: '#dd6b20', cls: 'ins', hint: '插入 B[j] 到末尾' },
+        rep: { text: '替换为 B[j]', arrow: '↖', color: '#805ad5', cls: 'rep', hint: '把 A[i] 替换成 B[j]' }
+      };
+      const op = opLabels[step.choice];
+
+      comp.style.display = 'flex';
+      comp.innerHTML = `
+        <div style="text-align:center;">
+          <div class="char-box a-char">${step.ai}</div>
+          <div class="pos-label">A[${step.i}]</div>
+        </div>
+        <div class="op-sign mismatch">≠</div>
+        <div style="text-align:center;">
+          <div class="char-box b-char">${step.bj}</div>
+          <div class="pos-label">B[${step.j}]</div>
+        </div>
+        <div class="intuition-text">
+          字符不同 → 三种操作中选代价最小的
+        </div>
+      `;
+      st2.textContent = `${step.ai} != ${step.bj} 不同`;
+      st3.textContent = `${op.arrow} ${op.text}（代价最小）`;
+
+      formula.style.display = 'block';
+      formula.innerHTML = `<span class="hl-mismatch">不同：f[${i}][${j}] = min(删除=${step.del}, 插入=${step.ins}, 替换=${step.rep}) = ${val}</span>`;
+
+      intuition.style.display = 'block';
+      intuition.innerHTML = `A[${i}] ≠ B[${j}]，有三种选择：<br>
+      · 删除 A[${i}]：f[${i-1}][${j}] + 1 = ${step.del} ${step.choice==='del'?'✅ ← 最优':''}<br>
+      · 插入 B[${j}]：f[${i}][${j-1}] + 1 = ${step.ins} ${step.choice==='ins'?'✅ ← 最优':''}<br>
+      · 替换为 B[${j}]：f[${i-1}][${j-1}] + 1 = ${step.rep} ${step.choice==='rep'?'✅ ← 最优':''}`;
+
+      sub.style.display = 'block';
+      sub.innerHTML = `当前子问题：A[1..${i}] → B[1..${j}]`;
+
+      area.innerHTML = renderTable(ff, dd, a, b, n, m, i, j, null, step);
+      return;
+    }
+
+    area.innerHTML = renderTable(ff, dd, a, b, n, m, i, j, null, step);
+    return;
+  }
+
+  if (step.type === 'done') {
+    st1.textContent = '完成！';
+    st2.textContent = `最少需要 ${step.val} 次操作`;
+    st4.textContent = `${step.val}`;
+    formula.style.display = 'block';
+    formula.innerHTML = `<span class="hl-val">答案：最少操作次数 = ${step.val}</span>`;
+
+    intuition.style.display = 'block';
+    intuition.innerHTML = `<strong>最终结果：</strong>将 A 转换为 B 最少需要 <strong>${step.val}</strong> 次操作。`;
+
+    area.innerHTML = renderTable(step.f, step.dir, a, b, n, m, -1, -1, null, null, true);
+    return;
+  }
+}
+
+function renderInitTable(a, b, n, m) {
+  let html = '<table class="dp-table"><thead><tr><th></th><th>f[i][j]</th>';
+  for (let j = 1; j <= m; j++) {
+    html += `<th>${b[j-1]}<span class="sub-label">j=${j}</span></th>`;
+  }
+  html += '</tr></thead><tbody>';
+  for (let i = 0; i <= n; i++) {
+    html += '<tr>';
+    if (i === 0) {
+      html += '<th class="row-header">f[0]</th><th>0</th>';
+    } else {
+      html += `<th class="row-header">${a[i-1]}<span class="sub-label">i=${i}</span></th><th>?</th>`;
+    }
+    for (let j = 1; j <= m; j++) {
+      html += '<td class="zero" style="background:#f7fafc;">?</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function renderExplain(step) {
+  const { a, b, n, m } = step;
+  if (step.topic === 'problem') {
+    return `
+      <div class="explain-step">
+        <div class="topic-header">
+          <span class="step-badge">1</span>
+          <span class="topic-title">理解问题：三种操作</span>
+          <span class="topic-sub">1 / 3</span>
+        </div>
+        <div class="body">
+          <div class="info-row">
+            <div class="info-card">
+              <div class="label">字符串 A</div>
+              <div class="value av">${a}</div>
+              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">长度 ${n}</div>
+            </div>
+            <div class="info-card">
+              <div class="label">字符串 B</div>
+              <div class="value bv">${b}</div>
+              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">长度 ${m}</div>
+            </div>
+            <div class="info-card">
+              <div class="label">目标</div>
+              <div class="value" style="color:#553c9a;">最少操作次数</div>
+              <div style="font-size:0.72rem;color:#a0aec0;margin-top:2px;">删除 / 插入 / 替换</div>
+            </div>
+          </div>
+          <p>要把字符串 A 变成 B，每次可以做三种操作之一：</p>
+          <ul style="margin:8px 0 8px 24px;line-height:1.7;font-size:0.92rem;color:#4a5568;">
+            <li><strong>删除</strong>：去掉 A 中的一个字符</li>
+            <li><strong>插入</strong>：在 A 中插入一个字符</li>
+            <li><strong>替换</strong>：把 A 中的一个字符变成另一个</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>示例</strong>：A = "${a}"，B = "${b}"<br>
+            请算出最少用多少次操作可以把 A 变成 B。
+          </div>
+        </div>
+      </div>`;
+  }
+  if (step.topic === 'substructure') {
+    return `
+      <div class="explain-step">
+        <div class="topic-header">
+          <span class="step-badge">2</span>
+          <span class="topic-title">关键思想：最优子结构</span>
+          <span class="topic-sub">2 / 3</span>
+        </div>
+        <div class="body">
+          <p>要计算将 A[1..i] 变成 B[1..j] 的最少操作次数，先看<strong>更短</strong>的字符串：</p>
+          <div class="highlight-box">
+            <strong>核心思想：</strong>大问题 → 拆成小问题 → 小问题的解组合成大问题的解
+          </div>
+          <hr class="divider">
+          <p style="text-align:center;font-size:0.95rem;">
+            定义 <strong style="font-family:SF Mono;font-size:1.05rem;color:#2b6cb0;">f[i][j]</strong>
+            = A[1..i] → B[1..j] 的 <strong>最少操作次数</strong>
+          </p>
+          <p style="text-align:center;font-size:0.85rem;color:#718096;margin-top:8px;">
+            看 A[i] 和 B[j] 是否相等，决定走哪条路
+          </p>
+        </div>
+      </div>`;
+  }
+  if (step.topic === 'recurrence') {
+    return `
+      <div class="explain-step">
+        <div class="topic-header">
+          <span class="step-badge">3</span>
+          <span class="topic-title">状态转移方程</span>
+          <span class="topic-sub">3 / 3</span>
+        </div>
+        <div class="body">
+          <p>比较 A[i] 和 B[j]（两个字符串的<strong>最后一个字符</strong>）：</p>
+
+          <div class="recurrence">
+            <span class="case-label" style="color:#68d391;">情况一：A[i] == B[j]（相同）</span>
+            <span class="arrow-hint" style="float:right;">↖ 斜向</span><br>
+            &nbsp;&nbsp;f[i][j] = <span style="color:#fbd38d;">f[i-1][j-1]</span><br>
+            &nbsp;&nbsp;<span style="color:#a0aec0;font-size:0.8rem;">
+            已经一样了 → 不需要操作，直接继承两个串都少看一个字符的结果</span>
+            <br><br>
+            <span class="case-label" style="color:#fc8181;">情况二：A[i] != B[j]（不同）</span>
+            <span class="arrow-hint" style="float:right;">↑ / ← / ↖ 取最小</span><br>
+            &nbsp;&nbsp;f[i][j] = <span style="color:#fbd38d;">min( f[i-1][j] + 1 , f[i][j-1] + 1 , f[i-1][j-1] + 1 )</span><br>
+            &nbsp;&nbsp;<span style="color:#a0aec0;font-size:0.8rem;">
+            · 删除 A[i]：f[i-1][j] + 1 &nbsp; ↑ 上方<br>
+            · 插入 B[j]：f[i][j-1] + 1 &nbsp; ← 左方<br>
+            · 替换为 B[j]：f[i-1][j-1] + 1 &nbsp; ↖ 斜向</span>
+          </div>
+
+          <div class="highlight-box">
+            <strong>边界条件：</strong><br>
+            f[0][j] = j：空串转成 B[1..j] 需要插入 j 次<br>
+            f[i][0] = i：A[1..i] 转成空串需要删除 i 次
+          </div>
+        </div>
+      </div>`;
+  }
+  return '';
+}
+
+function renderTable(f, dir, a, b, n, m, curI, curJ, answerVal, cellStep, isAnswerFinal) {
+  let html = '<table class="dp-table"><thead><tr><th></th><th>f[i][j]</th>';
+  for (let j = 1; j <= m; j++) {
+    html += `<th>${b[j-1]}<span class="sub-label">j=${j}</span></th>`;
+  }
+  html += '</tr></thead><tbody>';
+
+  for (let i = 0; i <= n; i++) {
+    html += '<tr>';
+    const zeroCls = (curI === i && curJ === 0) ? ' current' : '';
+    if (i === 0) {
+      html += `<th class="row-header">f[0]</th><th${zeroCls ? ' class="' + zeroCls.trim() + '"' : ''}>0</th>`;
+    } else {
+      html += `<th class="row-header">${a[i-1]}<span class="sub-label">i=${i}</span></th><th${zeroCls ? ' class="' + zeroCls.trim() + '"' : ''}>${f[i][0]||''}</th>`;
+    }
+    for (let j = 1; j <= m; j++) {
+      let cls = '';
+      const val = f[i][j];
+      const d = dir && dir[i] ? dir[i][j] : '';
+
+      if (curI === i && curJ === j) {
+        cls = 'current';
+        if (cellStep && cellStep.matchType === 'match') cls = 'current';
+        else if (cellStep && cellStep.matchType === 'mismatch') {
+          const c = cellStep.choice;
+          if (c === 'del') cls = 'del-choice current';
+          else if (c === 'ins') cls = 'ins-choice current';
+          else cls = 'rep-choice current';
+        }
+      } else if (i === 0 || j === 0) {
+        cls = 'zero';
+      } else {
+        cls = 'filled';
+      }
+
+      if (isAnswerFinal && i === n && j === m) {
+        cls = 'answer';
+      }
+
+      let arrow = '';
+      if (d === 'diag-eq' && !(i === curI && j === curJ)) {
+        arrow = '<span class="arrow diag-eq">↖</span>';
+      } else if (d === 'del' && !(i === curI && j === curJ)) {
+        arrow = '<span class="arrow del">↑</span>';
+      } else if (d === 'ins' && !(i === curI && j === curJ)) {
+        arrow = '<span class="arrow ins">←</span>';
+      } else if (d === 'rep' && !(i === curI && j === curJ)) {
+        arrow = '<span class="arrow rep">↖</span>';
+      }
+
+      html += `<td class="${cls}">${arrow}${val}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function renderStepList() {
+  const list = document.getElementById('stepList');
+  list.innerHTML = '';
+  steps.forEach((step, idx) => {
+    const div = document.createElement('div');
+    div.className = 'step' + (idx === currentStep ? ' active' : '');
+    let icon = '';
+    if (step.type === 'init') icon = '';
+    else if (step.type === 'explain') icon = '';
+    else if (step.type === 'boundary') icon = '';
+    else if (step.type === 'cell') icon = step.matchType === 'match' ? '' : '';
+    else if (step.type === 'done') icon = '';
+    div.innerHTML = `<span class="step-num">#${idx+1}</span><span class="step-desc">${icon}${step.desc}</span>`;
+    div.onclick = () => jumpToStep(idx);
+    list.appendChild(div);
+  });
+  if (currentStep >= 0) {
+    const active = list.querySelector('.step.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function renderAll() {
+  const total = steps.length;
+  document.getElementById('stepNum').textContent = total > 0 ? currentStep + 1 : 0;
+  document.getElementById('stepTotal').textContent = total;
+  document.getElementById('btnStep').disabled = (currentStep >= total - 1);
+  document.getElementById('btnReset').disabled = (total === 0);
+  renderStep(currentStep);
+  renderStepList();
+}
+
+function startDemo() {
+  stopAuto();
+  const a = document.getElementById('inputA').value.trim();
+  const b = document.getElementById('inputB').value.trim();
+  if (!a || !b) { alert('请输入两个字符串！'); return; }
+  if (a.length > 10 || b.length > 10) {
+    alert('为演示效果，建议长度不超过 10。当前 A=' + a.length + ', B=' + b.length);
+  }
+  steps = generateSteps(a, b);
+  currentStep = 0;
+  renderAll();
+}
+
+function stepForward() {
+  if (steps.length === 0) { startDemo(); return; }
+  if (currentStep < steps.length - 1) { currentStep++; renderAll(); }
+}
+
+function prevStep() {
+  if (currentStep > 0) { currentStep--; renderAll(); }
+}
+
+function jumpToStep(idx) {
+  if (idx < 0 || idx >= steps.length) return;
+  currentStep = idx;
+  renderAll();
+}
+
+function resetSteps() { stopAuto(); currentStep = 0; renderAll(); }
+
+function resetDemo() {
+  stopAuto();
+  steps = []; currentStep = -1; renderAll();
+  document.getElementById('demoArea').innerHTML =
+    '<div style="text-align:center;color:#a0aec0;padding:40px 0;">输入两个字符串，点击「逐步演示」或「自动演示」开始</div>';
+  document.getElementById('stepList').innerHTML = '<div style="color:#a0aec0;">等待开始...</div>';
+  document.getElementById('stepNum').textContent = '0';
+  document.getElementById('stepTotal').textContent = '0';
+  ['explainBox','intuitionBox','comparisonBox','formulaBox','subproblemLabel'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  ['status1','status2','status3','status4'].forEach(id => {
+    document.getElementById(id).textContent = '—';
+  });
+}
+
+function autoPlay() {
+  if (autoTimer) { stopAuto(); return; }
+  if (steps.length === 0 || currentStep >= steps.length - 1) { startDemo(); if (steps.length === 0) return; currentStep = -1; }
+  const speed = parseInt(document.getElementById('speedSlider').value) || 700;
+  document.getElementById('btnAuto').textContent = '暂停';
+  document.getElementById('btnStep').disabled = true;
+  function tick() {
+    if (currentStep < steps.length - 1) {
+      currentStep++; renderAll();
+      if (currentStep < steps.length - 1) { autoTimer = setTimeout(tick, speed); } else { stopAuto(); }
+    }
+  }
+  autoTimer = setTimeout(tick, speed);
+}
+
+function stopAuto() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  document.getElementById('btnAuto').textContent = '自动演示';
+  document.getElementById('btnStep').disabled = (currentStep >= steps.length - 1 && steps.length > 0);
+}
+
+document.getElementById('speedSlider').addEventListener('input', function () {
+  document.getElementById('speedLabel').textContent = this.value + 'ms';
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'ArrowRight') { e.preventDefault(); stepForward(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
+  else if (e.key === ' ') { e.preventDefault(); autoTimer ? stopAuto() : autoPlay(); }
+});
+
+document.getElementById('inputA').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') document.getElementById('inputB').focus();
+});
+document.getElementById('inputB').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') startDemo();
+});
+</script>
+</body>
+</html>
