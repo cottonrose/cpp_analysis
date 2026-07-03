@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>奇偶替换 — 二分答案交互演示</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8; color: #2d3748;
+  min-height: 100vh;
+}
+header {
+  background: linear-gradient(135deg, #1a365d, #2a5298);
+  color: #fff; padding: 20px 32px;
+  display: flex; align-items: center; gap: 16px;
+}
+header h1 { font-size: 1.5rem; font-weight: 700; }
+header .badge { background: #ed8936; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; }
+header .badge.green { background: #38a169; }
+.container { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
+.card {
+  background: #fff; border-radius: 12px; padding: 20px 24px;
+  margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card h2 { font-size: 1.1rem; margin-bottom: 10px; color: #1a365d; }
+.card p { line-height: 1.7; font-size: 0.92rem; color: #4a5568; }
+
+.controls {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px;
+}
+.controls label { font-size: 0.85rem; font-weight: 600; color: #4a5568; }
+.controls input[type="text"] {
+  padding: 7px 10px; border: 1px solid #cbd5e0; border-radius: 6px;
+  font-size: 0.9rem; font-family: "SF Mono", "Fira Code", monospace; width: 180px;
+}
+.controls input:focus { border-color: #5a67d8; outline: none; box-shadow: 0 0 0 3px rgba(90,103,216,0.15); }
+.controls input[type="range"] { width: 100px; vertical-align: middle; }
+.btn {
+  padding: 7px 16px; border: none; border-radius: 6px; font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: #2b6cb0; color: #fff; }
+.btn-primary:hover { background: #2c5282; }
+.btn-success { background: #38a169; color: #fff; }
+.btn-success:hover { background: #2f855a; }
+.btn-warning { background: #dd6b20; color: #fff; }
+.btn-warning:hover { background: #c05621; }
+.btn-gray { background: #a0aec0; color: #fff; }
+.btn-gray:hover { background: #718096; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-sm { padding: 4px 10px; font-size: 0.78rem; }
+
+.demo-area {
+  padding: 16px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;
+  min-height: 200px;
+}
+
+.status-bar {
+  display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem;
+  padding: 10px 16px; background: #edf2f7; border-radius: 8px; margin-top: 8px;
+}
+.status-item strong { color: #1a365d; }
+
+.step-list {
+  max-height: 220px; overflow-y: auto; font-size: 0.8rem;
+}
+.step-list .step {
+  padding: 5px 8px; border-left: 3px solid transparent; margin-bottom: 2px; cursor: pointer;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.step-list .step.active { background: #ebf8ff; border-left-color: #3182ce; }
+.step-list .step .step-num { font-weight: 700; color: #2b6cb0; flex-shrink: 0; min-width: 28px; }
+.step-list .step .step-desc { color: #4a5568; }
+
+.code-block {
+  background: #1a202c; color: #e2e8f0; padding: 16px; border-radius: 8px;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 0.8rem;
+  line-height: 1.6; overflow-x: auto; white-space: pre;
+}
+.code-block .kw { color: #9f7aea; }
+.code-block .type { color: #68d391; }
+.code-block .num { color: #fbd38d; }
+.code-block .str { color: #fc8181; }
+.code-block .cmt { color: #718096; font-style: italic; }
+.code-block .fn { color: #63b3ed; }
+.code-block .op { color: #f6ad55; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+/* Array visualization */
+.array-row {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0;
+}
+.array-label { font-weight: 700; color: #2d3748; min-width: 70px; font-size: 0.9rem; }
+.array-cells {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.array-cell {
+  width: 44px; height: 44px; border-radius: 8px; display: flex;
+  align-items: center; justify-content: center; font-weight: 700;
+  font-size: 0.9rem; position: relative; transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.array-cell.even-need {
+  background: #ebf8ff; color: #2b6cb0; border: 2px solid #90cdf4;
+}
+.array-cell.odd-need {
+  background: #fffaf0; color: #c05621; border: 2px solid #fbd38d;
+}
+.array-cell.assigned { border-width: 3px; }
+.array-cell.assigned.even-need { border-color: #3182ce; background: #bee3f8; }
+.array-cell.assigned.odd-need { border-color: #dd6b20; background: #feebc8; }
+.array-cell .assign-val {
+  position: absolute; bottom: -18px; font-size: 0.7rem; font-weight: 600;
+  color: #2d3748;
+}
+.array-cell.highlight { transform: scale(1.15); z-index: 2; box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+
+/* Bin search range */
+.bs-range {
+  position: relative; height: 60px; margin: 16px 0;
+  background: #e2e8f0; border-radius: 8px;
+}
+.bs-track { position: relative; height: 100%; }
+.bs-label {
+  position: absolute; top: -2px; font-size: 0.75rem; font-weight: 700;
+  transform: translateX(-50%); text-align: center;
+}
+.bs-label .val { display: block; font-size: 1rem; }
+.bs-label.lo-label { color: #e53e3e; }
+.bs-label.hi-label { color: #2b6cb0; }
+.bs-label.mid-label { color: #dd6b20; }
+.bs-marker {
+  position: absolute; top: 28px; width: 3px; height: 28px; border-radius: 2px;
+  transform: translateX(-50%);
+}
+.bs-marker.lo { background: #e53e3e; }
+.bs-marker.hi { background: #2b6cb0; }
+.bs-marker.mid { background: #dd6b20; }
+.bs-range-fill {
+  position: absolute; top: 0; height: 100%;
+  background: linear-gradient(to right, #fc8181, #fbd38d, #90cdf4);
+  border-radius: 8px; opacity: 0.5;
+}
+
+/* Count check */
+.count-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0;
+}
+.count-item {
+  padding: 14px; border-radius: 10px; text-align: center;
+  border: 2px solid #e2e8f0;
+}
+.count-item .label { font-size: 0.8rem; font-weight: 600; color: #4a5568; margin-bottom: 6px; }
+.count-item .ratio { font-size: 1.6rem; font-weight: 800; }
+.count-item .ratio .need { color: #e53e3e; }
+.count-item .ratio .slash { color: #a0aec0; margin: 0 4px; }
+.count-item .ratio .avail { color: #2b6cb0; }
+.count-item .verdict { margin-top: 6px; font-size: 0.85rem; font-weight: 700; }
+.count-item .verdict.ok { color: #38a169; }
+.count-item .verdict.fail { color: #e53e3e; }
+.count-item.ok { border-color: #38a169; background: #f0fff4; }
+.count-item.fail { border-color: #e53e3e; background: #fff5f5; }
+.count-item.even-box { border-color: #90cdf4; }
+.count-item.odd-box { border-color: #fbd38d; }
+
+/* Explanation box */
+.explain-box {
+  background: #ebf8ff; border-left: 4px solid #3182ce;
+  padding: 12px 16px; border-radius: 6px; margin: 10px 0;
+  font-size: 0.9rem; line-height: 1.7;
+}
+.explain-box.success { background: #f0fff4; border-left-color: #38a169; }
+.explain-box.fail { background: #fff5f5; border-left-color: #e53e3e; }
+.explain-box.info { background: #faf5ff; border-left-color: #805ad5; }
+
+.assignment-table {
+  margin: 12px 0; width: 100%; border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.assignment-table th, .assignment-table td {
+  padding: 8px 12px; border: 1px solid #e2e8f0; text-align: center;
+}
+.assignment-table th { background: #edf2f7; font-weight: 600; }
+.assignment-table .even-cell { background: #ebf8ff; }
+.assignment-table .odd-cell { background: #fffaf0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>奇偶替换</h1>
+  <span class="badge">二分答案</span>
+  <span class="badge green">贪心判定</span>
+</header>
+
+<div class="container">
+
+  <!-- 题目描述 -->
+  <div class="card">
+    <h2>📋 题目描述</h2>
+    <p>给定两个只由 0 和 1 组成的数组（长度 n, m ≤ 5000）。用偶数替换每个 0，用奇数替换每个 1，使得替换后两个数组都单调递增（非严格），且所有元素均大于 0，每个正整数最多使用一次。求使用的最大数字的最小可能值。</p>
+  </div>
+
+  <!-- 输入区 -->
+  <div class="card">
+    <div class="controls">
+      <label>数组 A：</label>
+      <input id="inputA" type="text" value="4 0 1 0 1" placeholder="n a1 a2 ...">
+      <label>数组 B：</label>
+      <input id="inputB" type="text" value="4 1 0 0 1" placeholder="m b1 b2 ...">
+      <button class="btn btn-primary" onclick="startDemo()">🚀 逐步演示</button>
+      <button class="btn btn-success" id="btnAuto" onclick="autoPlay()">▶️ 自动演示</button>
+      <button class="btn btn-gray" onclick="resetDemo()">↺ 重置</button>
+    </div>
+    <div class="controls" style="margin-bottom:0;">
+      <span style="font-size:0.82rem;color:#718096;">
+        速度：<input id="speedSlider" type="range" min="300" max="2500" value="800" step="100">
+        <span id="speedLabel">800ms</span>
+      </span>
+      <span class="hint" style="margin-left:12px;font-size:0.82rem;color:#718096;">
+        💡 <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">→</kbd>
+        <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">←</kbd>
+        <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">Space</kbd>
+      </span>
+      <span class="hint" style="margin-left:12px;font-size:0.82rem;color:#718096;">
+        快速填入：<button class="btn btn-gray btn-sm" onclick="setExample(1)">样例1</button>
+        <button class="btn btn-gray btn-sm" onclick="setExample(2)">样例2</button>
+        <button class="btn btn-gray btn-sm" onclick="setExample(3)">样例3</button>
+      </span>
+    </div>
+  </div>
+
+  <!-- 主演示区 -->
+  <div class="card">
+    <h2>🧮 二分答案推导过程</h2>
+    <div style="margin-bottom:10px;">
+      <button class="btn btn-warning btn-sm" id="btnStep" onclick="stepForward()" disabled>⏭ 下一步</button>
+      <button class="btn btn-gray btn-sm" id="btnReset" onclick="resetSteps()" disabled>↺ 重置步骤</button>
+      <span style="margin-left:10px;font-size:0.85rem;font-weight:600;">
+        步骤 <span id="stepNum">0</span> / <span id="stepTotal">0</span>
+      </span>
+    </div>
+    <div class="demo-area" id="demoArea">
+      <div style="text-align:center;color:#a0aec0;padding:40px 0;">
+        点击「🚀 逐步演示」或「▶️ 自动演示」开始
+      </div>
+    </div>
+    <div class="status-bar">
+      <div class="status-item"><strong>当前操作：</strong><span id="status1">—</span></div>
+      <div class="status-item"><strong>搜索区间：</strong><span id="status2">—</span></div>
+    </div>
+  </div>
+
+  <!-- 双栏 -->
+  <div class="two-col">
+    <div class="card">
+      <h2>📜 步骤历史</h2>
+      <div class="step-list" id="stepList">
+        <div style="color:#a0aec0;">等待开始...</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>💻 参考代码 (C++)</h2>
+      <div class="code-block" id="codeBlock"></div>
+    </div>
+  </div>
+
+  <!-- 解题思路 -->
+  <div class="card">
+    <h2>🧠 解题思路</h2>
+    <p><strong>核心思想</strong>：二分答案 + 贪心判定。</p>
+    <p>1. 二分最大数字 X，判定能否用 ≤ X 的正整数完成替换。<br>
+       2. 判定方法：统计两个数组中 0 的总数（需偶数）和 1 的总数（需奇数）。若偶数个数 ≤ X/2 且奇数个数 ≤ (X+1)/2，则可行。<br>
+       3. 偶数是从 2 开始每次 +2 的正整数，奇数从 1 开始每次 +2。可用偶数个数为 ⌊X/2⌋，可用奇数个数为 ⌈X/2⌉。<br>
+       4. 由于每个数最多用一次，且奇偶性不同不会冲突，因此只需检查每个奇偶类的总数是否够用。</p>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// State
+// ============================================================
+let steps = [];
+let currentStep = -1;
+let autoTimer = null;
+
+// ============================================================
+// Parse input
+// ============================================================
+function parseInput() {
+  const rawA = document.getElementById('inputA').value.trim().split(/\s+/).map(Number);
+  const rawB = document.getElementById('inputB').value.trim().split(/\s+/).map(Number);
+  const n = rawA[0], m = rawB[0];
+  const a = rawA.slice(1);
+  const b = rawB.slice(1);
+  if (a.length !== n || b.length !== m) {
+    alert('数组长度与声明不符！请检查输入。');
+    return null;
+  }
+  return { n, m, a, b };
+}
+
+// ============================================================
+// Generate steps — binary search visualization
+// ============================================================
+function generateSteps(data) {
+  const { n, m, a, b } = data;
+  const s = [];
+  const total_0 = a.filter(x => x === 0).length + b.filter(x => x === 0).length;
+  const total_1 = a.filter(x => x === 1).length + b.filter(x => x === 1).length;
+
+  // Show initial arrays
+  s.push({
+    type: 'init',
+    desc: `数组 A: [${a.join(', ')}]，数组 B: [${b.join(', ')}]。共需要 ${total_0} 个偶数、${total_1} 个奇数。`,
+    a, b, n, m, total_0, total_1
+  });
+
+  let lo = 0;
+  let hi = 2 * (n + m) + 5;
+  let iter = 1;
+
+  // Show initial binary search range
+  s.push({
+    type: 'range_init',
+    desc: `初始化二分范围：lo = ${lo}，hi = ${hi}。答案在 [${lo}, ${hi}] 之间。`,
+    lo, hi, total_0, total_1, a, b
+  });
+
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const evenAvail = Math.floor(mid / 2);
+    const oddAvail = Math.ceil(mid / 2);
+    const feasible = (total_0 <= evenAvail && total_1 <= oddAvail);
+
+    // Show mid point
+    s.push({
+      type: 'mid_point',
+      desc: `第 ${iter} 轮：mid = ⌊(${lo} + ${hi}) / 2⌋ = ${mid}`,
+      lo, hi, mid, total_0, total_1, evenAvail, oddAvail, feasible, iter, a, b
+    });
+
+    // Show count check
+    s.push({
+      type: 'count_check',
+      desc: `检查 X = ${mid}：偶数需要 ${total_0} 个 ≤ 可用 ${evenAvail} 个${
+        total_0 <= evenAvail ? ' ✅' : ' ❌'
+      }，奇数需要 ${total_1} 个 ≤ 可用 ${oddAvail} 个${
+        total_1 <= oddAvail ? ' ✅' : ' ❌'
+      }`,
+      lo, hi, mid, total_0, total_1, evenAvail, oddAvail, feasible, iter, a, b
+    });
+
+    // Show result
+    s.push({
+      type: 'result',
+      desc: feasible
+        ? `✅ X = ${mid} 可行！尝试更小的值，更新 hi = ${mid}。`
+        : `❌ X = ${mid} 不可行，需要更大的值，更新 lo = ${mid + 1}。`,
+      lo, hi, mid, total_0, total_1, evenAvail, oddAvail, feasible, iter, a, b
+    });
+
+    if (feasible) {
+      hi = mid;
+      s.push({
+        type: 'update',
+        desc: `hi ← ${mid}，区间缩小为 [${lo}, ${hi}]`,
+        lo, hi, mid, total_0, total_1, evenAvail, oddAvail, feasible: true, iter, a, b
+      });
+    } else {
+      lo = mid + 1;
+      s.push({
+        type: 'update',
+        desc: `lo ← ${mid + 1}，区间缩小为 [${lo}, ${hi}]`,
+        lo, hi, mid, total_0, total_1, evenAvail, oddAvail, feasible: false, iter, a, b
+      });
+    }
+    iter++;
+  }
+
+  // Done
+  s.push({
+    type: 'done',
+    desc: `🎉 二分结束！最小的最大数字为：${lo}`,
+    lo, answer: lo, total_0, total_1, iter: iter - 1, a, b
+  });
+
+  return s;
+}
+
+// ============================================================
+// Render step
+// ============================================================
+function renderStep(stepIndex) {
+  const area = document.getElementById('demoArea');
+  if (stepIndex < 0 || stepIndex >= steps.length) {
+    area.innerHTML = '<div style="text-align:center;color:#a0aec0;padding:40px 0;">等待开始...</div>';
+    return;
+  }
+  const st = steps[stepIndex];
+  let html = '';
+
+  switch (st.type) {
+    case 'init':
+      html = renderInit(st);
+      break;
+    case 'range_init':
+      html = renderRangeInit(st);
+      break;
+    case 'mid_point':
+      html = renderMidPoint(st);
+      break;
+    case 'count_check':
+      html = renderCountCheck(st);
+      break;
+    case 'result':
+      html = renderResult(st);
+      break;
+    case 'update':
+      html = renderUpdate(st);
+      break;
+    case 'done':
+      html = renderDone(st);
+      break;
+    default:
+      html = `<div style="padding:20px;text-align:center;">${st.desc}</div>`;
+  }
+
+  area.innerHTML = html;
+}
+
+function renderArrays(a, b, assignedA, assignedB) {
+  let html = '<div style="margin-bottom:8px;">';
+  html += '<div class="array-row">';
+  html += '<span class="array-label">数组 A：</span>';
+  html += '<div class="array-cells">';
+  for (let i = 0; i < a.length; i++) {
+    const cls = a[i] === 0 ? 'even-need' : 'odd-need';
+    const extra = assignedA && assignedA[i] !== undefined ? ' assigned' : '';
+    const val = assignedA && assignedA[i] !== undefined
+      ? `<span class="assign-val">${assignedA[i]}</span>` : '';
+    html += `<div class="array-cell ${cls}${extra}">${a[i]}${val}</div>`;
+  }
+  html += '</div></div>';
+
+  html += '<div class="array-row">';
+  html += '<span class="array-label">数组 B：</span>';
+  html += '<div class="array-cells">';
+  for (let i = 0; i < b.length; i++) {
+    const cls = b[i] === 0 ? 'even-need' : 'odd-need';
+    const extra = assignedB && assignedB[i] !== undefined ? ' assigned' : '';
+    const val = assignedB && assignedB[i] !== undefined
+      ? `<span class="assign-val">${assignedB[i]}</span>` : '';
+    html += `<div class="array-cell ${cls}${extra}">${b[i]}${val}</div>`;
+  }
+  html += '</div></div>';
+  html += '</div>';
+  return html;
+}
+
+function renderStatSummary(total_0, total_1) {
+  return `<div style="display:flex;gap:8px;font-size:0.85rem;">
+    <span style="background:#ebf8ff;padding:2px 10px;border-radius:4px;font-weight:600;">
+      偶数 (0): ${total_0} 个
+    </span>
+    <span style="background:#fffaf0;padding:2px 10px;border-radius:4px;font-weight:600;">
+      奇数 (1): ${total_1} 个
+    </span>
+  </div>`;
+}
+
+function renderBinSearchBar(lo, hi, mid, highlightMid) {
+  const range = Math.max(hi - lo, 1);
+  const loPct = 0;
+  const hiPct = 100;
+  const midPct = ((mid - lo) / range) * 100;
+  const labels = [];
+
+  // lo label
+  labels.push(`<div class="bs-label lo-label" style="left:${loPct}%;">
+    <span class="val">${lo}</span>lo
+  </div>`);
+  // hi label
+  labels.push(`<div class="bs-label hi-label" style="left:${hiPct}%;">
+    <span class="val">${hi}</span>hi
+  </div>`);
+
+  if (highlightMid && mid !== undefined) {
+    labels.push(`<div class="bs-label mid-label" style="left:${midPct}%;">
+      <span class="val">${mid}</span>mid
+    </div>`);
+  }
+
+  const markers = [];
+  if (highlightMid && mid !== undefined) {
+    markers.push(`<div class="bs-marker mid" style="left:${midPct}%;"></div>`);
+  }
+
+  return `<div class="bs-range">
+    <div class="bs-track">${labels.join('')}${markers.join('')}</div>
+  </div>`;
+}
+
+function renderInit(st) {
+  const { a, b, total_0, total_1 } = st;
+  return `
+    <div class="explain-box info">📌 <strong>问题分析</strong>：0 → 偶数，1 → 奇数，替换后两个数组均需递增。</div>
+    ${renderArrays(a, b)}
+    <div style="margin-top:8px;">${renderStatSummary(total_0, total_1)}</div>
+  `;
+}
+
+function renderRangeInit(st) {
+  const { lo, hi, total_0, total_1 } = st;
+  return `
+    <div class="explain-box">🔍 <strong>初始化二分搜索</strong></div>
+    ${renderArrays(st.a, st.b)}
+    ${renderStatSummary(total_0, total_1)}
+    ${renderBinSearchBar(lo, hi)}
+    <div style="margin-top:8px;font-size:0.9rem;color:#4a5568;">
+      答案在 [${lo}, ${hi}] 之间，开始二分查找最小的可行 X。
+    </div>
+  `;
+}
+
+function renderMidPoint(st) {
+  const { lo, hi, mid, total_0, total_1 } = st;
+  return `
+    <div class="explain-box">🎯 <strong>第 ${st.iter} 轮</strong>：取中点 X = ${mid}</div>
+    ${renderArrays(st.a, st.b)}
+    ${renderStatSummary(total_0, total_1)}
+    ${renderBinSearchBar(lo, hi, mid, true)}
+    <div style="margin-top:8px;font-size:0.9rem;color:#4a5568;">
+      检查 X = ${mid} 能否完成替换…
+    </div>
+  `;
+}
+
+function renderCountCheck(st) {
+  const { lo, hi, mid, total_0, total_1, evenAvail, oddAvail, feasible } = st;
+  const evenOk = total_0 <= evenAvail;
+  const oddOk = total_1 <= oddAvail;
+
+  return `
+    <div class="explain-box ${feasible ? 'success' : 'fail'}">
+      <strong>${feasible ? '✅' : '❌'} 检查 X = ${mid}</strong>：
+      ${feasible ? '可行！' : '不可行'}
+    </div>
+    ${renderArrays(st.a, st.b)}
+    ${renderBinSearchBar(lo, hi, mid, true)}
+    <div class="count-grid">
+      <div class="count-item even-box ${evenOk ? 'ok' : 'fail'}">
+        <div class="label">偶数 (替换 0)</div>
+        <div class="ratio">
+          <span class="need">${total_0}</span>
+          <span class="slash">/</span>
+          <span class="avail">${evenAvail}</span>
+        </div>
+        <div class="verdict ${evenOk ? 'ok' : 'fail'}">
+          ${evenOk ? '✅ 够用' : '❌ 不够'}
+        </div>
+      </div>
+      <div class="count-item odd-box ${oddOk ? 'ok' : 'fail'}">
+        <div class="label">奇数 (替换 1)</div>
+        <div class="ratio">
+          <span class="need">${total_1}</span>
+          <span class="slash">/</span>
+          <span class="avail">${oddAvail}</span>
+        </div>
+        <div class="verdict ${oddOk ? 'ok' : 'fail'}">
+          ${oddOk ? '✅ 够用' : '❌ 不够'}
+        </div>
+      </div>
+    </div>
+    <div style="font-size:0.85rem;color:#4a5568;margin-top:4px;">
+      可用偶数（≤${mid}）：${evenAvail} 个 = 2, 4, 6, …<br>
+      可用奇数（≤${mid}）：${oddAvail} 个 = 1, 3, 5, …
+    </div>
+  `;
+}
+
+function renderResult(st) {
+  const { lo, hi, mid, feasible } = st;
+  return `
+    <div class="explain-box ${feasible ? 'success' : 'fail'}">
+      <strong>${feasible ? '✅' : '❌'} 判定结果</strong><br>
+      ${feasible
+        ? `X = ${mid} 可行 → 尝试更小值，hi = ${mid}`
+        : `X = ${mid} 不可行 → 需要更大值，lo = ${mid + 1}`
+      }
+    </div>
+    ${renderBinSearchBar(lo, hi, mid, true)}
+  `;
+}
+
+function renderUpdate(st) {
+  const { lo, hi, feasible } = st;
+  return `
+    <div class="explain-box info">
+      <strong>📐 区间更新</strong><br>
+      ${feasible
+        ? `X = ${st.mid} 可行，hi = ${st.mid}，新区间 [${lo}, ${hi}]`
+        : `X = ${st.mid} 不可行，lo = ${st.mid + 1}，新区间 [${lo}, ${hi}]`
+      }
+    </div>
+    ${renderBinSearchBar(lo, hi)}
+    <div style="margin-top:8px;font-size:0.9rem;color:#4a5568;">
+      搜索区间长度：${hi - lo}
+    </div>
+  `;
+}
+
+function renderDone(st) {
+  const { answer, total_0, total_1 } = st;
+  const evenAvail = Math.floor(answer / 2);
+  const oddAvail = Math.ceil(answer / 2);
+
+  // Show a sample assignment
+  let assignHtml = '';
+  const a = st.a || [];
+  const b = st.b || [];
+  let assignedA = [], assignedB = [];
+  let nextEven = 2, nextOdd = 1;
+
+  for (let v of a) {
+    if (v === 0) { assignedA.push(nextEven); nextEven += 2; }
+    else { assignedA.push(nextOdd); nextOdd += 2; }
+  }
+  for (let v of b) {
+    if (v === 0) { assignedB.push(nextEven); nextEven += 2; }
+    else { assignedB.push(nextOdd); nextOdd += 2; }
+  }
+
+  return `
+    <div class="explain-box success" style="border-left-color:#805ad5;background:#faf5ff;">
+      🎉 <strong>二分结束！最少需要的最大数字为：${answer}</strong>
+    </div>
+    <div style="margin:12px 0;">
+      <strong style="font-size:0.9rem;">一组可行解（贪心分配）：</strong>
+    </div>
+    ${renderArrays(a, b, assignedA, assignedB)}
+    <div style="margin-top:8px;font-size:0.85rem;color:#4a5568;">
+      X = ${answer} 时：偶数可用 ${evenAvail} 个（需要 ${total_0} 个），奇数可用 ${oddAvail} 个（需要 ${total_1} 个）。
+    </div>
+  `;
+}
+
+// ============================================================
+// Step list
+// ============================================================
+function renderStepList() {
+  const list = document.getElementById('stepList');
+  list.innerHTML = '';
+  steps.forEach((step, idx) => {
+    const div = document.createElement('div');
+    div.className = 'step' + (idx === currentStep ? ' active' : '');
+    let icon = '';
+    switch (step.type) {
+      case 'init': icon = '📋'; break;
+      case 'range_init': icon = '🔍'; break;
+      case 'mid_point': icon = '🎯'; break;
+      case 'count_check': icon = '🔢'; break;
+      case 'result': icon = step.feasible ? '✅' : '❌'; break;
+      case 'update': icon = '📐'; break;
+      case 'done': icon = '🎉'; break;
+    }
+    div.innerHTML = `<span class="step-num">#${idx+1}</span><span class="step-desc">${icon} ${step.desc}</span>`;
+    div.onclick = () => jumpToStep(idx);
+    list.appendChild(div);
+  });
+  if (currentStep >= 0) {
+    const active = list.querySelector('.step.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+// ============================================================
+// Status update
+// ============================================================
+function updateStatus(step) {
+  if (!step) {
+    document.getElementById('status1').textContent = '—';
+    document.getElementById('status2').textContent = '—';
+    return;
+  }
+  const typeNames = {
+    init: '初始状态',
+    range_init: '设置二分范围',
+    mid_point: '取中点',
+    count_check: '检查可行性',
+    result: '判定结果',
+    update: '更新区间',
+    done: '完成'
+  };
+  document.getElementById('status1').textContent = typeNames[step.type] || step.type;
+  if (step.lo !== undefined && step.hi !== undefined) {
+    document.getElementById('status2').textContent = `[${step.lo}, ${step.hi}]`;
+  } else {
+    document.getElementById('status2').textContent = step.type === 'init' ? '分析中…' : '—';
+  }
+}
+
+// ============================================================
+// Control functions
+// ============================================================
+function renderAll() {
+  const total = steps.length;
+  document.getElementById('stepNum').textContent = total > 0 ? currentStep + 1 : 0;
+  document.getElementById('stepTotal').textContent = total;
+  document.getElementById('btnStep').disabled = (currentStep >= total - 1);
+  document.getElementById('btnReset').disabled = (total === 0);
+  renderStep(currentStep);
+  renderStepList();
+  updateStatus(steps[currentStep]);
+}
+
+function startDemo() {
+  stopAuto();
+  const data = parseInput();
+  if (!data) return;
+  steps = generateSteps(data);
+  currentStep = 0;
+  renderAll();
+}
+
+function stepForward() {
+  if (steps.length === 0) { startDemo(); return; }
+  if (currentStep < steps.length - 1) { currentStep++; renderAll(); }
+}
+
+function prevStep() {
+  if (currentStep > 0) { currentStep--; renderAll(); }
+}
+
+function jumpToStep(idx) {
+  if (idx < 0 || idx >= steps.length) return;
+  currentStep = idx;
+  renderAll();
+}
+
+function resetSteps() { stopAuto(); currentStep = 0; renderAll(); }
+
+function resetDemo() {
+  stopAuto();
+  steps = []; currentStep = -1; renderAll();
+  document.getElementById('demoArea').innerHTML =
+    '<div style="text-align:center;color:#a0aec0;padding:40px 0;">点击「🚀 逐步演示」或「▶️ 自动演示」开始</div>';
+  document.getElementById('stepList').innerHTML = '<div style="color:#a0aec0;">等待开始...</div>';
+  document.getElementById('stepNum').textContent = '0';
+  document.getElementById('stepTotal').textContent = '0';
+  document.getElementById('status1').textContent = '—';
+  document.getElementById('status2').textContent = '—';
+}
+
+function autoPlay() {
+  if (autoTimer) { stopAuto(); return; }
+  if (steps.length === 0 || currentStep >= steps.length - 1) { startDemo(); if (steps.length === 0) return; currentStep = -1; }
+  const speed = parseInt(document.getElementById('speedSlider').value) || 800;
+  document.getElementById('btnAuto').textContent = '⏸ 暂停';
+  document.getElementById('btnStep').disabled = true;
+  function tick() {
+    if (currentStep < steps.length - 1) {
+      currentStep++; renderAll();
+      if (currentStep < steps.length - 1) { autoTimer = setTimeout(tick, speed); } else { stopAuto(); }
+    }
+  }
+  autoTimer = setTimeout(tick, speed);
+}
+
+function stopAuto() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  document.getElementById('btnAuto').textContent = '▶️ 自动演示';
+  document.getElementById('btnStep').disabled = (currentStep >= steps.length - 1 && steps.length > 0);
+}
+
+function setExample(n) {
+  const examples = {
+    1: { a: '0', b: '4 1 0 1 1' },
+    2: { a: '4 0 1 0 1', b: '4 1 0 0 1' },
+    3: { a: '5 0 1 0 0 1', b: '4 0 0 0 1' },
+  };
+  const ex = examples[n];
+  if (ex) {
+    document.getElementById('inputA').value = ex.a;
+    document.getElementById('inputB').value = ex.b;
+  }
+}
+
+// Event listeners
+document.getElementById('speedSlider').addEventListener('input', function () {
+  document.getElementById('speedLabel').textContent = this.value + 'ms';
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'ArrowRight') { e.preventDefault(); stepForward(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
+  else if (e.key === ' ') { e.preventDefault(); autoTimer ? stopAuto() : autoPlay(); }
+});
+
+document.getElementById('inputA').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') document.getElementById('inputB').focus();
+});
+document.getElementById('inputB').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') startDemo();
+});
+
+// Init code block
+document.getElementById('codeBlock').textContent = `#include <bits/stdc++.h>
+using namespace std;
+
+bool check(int x, const vector<int>& a, const vector<int>& b) {
+    int even_cnt = 0, odd_cnt = 0;
+    for (int v : a) (v == 0 ? even_cnt : odd_cnt)++;
+    for (int v : b) (v == 0 ? even_cnt : odd_cnt)++;
+    if (even_cnt > x / 2) return false;
+    if (odd_cnt > (x + 1) / 2) return false;
+    return true;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int n, m; cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) cin >> a[i];
+    cin >> m;
+    vector<int> b(m);
+    for (int i = 0; i < m; i++) cin >> b[i];
+    int lo = 0, hi = 2 * (n + m) + 5;
+    while (lo < hi) {
+        int mid = (lo + hi) / 2;
+        if (check(mid, a, b)) hi = mid;
+        else lo = mid + 1;
+    }
+    cout << lo << "\\n";
+    return 0;
+}`;
+</script>
+</body>
+</html>
