@@ -54,9 +54,20 @@ header .badge.green { background: #38a169; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-sm { padding: 4px 10px; font-size: 0.78rem; }
 
+/* ===== Demo layout: left viz + right step history ===== */
+.demo-layout {
+  display: grid; grid-template-columns: 1fr 260px; gap: 16px;
+}
+@media (max-width: 900px) { .demo-layout { grid-template-columns: 1fr; } }
+.demo-left { min-width: 0; }
+.demo-right {
+  min-width: 0; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;
+  padding: 10px;
+}
+
 .demo-area {
-  padding: 16px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;
-  min-height: 200px;
+  padding: 14px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;
+  min-height: 180px;
 }
 .status-bar {
   display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem;
@@ -64,16 +75,21 @@ header .badge.green { background: #38a169; }
 }
 .status-item strong { color: #1a365d; }
 
+/* Step history on the right */
 .step-list {
-  max-height: 220px; overflow-y: auto; font-size: 0.8rem;
+  max-height: 420px; overflow-y: auto; font-size: 0.78rem;
+  padding-right: 4px;
 }
 .step-list .step {
-  padding: 5px 8px; border-left: 3px solid transparent; margin-bottom: 2px; cursor: pointer;
-  display: flex; align-items: flex-start; gap: 8px;
+  padding: 4px 6px; border-left: 3px solid transparent; margin-bottom: 2px; cursor: pointer;
+  display: flex; align-items: flex-start; gap: 6px; border-radius: 3px;
 }
+.step-list .step:hover { background: #edf2f7; }
 .step-list .step.active { background: #ebf8ff; border-left-color: #3182ce; }
-.step-list .step .step-num { font-weight: 700; color: #2b6cb0; flex-shrink: 0; min-width: 28px; }
-.step-list .step .step-desc { color: #4a5568; }
+.step-list .step .step-num { font-weight: 700; color: #2b6cb0; flex-shrink: 0; min-width: 24px; font-size: 0.72rem; }
+.step-list .step .step-desc { color: #4a5568; line-height: 1.3; }
+.step-list .step.analysis .step-num { color: #805ad5; }
+.step-list .step.analysis.active { background: #faf5ff; border-left-color: #805ad5; }
 
 .code-block {
   background: #1a202c; color: #e2e8f0; padding: 16px; border-radius: 8px;
@@ -88,19 +104,16 @@ header .badge.green { background: #38a169; }
 .code-block .fn { color: #63b3ed; }
 .code-block .op { color: #f6ad55; }
 
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-@media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
-
 /* Arrays */
 .array-row {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 6px 0;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 5px 0;
 }
-.array-label { font-weight: 700; color: #2d3748; min-width: 70px; font-size: 0.9rem; }
-.array-cells { display: flex; gap: 6px; flex-wrap: wrap; }
+.array-label { font-weight: 700; color: #2d3748; min-width: 60px; font-size: 0.85rem; }
+.array-cells { display: flex; gap: 5px; flex-wrap: wrap; }
 .array-cell {
-  width: 44px; height: 44px; border-radius: 8px; display: flex;
+  width: 38px; height: 38px; border-radius: 6px; display: flex;
   align-items: center; justify-content: center; font-weight: 700;
-  font-size: 0.9rem; position: relative;
+  font-size: 0.85rem; position: relative;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 .array-cell.even-need { background: #ebf8ff; color: #2b6cb0; border: 2px solid #90cdf4; }
@@ -108,16 +121,16 @@ header .badge.green { background: #38a169; }
 .array-cell.done { border-width: 3px; }
 .array-cell.done.even-need { border-color: #3182ce; background: #bee3f8; }
 .array-cell.done.odd-need { border-color: #dd6b20; background: #feebc8; }
-.array-cell .assign-val { position: absolute; bottom: -18px; font-size: 0.7rem; font-weight: 600; color: #2d3748; }
+.array-cell .assign-val { position: absolute; bottom: -16px; font-size: 0.65rem; font-weight: 600; color: #2d3748; }
 
 /* DP table */
-.dp-wrap { overflow-x: auto; margin: 8px 0; }
-.dp-table { border-collapse: collapse; font-size: 0.82rem; min-width: 180px; }
+.dp-wrap { overflow-x: auto; margin: 6px 0; }
+.dp-table { border-collapse: collapse; font-size: 0.8rem; min-width: 160px; }
 .dp-table th, .dp-table td {
-  padding: 7px 11px; border: 1px solid #cbd5e0; text-align: center;
-  min-width: 38px; transition: all 0.2s;
+  padding: 5px 9px; border: 1px solid #cbd5e0; text-align: center;
+  min-width: 34px; transition: all 0.2s;
 }
-.dp-table th { background: #edf2f7; font-weight: 600; font-size: 0.75rem; }
+.dp-table th { background: #edf2f7; font-weight: 600; font-size: 0.72rem; }
 .dp-table td.empty { background: #fff; color: #a0aec0; }
 .dp-table td.filled { background: #f0fff4; color: #276749; font-weight: 600; }
 .dp-table td.current {
@@ -128,39 +141,47 @@ header .badge.green { background: #38a169; }
   background: #e9d8fd; color: #6b46c1; font-weight: 700;
   border: 2px solid #805ad5;
 }
-.dp-table td.from-a { border-left: 3px solid #3182ce; }
-.dp-table td.from-b { border-top: 3px solid #dd6b20; }
 
-/* nxt calculation box */
+/* nxt box */
 .nxt-box {
-  display: flex; gap: 16px; flex-wrap: wrap; margin: 8px 0;
+  display: flex; gap: 12px; flex-wrap: wrap; margin: 6px 0;
 }
 .nxt-item {
-  flex: 1; min-width: 200px; padding: 10px 14px; border-radius: 8px;
-  border: 2px solid #e2e8f0; font-size: 0.85rem;
+  flex: 1; min-width: 180px; padding: 8px 12px; border-radius: 6px;
+  border: 2px solid #e2e8f0; font-size: 0.82rem;
 }
-.nxt-item .label { font-weight: 600; margin-bottom: 4px; }
-.nxt-item .calc { font-family: "SF Mono", "Fira Code", monospace; font-size: 0.9rem; color: #2d3748; }
+.nxt-item .label { font-weight: 600; margin-bottom: 3px; font-size: 0.78rem; }
+.nxt-item .calc { font-family: "SF Mono", "Fira Code", monospace; font-size: 0.85rem; color: #2d3748; }
 .nxt-item.chosen { border-color: #805ad5; background: #faf5ff; }
 .nxt-item.from-a { border-color: #3182ce; background: #ebf8ff; }
 .nxt-item.from-b { border-color: #dd6b20; background: #fffaf0; }
 
 .explain-box {
   background: #ebf8ff; border-left: 4px solid #3182ce;
-  padding: 10px 14px; border-radius: 6px; margin: 8px 0;
-  font-size: 0.88rem; line-height: 1.6;
+  padding: 9px 12px; border-radius: 6px; margin: 6px 0;
+  font-size: 0.85rem; line-height: 1.6;
 }
 .explain-box.success { background: #f0fff4; border-left-color: #38a169; }
 .explain-box.fail { background: #fff5f5; border-left-color: #e53e3e; }
 .explain-box.info { background: #faf5ff; border-left-color: #805ad5; }
 .explain-box.warn { background: #fffff0; border-left-color: #d69e2e; }
+.explain-box.deduce { background: #fefcf0; border-left-color: #b7791f; }
 
-.stat-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+.stat-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0; }
 .stat-tag {
-  padding: 3px 10px; border-radius: 4px; font-weight: 600; font-size: 0.8rem;
+  padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.78rem;
 }
 .stat-tag.even { background: #ebf8ff; color: #2b6cb0; }
 .stat-tag.odd { background: #fffaf0; color: #c05621; }
+
+.analysis-card {
+  background: #faf5ff; border: 1px solid #e9d8fd; border-radius: 8px;
+  padding: 12px 16px; margin: 6px 0;
+}
+.analysis-card h3 { font-size: 0.92rem; color: #6b46c1; margin-bottom: 6px; }
+.analysis-card p, .analysis-card li { font-size: 0.85rem; color: #4a5568; line-height: 1.7; }
+.analysis-card ul { padding-left: 18px; margin: 4px 0; }
+.analysis-card .key { background: #fefcbf; padding: 1px 5px; border-radius: 3px; font-weight: 600; font-family: monospace; }
 </style>
 </head>
 <body>
@@ -190,8 +211,8 @@ header .badge.green { background: #38a169; }
     </div>
     <div class="controls" style="margin-bottom:0;">
       <span style="font-size:0.82rem;color:#718096;">
-        速度：<input id="speedSlider" type="range" min="300" max="2500" value="900" step="100">
-        <span id="speedLabel">900ms</span>
+        速度：<input id="speedSlider" type="range" min="300" max="2500" value="1200" step="100">
+        <span id="speedLabel">1200ms</span>
       </span>
       <span style="margin-left:12px;font-size:0.82rem;color:#718096;">
         💡 <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">→</kbd>
@@ -207,37 +228,41 @@ header .badge.green { background: #38a169; }
     </div>
   </div>
 
+  <!-- Main demo card with side-by-side layout -->
   <div class="card">
     <h2>🧮 DP 填表过程</h2>
-    <div style="margin-bottom:10px;">
+    <div style="margin-bottom:8px;">
       <button class="btn btn-warning btn-sm" id="btnStep" onclick="stepForward()" disabled>⏭ 下一步</button>
       <button class="btn btn-gray btn-sm" id="btnReset" onclick="resetSteps()" disabled>↺ 重置步骤</button>
       <span style="margin-left:10px;font-size:0.85rem;font-weight:600;">
         步骤 <span id="stepNum">0</span> / <span id="stepTotal">0</span>
       </span>
     </div>
-    <div class="demo-area" id="demoArea">
-      <div style="text-align:center;color:#a0aec0;padding:40px 0;">
-        点击「🚀 逐步演示」或「▶️ 自动演示」开始
+    <div class="demo-layout">
+      <div class="demo-left">
+        <div class="demo-area" id="demoArea">
+          <div style="text-align:center;color:#a0aec0;padding:40px 0;">
+            点击「🚀 逐步演示」或「▶️ 自动演示」开始
+          </div>
+        </div>
+        <div class="status-bar">
+          <div class="status-item"><strong>当前：</strong><span id="status1">—</span></div>
+          <div class="status-item"><strong>DP 位置：</strong><span id="status2">—</span></div>
+        </div>
       </div>
-    </div>
-    <div class="status-bar">
-      <div class="status-item"><strong>当前：</strong><span id="status1">—</span></div>
-      <div class="status-item"><strong>DP 位置：</strong><span id="status2">—</span></div>
+      <div class="demo-right">
+        <div style="font-size:0.8rem;font-weight:700;color:#2d3748;margin-bottom:6px;">📜 步骤历史</div>
+        <div class="step-list" id="stepList">
+          <div style="color:#a0aec0;font-size:0.78rem;">等待开始...</div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="two-col">
-    <div class="card">
-      <h2>📜 步骤历史</h2>
-      <div class="step-list" id="stepList">
-        <div style="color:#a0aec0;">等待开始...</div>
-      </div>
-    </div>
-    <div class="card">
-      <h2>💻 参考代码 (C++)</h2>
-      <div class="code-block" id="codeBlock"></div>
-    </div>
+  <!-- Bottom: code only -->
+  <div class="card">
+    <h2>💻 参考代码 (C++)</h2>
+    <div class="code-block" id="codeBlock"></div>
   </div>
 
   <div class="card">
@@ -259,9 +284,6 @@ let steps = [];
 let currentStep = -1;
 let autoTimer = null;
 
-// ============================================================
-// Parse
-// ============================================================
 function parseInput() {
   const rawA = document.getElementById('inputA').value.trim().split(/\s+/).map(Number);
   const rawB = document.getElementById('inputB').value.trim().split(/\s+/).map(Number);
@@ -271,7 +293,6 @@ function parseInput() {
   return { n, m, a, b };
 }
 
-// nxt(x, y) = smallest number > x with parity y
 function nxt(x, y) {
   let k = x + 1;
   while (k % 2 !== y) k++;
@@ -284,81 +305,77 @@ function nxt(x, y) {
 function generateSteps(data) {
   const { n, m, a, b } = data;
   const s = [];
-
-  // 1-index arrays for display
   const A = [0, ...a];
   const B = [0, ...b];
+  const INF = 1e9;
 
-  // init
+  // ── Step 0: init ──
   s.push({
     type: 'init',
-    desc: `数组 A: [${a.join(', ')}]，B: [${b.join(', ')}]。f[0][0] = 0`,
+    desc: `数组 A: [${a.join(', ')}]，B: [${b.join(', ')}]`,
     a, b, n, m
   });
 
-  const INF = 1e9;
+  // ── Analysis steps: derive the DP equation ──
+  s.push({
+    type: 'analysis_state',
+    desc: `定义状态：f[i][j] 表示处理完 A 前 i 个、B 前 j 个后，已用数字的最大值的最小可能值`,
+    a, b, n, m
+  });
+
+  s.push({
+    type: 'analysis_boundary',
+    desc: `边界：f[0][0] = 0（未用任何数字），其余初始化为 ∞`,
+    a, b, n, m
+  });
+
+  s.push({
+    type: 'analysis_nxt',
+    desc: `nxt(x, y)：大于 x 的最小整数，且该数 % 2 = y（0→偶数，1→奇数）`,
+    a, b, n, m
+  });
+
+  s.push({
+    type: 'analysis_transition',
+    desc: `转移方程推导：f[i][j] = min(nxt(f[i-1][j], a[i]), nxt(f[i][j-1], b[j]))`,
+    a, b, n, m
+  });
+
+  // ── DP computation ──
   const f = Array.from({ length: n + 1 }, () => Array(m + 1).fill(INF));
   const from = Array.from({ length: n + 1 }, () => Array(m + 1).fill(null));
   f[0][0] = 0;
 
-  // DP computation in row-major order
-  const order = [];
   for (let i = 0; i <= n; i++) {
     for (let j = 0; j <= m; j++) {
       if (i === 0 && j === 0) continue;
-      let bestVal = INF;
-      let bestDir = null;
-
+      let bestVal = INF, bestDir = null;
       if (i > 0 && f[i - 1][j] < INF) {
         const v = nxt(f[i - 1][j], A[i]);
-        if (v < bestVal) {
-          bestVal = v;
-          bestDir = { dir: 'A', fromI: i - 1, fromJ: j, nxtVal: v, parity: A[i] };
-        }
+        if (v < bestVal) { bestVal = v; bestDir = { dir: 'A', fromI: i - 1, fromJ: j, nxtVal: v, parity: A[i] }; }
       }
       if (j > 0 && f[i][j - 1] < INF) {
         const v = nxt(f[i][j - 1], B[j]);
-        if (v < bestVal) {
-          bestVal = v;
-          bestDir = { dir: 'B', fromI: i, fromJ: j - 1, nxtVal: v, parity: B[j] };
-        }
+        if (v < bestVal) { bestVal = v; bestDir = { dir: 'B', fromI: i, fromJ: j - 1, nxtVal: v, parity: B[j] }; }
       }
-
-      if (bestVal < INF) {
-        f[i][j] = bestVal;
-        from[i][j] = bestDir;
-      }
+      if (bestVal < INF) { f[i][j] = bestVal; from[i][j] = bestDir; }
     }
   }
 
-  // Generate steps for each cell in row-major order
   for (let i = 0; i <= n; i++) {
     for (let j = 0; j <= m; j++) {
       if (i === 0 && j === 0) continue;
-      const cellF = f[i][j];
-      const cellFrom = from[i][j];
-
-      // Compute nxt values for display
+      const cellF = f[i][j], cellFrom = from[i][j];
       let nxtA = null, nxtB = null;
       if (i > 0 && f[i - 1][j] < INF) nxtA = { fromVal: f[i - 1][j], result: nxt(f[i - 1][j], A[i]) };
       if (j > 0 && f[i][j - 1] < INF) nxtB = { fromVal: f[i][j - 1], result: nxt(f[i][j - 1], B[j]) };
-
-      let desc;
-      if (cellF < INF) {
-        desc = `f[${i}][${j}] = ${cellF}`;
-        if (cellFrom) {
-          desc += ` ← 从 ${cellFrom.dir === 'A' ? `A[${i}]` : `B[${j}]`} 来`;
-        }
-      } else {
-        desc = `f[${i}][${j}] = ∞（不可达）`;
-      }
-
+      const desc = cellF < INF
+        ? `f[${i}][${j}] = ${cellF}${cellFrom ? ' ← ' + (cellFrom.dir === 'A' ? 'A' : 'B') : ''}`
+        : `f[${i}][${j}] = ∞`;
       s.push({
-        type: 'cell',
-        desc,
+        type: 'cell', desc,
         i, j, val: cellF < INF ? cellF : INF,
-        from: cellFrom,
-        nxtA, nxtB,
+        from: cellFrom, nxtA, nxtB,
         f: f.map(r => [...r]),
         isAnswer: (i === n && j === m),
         a, b, n, m
@@ -366,13 +383,11 @@ function generateSteps(data) {
     }
   }
 
-  // done
+  // ── done ──
   const answer = f[n][m];
   s.push({
     type: 'done',
-    desc: answer < INF
-      ? `🎉 答案：f[${n}][${m}] = ${answer}`
-      : '❌ 无解',
+    desc: answer < INF ? `🎉 答案：f[${n}][${m}] = ${answer}` : '❌ 无解',
     answer: answer < INF ? answer : -1,
     f: f.map(r => [...r]),
     from: from.map(r => [...r]),
@@ -408,7 +423,7 @@ function renderArrays(a, b, doneA, doneB) {
 
 function renderDpTable(f, currentI, currentJ, isAnswer) {
   const n = f.length - 1, m = f[0].length - 1;
-  if (n * m > 100) return '<div style="color:#a0aec0;font-size:0.85rem;">DP 表过大，仅显示数值</div>';
+  if (n * m > 100) return '<div style="color:#a0aec0;font-size:0.82rem;">DP 表过大</div>';
   const INF = 1e9;
   let html = '<div class="dp-wrap"><table class="dp-table"><tr><th></th>';
   for (let j = 0; j <= m; j++) html += `<th>B${j}</th>`;
@@ -418,15 +433,10 @@ function renderDpTable(f, currentI, currentJ, isAnswer) {
     for (let j = 0; j <= m; j++) {
       const val = f[i][j];
       let cls = 'empty', txt = '∞';
-      if (val < INF) {
-        cls = 'filled';
-        txt = String(val);
+      if (val < INF) { cls = 'filled'; txt = String(val);
         if (i === currentI && j === currentJ) cls += ' current';
         if (isAnswer && i === n && j === m) cls += ' answer';
-      } else if (i === currentI && j === currentJ) {
-        cls = 'empty current';
-        txt = '∞';
-      }
+      } else if (i === currentI && j === currentJ) { cls = 'empty current'; txt = '∞'; }
       html += `<td class="${cls}">${txt}</td>`;
     }
     html += '</tr>';
@@ -446,13 +456,92 @@ function renderStep(stepIndex) {
   switch (st.type) {
     case 'init':
       area.innerHTML = `
-        <div class="explain-box info">📌 初始状态：f[0][0] = 0</div>
+        <div class="explain-box info">📌 初始状态</div>
         ${renderArrays(st.a, st.b)}
         <div class="stat-row">
           <span class="stat-tag even">0 → 偶数</span>
           <span class="stat-tag odd">1 → 奇数</span>
         </div>
+        <div style="font-size:0.85rem;color:#4a5568;margin-top:4px;">
+          目标：为每个位置分配符合奇偶性的数，两数组各自递增，所有数互不相同且 ≤ 某上限。
+          最小化这个上限。
+        </div>`;
+      break;
+
+    case 'analysis_state': {
+      const total0 = st.a.filter(x=>x===0).length + st.b.filter(x=>x===0).length;
+      const total1 = st.a.filter(x=>x===1).length + st.b.filter(x=>x===1).length;
+      area.innerHTML = `
+        <div class="analysis-card">
+          <h3>📐 第一步：定义状态</h3>
+          <p>设 <span class="key">f[i][j]</span> = 处理完 <strong>A 的前 i 个</strong>元素和 <strong>B 的前 j 个</strong>元素后，</p>
+          <p style="padding-left:20px;">已经使用过的数字中，<strong>最大值的最小可能值</strong>。</p>
+          <p style="margin-top:6px;">最终答案就是 <span class="key">f[n][m]</span>（n 和 m 是两数组长度）。</p>
+        </div>
+        ${renderArrays(st.a, st.b)}
+        <div class="stat-row">
+          <span class="stat-tag even">偶数（替换 0）共 ${total0} 个</span>
+          <span class="stat-tag odd">奇数（替换 1）共 ${total1} 个</span>
+        </div>`;
+      break;
+    }
+
+    case 'analysis_boundary':
+      area.innerHTML = `
+        <div class="analysis-card">
+          <h3>🔹 第二步：边界条件</h3>
+          <p><span class="key">f[0][0] = 0</span> — 还没有使用任何数字，已使用的最大值为 0（哨兵）。</p>
+          <p style="margin-top:4px;">其余 <span class="key">f[i][j]</span> 初始化为 <span class="key">∞</span>（正无穷），表示不可达。</p>
+        </div>
+        ${renderArrays(st.a, st.b)}
         ${renderDpTable([[0]], 0, 0)}`;
+      break;
+
+    case 'analysis_nxt': {
+      const examples = [
+        { x: 0, y: 0, want: '偶数', result: 2 },
+        { x: 1, y: 1, want: '奇数', result: 3 },
+        { x: 3, y: 0, want: '偶数', result: 4 },
+        { x: 4, y: 1, want: '奇数', result: 5 }
+      ];
+      area.innerHTML = `
+        <div class="analysis-card">
+          <h3>🔧 第三步：辅助函数 nxt(x, y)</h3>
+          <p><span class="key">nxt(x, y)</span> = 求 <strong>大于 x</strong> 的最小整数 k，且 <span class="key">k % 2 = y</span>。</p>
+          <ul>
+            <li>y = 0 → 偶数（2, 4, 6, …）</li>
+            <li>y = 1 → 奇数（1, 3, 5, …）</li>
+          </ul>
+          <p style="margin-top:4px;">为什么？替换规则要求 0→偶数、1→奇数，且每个新数必须＞前一个已用的数。</p>
+        </div>
+        <div class="stat-row">${examples.map(e =>
+          `<span class="stat-tag" style="background:#edf2f7;color:#2d3748;">
+            nxt(${e.x}, ${e.y}) = ${e.result}（${e.want}）</span>`
+        ).join('')}</div>`;
+      break;
+    }
+
+    case 'analysis_transition':
+      area.innerHTML = `
+        <div class="analysis-card">
+          <h3>🔄 第四步：状态转移方程</h3>
+          <p>要计算 <span class="key">f[i][j]</span>，最后一个填的数字可能来自：</p>
+          <ul>
+            <li><strong>从 A 来</strong>：前一步是 <span class="key">f[i-1][j]</span>（已处理 A 前 i-1 个、B 前 j 个），
+              再填 A 的第 i 个数 <span class="key">a[i]</span>。<br>
+              填入的数 = <span class="key">nxt(f[i-1][j], a[i])</span></li>
+            <li><strong>从 B 来</strong>：前一步是 <span class="key">f[i][j-1]</span>（已处理 A 前 i 个、B 前 j-1 个），
+              再填 B 的第 j 个数 <span class="key">b[j]</span>。<br>
+              填入的数 = <span class="key">nxt(f[i][j-1], b[j])</span></li>
+          </ul>
+          <p style="margin-top:6px;">取两种方式中结果更小的那个：</p>
+          <p style="text-align:center;font-size:1rem;margin:6px 0;padding:8px;background:#edf2f7;border-radius:6px;">
+            <span class="key">f[i][j] = min( nxt(f[i-1][j], a[i]), nxt(f[i][j-1], b[j]) )</span>
+          </p>
+        </div>
+        <div style="font-size:0.85rem;color:#4a5568;margin-top:4px;">
+          其中 <strong>a[i]</strong>（值为 0 或 1）决定了要填偶还是奇，<strong>b[j]</strong> 同理。
+        </div>`;
       break;
 
     case 'cell': {
@@ -464,22 +553,19 @@ function renderStep(stepIndex) {
         if (st.nxtA) {
           const chosen = st.from && st.from.dir === 'A';
           nxtHtml += `<div class="nxt-item from-a${chosen ? ' chosen' : ''}">
-            <div class="label">从 A[${st.i}] 来 ${chosen ? '✅ 选中' : ''}</div>
-            <div class="calc">nxt(f[${st.i - 1}][${st.j}]=${st.nxtA.fromVal}, ${st.a[st.i - 1]}) =
-              >${st.nxtA.fromVal} 的最小${st.a[st.i - 1] === 0 ? '偶' : '奇'}数 = ${st.nxtA.result}</div>
+            <div class="label">从 A[${st.i}]（${st.a[st.i - 1]}）${chosen ? '✅ 选中' : ''}</div>
+            <div class="calc">nxt(${st.nxtA.fromVal}, ${st.a[st.i - 1]}) = ${st.nxtA.result}</div>
           </div>`;
         }
         if (st.nxtB) {
           const chosen = st.from && st.from.dir === 'B';
           nxtHtml += `<div class="nxt-item from-b${chosen ? ' chosen' : ''}">
-            <div class="label">从 B[${st.j}] 来 ${chosen ? '✅ 选中' : ''}</div>
-            <div class="calc">nxt(f[${st.i}][${st.j - 1}]=${st.nxtB.fromVal}, ${st.b[st.j - 1]}) =
-              >${st.nxtB.fromVal} 的最小${st.b[st.j - 1] === 0 ? '偶' : '奇'}数 = ${st.nxtB.result}</div>
+            <div class="label">从 B[${st.j}]（${st.b[st.j - 1]}）${chosen ? '✅ 选中' : ''}</div>
+            <div class="calc">nxt(${st.nxtB.fromVal}, ${st.b[st.j - 1]}) = ${st.nxtB.result}</div>
           </div>`;
         }
         nxtHtml += '</div>';
       }
-
       area.innerHTML = `
         ${reachable
           ? `<div class="explain-box">📍 计算 f[${st.i}][${st.j}]</div>`
@@ -497,45 +583,28 @@ function renderStep(stepIndex) {
     }
 
     case 'done': {
-      const INF = 1e9;
-      const fTable = st.f;
-      const n = st.n, m = st.m;
-      const answer = st.answer;
-
-      // Backtrack
-      const assignA = Array(n).fill(undefined);
-      const assignB = Array(m).fill(undefined);
+      const n = st.n, m = st.m, answer = st.answer;
+      const assignA = Array(n).fill(undefined), assignB = Array(m).fill(undefined);
       if (answer > 0) {
         let i = n, j = m;
-        const usedVals = new Set();
         while (i > 0 || j > 0) {
-          const fromData = st.from[i][j];
-          if (!fromData) break;
-          if (fromData.dir === 'A') {
-            assignA[i - 1] = fromData.nxtVal;
-            i = fromData.fromI;
-            j = fromData.fromJ;
-          } else {
-            assignB[j - 1] = fromData.nxtVal;
-            i = fromData.fromI;
-            j = fromData.fromJ;
-          }
+          const fd = st.from[i][j];
+          if (!fd) break;
+          if (fd.dir === 'A') { assignA[i - 1] = fd.nxtVal; i = fd.fromI; j = fd.fromJ; }
+          else { assignB[j - 1] = fd.nxtVal; i = fd.fromI; j = fd.fromJ; }
         }
       }
-
       area.innerHTML = `
         <div class="explain-box success" style="border-left-color:#805ad5;background:#faf5ff;">
           🎉 <strong>答案：f[${n}][${m}] = ${answer}</strong>
         </div>
         ${renderArrays(st.a, st.b, assignA, assignB)}
-        ${renderDpTable(fTable, n, m, true)}
+        ${renderDpTable(st.f, n, m, true)}
         <div class="stat-row">
-          <span class="stat-tag even">偶数: ${assignA.filter((_,i)=>st.a[i]===0).length + assignB.filter((_,i)=>st.b[i]===0).length} 个</span>
-          <span class="stat-tag odd">奇数: ${assignA.filter((_,i)=>st.a[i]===1).length + assignB.filter((_,i)=>st.b[i]===1).length} 个</span>
+          <span class="stat-tag even">偶数 ${assignA.filter((_,i)=>st.a[i]===0).length + assignB.filter((_,i)=>st.b[i]===0).length} 个</span>
+          <span class="stat-tag odd">奇数 ${assignA.filter((_,i)=>st.a[i]===1).length + assignB.filter((_,i)=>st.b[i]===1).length} 个</span>
         </div>
-        <div style="margin-top:6px;font-size:0.85rem;color:#4a5568;">
-          DP 表回溯得到一组可行分配。使用的最大数字为 ${answer}，即最小的可能值。
-        </div>`;
+        <div style="margin-top:4px;font-size:0.82rem;color:#4a5568;">DP 回溯得到一组可行分配。最大数字 ${answer} 即为最小值。</div>`;
       break;
     }
 
@@ -545,21 +614,29 @@ function renderStep(stepIndex) {
 }
 
 // ============================================================
-// Step list
+// Step list (right side)
 // ============================================================
 function renderStepList() {
   const list = document.getElementById('stepList');
   list.innerHTML = '';
   steps.forEach((step, idx) => {
     const div = document.createElement('div');
-    div.className = 'step' + (idx === currentStep ? ' active' : '');
+    const isAnalysis = step.type.startsWith('analysis');
+    div.className = 'step' + (idx === currentStep ? ' active' : '') + (isAnalysis ? ' analysis' : '');
     let icon = '';
     switch (step.type) {
       case 'init': icon = '📋'; break;
+      case 'analysis_state': icon = '📐'; break;
+      case 'analysis_boundary': icon = '🔹'; break;
+      case 'analysis_nxt': icon = '🔧'; break;
+      case 'analysis_transition': icon = '🔄'; break;
       case 'cell': icon = step.val < 1e9 ? '✅' : '❌'; break;
       case 'done': icon = '🎉'; break;
     }
-    div.innerHTML = `<span class="step-num">#${idx+1}</span><span class="step-desc">${icon} ${step.desc}</span>`;
+    // Shortened description for the side panel
+    let shortDesc = step.desc;
+    if (shortDesc.length > 40) shortDesc = shortDesc.slice(0, 38) + '…';
+    div.innerHTML = `<span class="step-num">#${idx+1}</span><span class="step-desc">${icon} ${shortDesc}</span>`;
     div.onclick = () => jumpToStep(idx);
     list.appendChild(div);
   });
@@ -571,7 +648,15 @@ function renderStepList() {
 
 function updateStatus(step) {
   if (!step) { document.getElementById('status1').textContent = '—'; document.getElementById('status2').textContent = '—'; return; }
-  const names = { init: '初始状态', cell: '填 DP 表', done: '完成' };
+  const names = {
+    init: '初始状态',
+    analysis_state: '定义状态',
+    analysis_boundary: '边界条件',
+    analysis_nxt: 'nxt 函数',
+    analysis_transition: '转移方程',
+    cell: '填 DP 表',
+    done: '完成'
+  };
   document.getElementById('status1').textContent = names[step.type] || step.type;
   document.getElementById('status2').textContent = (step.i !== undefined && step.j !== undefined) ? `(${step.i}, ${step.j})` : '—';
 }
@@ -615,7 +700,7 @@ function resetDemo() {
   stopAuto();
   steps = []; currentStep = -1; renderAll();
   document.getElementById('demoArea').innerHTML = '<div style="text-align:center;color:#a0aec0;padding:40px 0;">点击「🚀 逐步演示」或「▶️ 自动演示」开始</div>';
-  document.getElementById('stepList').innerHTML = '<div style="color:#a0aec0;">等待开始...</div>';
+  document.getElementById('stepList').innerHTML = '<div style="color:#a0aec0;font-size:0.78rem;">等待开始...</div>';
   document.getElementById('stepNum').textContent = '0';
   document.getElementById('stepTotal').textContent = '0';
   document.getElementById('status1').textContent = '—';
@@ -625,7 +710,7 @@ function resetDemo() {
 function autoPlay() {
   if (autoTimer) { stopAuto(); return; }
   if (steps.length === 0 || currentStep >= steps.length - 1) { startDemo(); if (steps.length === 0) return; currentStep = -1; }
-  const speed = parseInt(document.getElementById('speedSlider').value) || 900;
+  const speed = parseInt(document.getElementById('speedSlider').value) || 1200;
   document.getElementById('btnAuto').textContent = '⏸ 暂停';
   document.getElementById('btnStep').disabled = true;
   function tick() {
@@ -663,7 +748,6 @@ document.getElementById('inputB').addEventListener('keydown', function (e) {
   if (e.key === 'Enter') startDemo();
 });
 
-// Code block
 document.getElementById('codeBlock').textContent = `#include <bits/stdc++.h>
 using namespace std;
 
