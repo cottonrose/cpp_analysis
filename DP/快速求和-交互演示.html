@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P1874 快速求和 — DP 交互演示</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f4f8; color: #2d3748;
+  min-height: 100vh;
+}
+header {
+  background: linear-gradient(135deg, #1a365d, #2a5298);
+  color: #fff; padding: 20px 32px;
+  display: flex; align-items: center; gap: 16px;
+}
+header h1 { font-size: 1.5rem; font-weight: 700; }
+header .badge { background: #805ad5; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; }
+header .badge.green { background: #38a169; }
+.container { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
+.card {
+  background: #fff; border-radius: 12px; padding: 20px 24px;
+  margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card h2 { font-size: 1.1rem; margin-bottom: 10px; color: #1a365d; }
+.card p { line-height: 1.7; font-size: 0.92rem; color: #4a5568; }
+
+.controls {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px;
+}
+.controls label { font-size: 0.85rem; font-weight: 600; color: #4a5568; }
+.controls input[type="text"] {
+  padding: 7px 10px; border: 1px solid #cbd5e0; border-radius: 6px;
+  font-size: 0.9rem; font-family: "SF Mono", "Fira Code", monospace; width: 120px;
+}
+.controls input[type="number"] {
+  padding: 7px 10px; border: 1px solid #cbd5e0; border-radius: 6px;
+  font-size: 0.9rem; width: 80px;
+}
+.controls input:focus { border-color: #5a67d8; outline: none; box-shadow: 0 0 0 3px rgba(90,103,216,0.15); }
+.controls input[type="range"] { width: 100px; vertical-align: middle; }
+.btn {
+  padding: 7px 16px; border: none; border-radius: 6px; font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: #2b6cb0; color: #fff; }
+.btn-primary:hover { background: #2c5282; }
+.btn-success { background: #38a169; color: #fff; }
+.btn-success:hover { background: #2f855a; }
+.btn-warning { background: #dd6b20; color: #fff; }
+.btn-warning:hover { background: #c05621; }
+.btn-gray { background: #a0aec0; color: #fff; }
+.btn-gray:hover { background: #718096; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-sm { padding: 4px 10px; font-size: 0.78rem; }
+
+.demo-layout {
+  display: grid; grid-template-columns: 1fr 260px; gap: 16px;
+}
+@media (max-width: 900px) { .demo-layout { grid-template-columns: 1fr; } }
+.demo-left { min-width: 0; }
+.demo-right {
+  min-width: 0; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;
+  padding: 10px;
+}
+.demo-area {
+  padding: 14px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;
+  min-height: 180px;
+}
+.status-bar {
+  display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem;
+  padding: 10px 16px; background: #edf2f7; border-radius: 8px; margin-top: 8px;
+}
+.status-item strong { color: #1a365d; }
+
+.step-list {
+  max-height: 420px; overflow-y: auto; font-size: 0.78rem;
+  padding-right: 4px;
+}
+.step-list .step {
+  padding: 4px 6px; border-left: 3px solid transparent; margin-bottom: 2px; cursor: pointer;
+  display: flex; align-items: flex-start; gap: 6px; border-radius: 3px;
+}
+.step-list .step:hover { background: #edf2f7; }
+.step-list .step.active { background: #ebf8ff; border-left-color: #3182ce; }
+.step-list .step .step-num { font-weight: 700; color: #2b6cb0; flex-shrink: 0; min-width: 24px; font-size: 0.72rem; }
+.step-list .step .step-desc { color: #4a5568; line-height: 1.3; }
+.step-list .step.analysis .step-num { color: #805ad5; }
+.step-list .step.analysis.active { background: #faf5ff; border-left-color: #805ad5; }
+
+.code-block {
+  background: #1a202c; color: #e2e8f0; padding: 16px; border-radius: 8px;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 0.8rem;
+  line-height: 1.6; overflow-x: auto; white-space: pre;
+}
+.code-block .kw { color: #9f7aea; }
+.code-block .type { color: #68d391; }
+.code-block .num { color: #fbd38d; }
+.code-block .str { color: #fc8181; }
+.code-block .cmt { color: #718096; font-style: italic; }
+.code-block .fn { color: #63b3ed; }
+.code-block .op { color: #f6ad55; }
+
+/* String display */
+.str-row { display: flex; align-items: center; gap: 4px; margin: 6px 0; flex-wrap: wrap; }
+.str-label { font-weight: 700; color: #2d3748; min-width: 50px; font-size: 0.85rem; }
+.str-cells { display: flex; gap: 2px; flex-wrap: wrap; }
+.str-cell {
+  width: 36px; height: 40px; border-radius: 4px; display: flex;
+  align-items: center; justify-content: center; font-weight: 700;
+  font-size: 1rem; position: relative;
+  background: #fff; border: 2px solid #e2e8f0; color: #2d3748;
+  transition: all 0.2s;
+}
+.str-cell.seg-start { border-left: 3px solid #3182ce; }
+.str-cell.seg-end { border-right: 3px solid #3182ce; }
+.str-cell.in-seg { background: #ebf8ff; border-color: #90cdf4; }
+.str-cell.seg-active { background: #fefcbf; border-color: #d69e2e; transform: scale(1.12); z-index: 2; }
+.str-cell .idx-label { position: absolute; top: -16px; font-size: 0.6rem; color: #a0aec0; font-weight: 400; }
+
+/* Segment info */
+.seg-info {
+  display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin: 6px 0;
+  padding: 8px 14px; background: #fff; border-radius: 8px; border: 1px solid #e2e8f0;
+}
+.seg-info .label { font-size: 0.82rem; font-weight: 600; color: #4a5568; }
+.seg-info .val { font-size: 1.1rem; font-weight: 800; color: #2d3748; font-family: monospace; }
+
+/* DP state list */
+.dp-states {
+  display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0;
+}
+.dp-state-group {
+  border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; min-width: 80px;
+  background: #fff;
+}
+.dp-state-group .prefix { font-size: 0.78rem; font-weight: 700; color: #2b6cb0; margin-bottom: 4px; }
+.dp-state-group .entries { display: flex; flex-direction: column; gap: 2px; }
+.dp-state-group .entry {
+  font-size: 0.78rem; font-family: monospace; padding: 1px 4px; border-radius: 2px;
+  color: #276749; font-weight: 600;
+}
+.dp-state-group .entry.highlight { background: #fefcbf; color: #975a16; }
+.dp-state-group .entry.newly { background: #f0fff4; color: #276749; }
+
+/* Updates list */
+.updates-list { margin: 6px 0; }
+.upd-item {
+  display: flex; align-items: center; gap: 6px; padding: 4px 10px;
+  border-radius: 4px; margin-bottom: 3px; font-size: 0.82rem; font-family: monospace;
+  background: #f0fff4; border: 1px solid #c6f6d5;
+}
+.upd-item .arrow { color: #38a169; font-weight: 700; }
+
+.explain-box {
+  background: #ebf8ff; border-left: 4px solid #3182ce;
+  padding: 9px 12px; border-radius: 6px; margin: 6px 0;
+  font-size: 0.85rem; line-height: 1.6;
+}
+.explain-box.success { background: #f0fff4; border-left-color: #38a169; }
+.explain-box.fail { background: #fff5f5; border-left-color: #e53e3e; }
+.explain-box.info { background: #faf5ff; border-left-color: #805ad5; }
+.explain-box.warn { background: #fffff0; border-left-color: #d69e2e; }
+
+.stat-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0; }
+.stat-tag {
+  padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.78rem;
+}
+.stat-tag.even { background: #ebf8ff; color: #2b6cb0; }
+.stat-tag.odd { background: #fffaf0; color: #c05621; }
+
+.analysis-card {
+  background: #faf5ff; border: 1px solid #e9d8fd; border-radius: 8px;
+  padding: 12px 16px; margin: 6px 0;
+}
+.analysis-card h3 { font-size: 0.92rem; color: #6b46c1; margin-bottom: 6px; }
+.analysis-card p, .analysis-card li { font-size: 0.85rem; color: #4a5568; line-height: 1.7; }
+.analysis-card ul { padding-left: 18px; margin: 4px 0; }
+.analysis-card .key { background: #fefcbf; padding: 1px 5px; border-radius: 3px; font-weight: 600; font-family: monospace; }
+
+.res-segments {
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 8px 0;
+  padding: 10px 16px; background: #fff; border-radius: 8px; border: 2px solid #e9d8fd;
+}
+.res-segments .seg {
+  padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 1rem;
+  background: #ebf8ff; border: 2px solid #90cdf4;
+}
+.res-segments .plus { font-size: 1.2rem; font-weight: 700; color: #e53e3e; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>P1874 快速求和</h1>
+  <span class="badge">动态规划</span>
+  <span class="badge green">O(L²·n)</span>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>📋 题目描述</h2>
+    <p>给定一个数字字符串（长度 ≤ 40）和一个目标数 n（n ≤ 100000），在字符串中插入最少数量的加号，使得计算结果等于 n。输出最少加号数，无解输出 -1。</p>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <label>字符串：</label>
+      <input id="inputS" type="text" value="159" placeholder="数字串">
+      <label>目标 n：</label>
+      <input id="inputN" type="number" value="24">
+      <button class="btn btn-primary" onclick="startDemo()">🚀 逐步演示</button>
+      <button class="btn btn-success" id="btnAuto" onclick="autoPlay()">▶️ 自动演示</button>
+      <button class="btn btn-gray" onclick="resetDemo()">↺ 重置</button>
+    </div>
+    <div class="controls" style="margin-bottom:0;">
+      <span style="font-size:0.82rem;color:#718096;">
+        速度：<input id="speedSlider" type="range" min="300" max="2500" value="1200" step="100">
+        <span id="speedLabel">1200ms</span>
+      </span>
+      <span style="margin-left:12px;font-size:0.82rem;color:#718096;">
+        💡 <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">→</kbd>
+        <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">←</kbd>
+        <kbd style="background:#edf2f7;padding:1px 5px;border-radius:3px;border:1px solid #cbd5e0;">Space</kbd>
+      </span>
+      <span style="margin-left:12px;font-size:0.82rem;color:#718096;">
+        快速填入：
+        <button class="btn btn-gray btn-sm" onclick="setExample(1)">159→24</button>
+        <button class="btn btn-gray btn-sm" onclick="setExample(2)">12→3</button>
+        <button class="btn btn-gray btn-sm" onclick="setExample(3)">101→11</button>
+      </span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🧮 DP 填表过程</h2>
+    <div style="margin-bottom:8px;">
+      <button class="btn btn-warning btn-sm" id="btnStep" onclick="stepForward()" disabled>⏭ 下一步</button>
+      <button class="btn btn-gray btn-sm" id="btnReset" onclick="resetSteps()" disabled>↺ 重置步骤</button>
+      <span style="margin-left:10px;font-size:0.85rem;font-weight:600;">
+        步骤 <span id="stepNum">0</span> / <span id="stepTotal">0</span>
+      </span>
+    </div>
+    <div class="demo-layout">
+      <div class="demo-left">
+        <div class="demo-area" id="demoArea">
+          <div style="text-align:center;color:#a0aec0;padding:40px 0;">
+            点击「🚀 逐步演示」或「▶️ 自动演示」开始
+          </div>
+        </div>
+        <div class="status-bar">
+          <div class="status-item"><strong>当前：</strong><span id="status1">—</span></div>
+          <div class="status-item"><strong>细节：</strong><span id="status2">—</span></div>
+        </div>
+      </div>
+      <div class="demo-right">
+        <div style="font-size:0.8rem;font-weight:700;color:#2d3748;margin-bottom:6px;">📜 步骤历史</div>
+        <div class="step-list" id="stepList">
+          <div style="color:#a0aec0;font-size:0.78rem;">等待开始...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💻 参考代码 (C++)</h2>
+    <div class="code-block" id="codeBlock"></div>
+  </div>
+
+  <div class="card">
+    <h2>🧠 解题思路</h2>
+    <p><strong>状态定义</strong>：<code>f[i][j]</code> = 使用前 i 位组成和 j 的最少段数（加号数 = 段数 - 1）。</p>
+    <p><strong>边界</strong>：<code>f[0][0] = 0</code>，其余 ∞。<br>
+       <strong>转移</strong>：枚举切分点 i，切出一段数字 <code>w = s[i+1..k]</code>，<br>
+       <code>f[k][j+w] = min(f[k][j+w], f[i][j] + 1)</code>。<br>
+       <strong>剪枝</strong>：<code>w &gt; n</code> 时 break（w 只会越来越大）。<br>
+       <strong>答案</strong>：<code>f[L][n]</code>（段数），若为 INF 输出 -1。</p>
+  </div>
+
+</div>
+
+<script>
+let steps = [];
+let currentStep = -1;
+let autoTimer = null;
+
+function parseInput() {
+  const s = document.getElementById('inputS').value.trim();
+  const n = parseInt(document.getElementById('inputN').value);
+  if (!s || isNaN(n) || n < 0) { alert('请输入有效数据！'); return null; }
+  return { s, n, L: s.length };
+}
+
+// ============================================================
+// Generate steps
+// ============================================================
+function generateSteps(data) {
+  const { s, n, L } = data;
+  const st = [];
+  const INF = 1e9;
+
+  // 1‑indexed digits
+  const d = ' ' + s;
+
+  // ── Analysis steps ──
+  st.push({ type: 'init', desc: `字符串"${s}"，目标和 n=${n}，长度 L=${L}`, s, n, L });
+
+  st.push({
+    type: 'analysis_problem',
+    desc: '切分字符串为若干段，每段作为一个整数，各段之和 = n。求最少切几段。',
+    s, n, L
+  });
+
+  st.push({
+    type: 'analysis_state',
+    desc: `f[i][j] = 前 i 位组成和 j 的最少段数。答案 = f[${L}][${n}]（段数），加号数 = 段数 - 1。`,
+    s, n, L
+  });
+
+  st.push({
+    type: 'analysis_boundary',
+    desc: 'f[0][0] = 0（空串和 0 需要 0 段），其余 ∞。',
+    s, n, L
+  });
+
+  st.push({
+    type: 'analysis_transition',
+    desc: '从 i 后切一段到 k：w = s[i+1..k]。f[k][j+w] = min(f[k][j+w], f[i][j] + 1)。w > n 时 break。',
+    s, n, L
+  });
+
+  // ── DP computation ──
+  const f = Array.from({ length: L + 1 }, () => Array(n + 1).fill(INF));
+  const from = Array.from({ length: L + 1 }, () => Array(n + 1).fill(null));
+  f[0][0] = 0;
+
+  // We'll record step data for each (i,k) iteration
+  const updates = [];
+
+  for (let i = 0; i < L; i++) {
+    let w = 0;
+    for (let k = i + 1; k <= L; k++) {
+      w = w * 10 + (d.charCodeAt(k) - 48);
+      if (w > n) {
+        updates.push({ i, k, w, type: 'break' });
+        break;
+      }
+      const batch = [];
+      for (let j = 0; j + w <= n; j++) {
+        if (f[i][j] < INF) {
+          const oldVal = f[k][j + w];
+          const newVal = f[i][j] + 1;
+          if (newVal < oldVal) {
+            f[k][j + w] = newVal;
+            from[k][j + w] = { i, j, w };
+            batch.push({ j, oldVal, newVal });
+          }
+        }
+      }
+      updates.push({ i, k, w, type: 'update', updates: batch });
+    }
+  }
+
+  // Generate steps from recorded updates
+  // Group by i
+  for (let i = 0; i < L; i++) {
+    const iUpdates = updates.filter(u => u.i === i);
+    if (iUpdates.length === 0) continue;
+
+    // Show current i
+    st.push({
+      type: 'loop_i', desc: `i = ${i}，当前已处理完前 ${i} 位`, i, s, n, L,
+      f: f.map(r => [...r])
+    });
+
+    for (const upd of iUpdates) {
+      if (upd.type === 'break') {
+        st.push({
+          type: 'break_msg',
+          desc: `k = ${upd.k}：w = ${upd.w} > n = ${n}，break`,
+          i: upd.i, k: upd.k, w: upd.w, s, n, L,
+          f: f.map(r => [...r])
+        });
+        break;
+      }
+      st.push({
+        type: 'segment',
+        desc: `切一段 s[${upd.i + 1}..${upd.k}] = ${upd.w}${upd.updates.length > 0 ? ` → ${upd.updates.length} 处更新` : '（无更新）'}`,
+        i: upd.i, k: upd.k, w: upd.w, s, n, L,
+        updates: upd.updates,
+        f: f.map(r => [...r])
+      });
+    }
+  }
+
+  // Done
+  const ans = f[L][n];
+  st.push({
+    type: 'done',
+    desc: ans < INF ? `🎉 f[${L}][${n}] = ${ans}，加号数 = ${ans - 1}` : '❌ 无解',
+    s, n, L, answer: ans < INF ? ans : -1,
+    f: f.map(r => [...r]),
+    from: from.map(r => [...r])
+  });
+
+  return st;
+}
+
+// ============================================================
+// Rendering
+// ============================================================
+function renderStr(s, activeI, activeK, iVal, kVal) {
+  let html = '<div class="str-row"><span class="str-label">串：</span><div class="str-cells">';
+  for (let idx = 0; idx < s.length; idx++) {
+    let cls = '';
+    if (activeI !== undefined && activeK !== undefined) {
+      const pos = idx + 1;
+      if (pos >= activeI + 1 && pos <= activeK) cls = ' in-seg';
+      if (pos === activeI + 1) cls += ' seg-start';
+      if (pos === activeK) cls += ' seg-end';
+    }
+    html += `<div class="str-cell${cls}"><span class="idx-label">${idx + 1}</span>${s[idx]}</div>`;
+  }
+  html += '</div></div>';
+  return html;
+}
+
+function renderSegInfo(w, i, k) {
+  return `<div class="seg-info">
+    <span class="label">段 s[${i + 1}..${k}]</span>
+    <span class="val">${w}</span>
+  </div>`;
+}
+
+function renderDpStates(f, L, n, highlightEntries, newlyEntries) {
+  const INF = 1e9;
+  let html = '<div style="font-size:0.82rem;font-weight:600;color:#2d3748;margin:6px 0 4px;">f 表（i → {和: 段数}）</div>';
+  html += '<div class="dp-states">';
+  for (let i = 0; i <= L; i++) {
+    if (!f[i]) continue;
+    const entries = [];
+    for (let j = 0; j <= n; j++) {
+      if (f[i][j] < INF) {
+        let cls = '';
+        if (highlightEntries && highlightEntries.some(e => e.i === i && e.j === j)) cls = ' highlight';
+        else if (newlyEntries && newlyEntries.some(e => e.i === i && e.j === j)) cls = ' highlight';
+        entries.push({ j, v: f[i][j], cls });
+      }
+    }
+    if (entries.length === 0 && i > 0) continue;
+    html += '<div class="dp-state-group">';
+    html += `<div class="prefix">i=${i}</div><div class="entries">`;
+    for (const e of entries) {
+      html += `<div class="entry${e.cls}">(${e.j}→${e.v})</div>`;
+    }
+    html += '</div></div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function renderUpdates(upd) {
+  if (!upd || upd.length === 0) return '';
+  let html = '<div class="updates-list">';
+  for (const u of upd) {
+    html += `<div class="upd-item">
+      f[${u.i}][${u.j}] + 1 = ${u.oldVal === 1e9 ? '∞' : u.oldVal} →
+      <span class="arrow">f[${u.i}][${u.j + u.newVal - u.oldVal - 1}] = ${u.newVal}</span>
+    </div>`;
+  }
+  return html + '</div>';
+}
+
+function renderStep(idx) {
+  const area = document.getElementById('demoArea');
+  if (idx < 0 || idx >= steps.length) {
+    area.innerHTML = '<div style="text-align:center;color:#a0aec0;padding:40px 0;">等待开始...</div>';
+    return;
+  }
+  const st = steps[idx];
+
+  switch (st.type) {
+    case 'init':
+      area.innerHTML = `
+        <div class="explain-box info">📌 字符串 "${st.s}"，目标和 n = ${st.n}</div>
+        ${renderStr(st.s)}
+        <div style="margin-top:4px;font-size:0.85rem;color:#4a5568;">
+          长度 L = ${st.L}，需要找到最少加号使等式成立。
+        </div>`;
+      break;
+
+    case 'analysis_problem':
+      area.innerHTML = `
+        <div class="analysis-card">
+          <h3>🔗 问题转化</h3>
+          <p>将数字串切分成若干段，每段作为一个整数，这些整数的和 = n。</p>
+          <p><strong>段数越少，加号越少</strong>：加号数 = 段数 - 1</p>
+          <p style="margin-top:4px;">因此只需求出 <strong>最少段数</strong>，再减 1 即答案。</p>
+        </div>
+        ${renderStr(st.s)}`;
+      break;
+
+    case 'analysis_state':
+      area.innerHTML = `
+        <div class="analysis-card">
+          <h3>📐 状态定义</h3>
+          <p><span class="key">f[i][j]</span> = 考虑字符串的<strong>前 i 位</strong>（第 1~i 位），通过添加加号，</p>
+          <p style="padding-left:20px;">使这些数字的<strong>和为 j</strong> 时，所需的<strong>最少段数</strong>。</p>
+          <p style="margin-top:6px;">最终答案为 <span class="key">f[${st.L}][${st.n}]</span>，加号数 = f[${st.L}][${st.n}] - 1。</p>
+        </div>
+        ${renderStr(st.s)}`;
+      break;
+
+    case 'analysis_boundary': {
+      const miniF = [[0]];
+      area.innerHTML = `
+        <div class="analysis-card">
+          <h3>🔹 边界</h3>
+          <p><span class="key">f[0][0] = 0</span> — 前 0 位组成和 0，需要 0 段。</p>
+          <p>其余 <span class="key">f[i][j]</span> 初始化为 <span class="key">∞</span>。</p>
+        </div>
+        ${renderStr(st.s)}
+        ${renderDpStates(miniF, st.L, st.n)}`;
+      break;
+    }
+
+    case 'analysis_transition':
+      area.innerHTML = `
+        <div class="analysis-card">
+          <h3>🔄 转移方程</h3>
+          <p>枚举切分点 i 和新段终点 k：</p>
+          <ul>
+            <li><span class="key">w = s[i+1..k]</span> — 新切出的数字</li>
+            <li>剪枝：<span class="key">w > n</span> 则 break</li>
+            <li><span class="key">f[k][j+w] = min(f[k][j+w], f[i][j] + 1)</span></li>
+          </ul>
+          <p style="margin-top:4px;">即在已有的划分后接一段，段数 + 1。</p>
+        </div>
+        ${renderStr(st.s)}`;
+      break;
+
+    case 'loop_i':
+      area.innerHTML = `
+        <div class="explain-box" style="border-left-color:#805ad5;background:#faf5ff;">
+          🔵 <strong>外层循环 i = ${st.i}</strong>：前 ${st.i} 位已处理完
+        </div>
+        ${renderStr(st.s)}
+        ${renderDpStates(st.f, st.L, st.n)}`;
+      break;
+
+    case 'segment': {
+      const segStr = st.s.slice(st.i, st.k);
+      let body = `
+        <div class="explain-box">
+          📍 切一段：<strong>[${st.i + 1}..${st.k}]</strong> = <strong>${segStr}</strong>（数值 ${st.w}）
+        </div>
+        ${renderStr(st.s, st.i, st.k)}
+        ${renderSegInfo(st.w, st.i, st.k)}`;
+      if (st.updates.length > 0) {
+        body += `<div style="font-size:0.82rem;font-weight:600;color:#38a169;margin:4px 0;">✅ 更新 ${st.updates.length} 处：</div>`;
+        for (const u of st.updates) {
+          body += `<div class="upd-item">
+            f[${st.i}][${u.j}] + 1 = ${u.newVal} →
+            <span class="arrow">f[${st.k}][${u.j + st.w}] = ${u.newVal}</span>
+            ${u.oldVal < 1e9 ? `（原 ${u.oldVal}，取 min）` : '（首次可达）'}
+          </div>`;
+        }
+      } else {
+        body += '<div style="font-size:0.82rem;color:#a0aec0;">无可达状态可更新。</div>';
+      }
+      body += renderDpStates(st.f, st.L, st.n);
+      area.innerHTML = body;
+      break;
+    }
+
+    case 'break_msg':
+      area.innerHTML = `
+        <div class="explain-box fail">
+          ⛔ <strong>剪枝</strong>：w = ${st.w} > n = ${st.n}，break
+        </div>
+        ${renderStr(st.s, st.i, st.k)}
+        <div style="font-size:0.85rem;">数值 ${st.w} 已超过目标和 ${st.n}，继续向右取更多位只会更大，不可能组成和 ${st.n}。</div>`;
+      break;
+
+    case 'done': {
+      const ans = st.answer;
+      if (ans < 0) {
+        area.innerHTML = `
+          <div class="explain-box fail">❌ 无解：无法用加号使等式成立</div>
+          ${renderDpStates(st.f, st.L, st.n, [{i:st.L, j:st.n}])}`;
+        break;
+      }
+      // Backtrack to show segments
+      const segs = [];
+      let i = st.L, j = st.n;
+      while (i > 0 && j > 0) {
+        const fData = st.from[i][j];
+        if (!fData) break;
+        segs.unshift({ start: fData.i + 1, end: i, val: fData.w });
+        i = fData.i;
+        j = fData.j;
+      }
+      let segHtml = '<div class="res-segments">';
+      for (let idx = 0; idx < segs.length; idx++) {
+        if (idx > 0) segHtml += '<span class="plus">+</span>';
+        segHtml += `<span class="seg">${segs[idx].val}</span>`;
+      }
+      segHtml += ` <span style="font-size:1.1rem;font-weight:700;">= ${st.n}</span></div>`;
+
+      area.innerHTML = `
+        <div class="explain-box success" style="border-left-color:#805ad5;background:#faf5ff;">
+          🎉 <strong>答案：f[${st.L}][${st.n}] = ${ans}</strong>
+          <br>加号数 = ${ans - 1}
+        </div>
+        ${segHtml}
+        ${ans >= 0 ? `<div style="font-size:0.85rem;color:#4a5568;margin-top:4px;">
+          分 ${ans} 段，插入 ${ans - 1} 个加号，和 = ${st.n}</div>` : ''}
+        ${renderDpStates(st.f, st.L, st.n, [{i:st.L, j:st.n}])}`;
+      break;
+    }
+
+    default:
+      area.innerHTML = `<div style="padding:20px;text-align:center;">${st.desc}</div>`;
+  }
+}
+
+// ============================================================
+// Step list
+// ============================================================
+function renderStepList() {
+  const list = document.getElementById('stepList');
+  list.innerHTML = '';
+  steps.forEach((step, idx) => {
+    const div = document.createElement('div');
+    const isAnalysis = step.type.startsWith('analysis');
+    div.className = 'step' + (idx === currentStep ? ' active' : '') + (isAnalysis ? ' analysis' : '');
+    let icon = '';
+    switch (step.type) {
+      case 'init': icon = '📋'; break;
+      case 'analysis_problem': icon = '🔗'; break;
+      case 'analysis_state': icon = '📐'; break;
+      case 'analysis_boundary': icon = '🔹'; break;
+      case 'analysis_transition': icon = '🔄'; break;
+      case 'loop_i': icon = '🔵'; break;
+      case 'segment': icon = '✂️'; break;
+      case 'break_msg': icon = '⛔'; break;
+      case 'done': icon = '🎉'; break;
+    }
+    let shortDesc = step.desc;
+    if (shortDesc.length > 40) shortDesc = shortDesc.slice(0, 38) + '…';
+    div.innerHTML = `<span class="step-num">#${idx+1}</span><span class="step-desc">${icon} ${shortDesc}</span>`;
+    div.onclick = () => jumpToStep(idx);
+    list.appendChild(div);
+  });
+  if (currentStep >= 0) {
+    const active = list.querySelector('.step.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function updateStatus(step) {
+  if (!step) { document.getElementById('status1').textContent = '—'; document.getElementById('status2').textContent = '—'; return; }
+  const names = {
+    init: '初始', analysis_problem: '问题转化', analysis_state: '定义状态',
+    analysis_boundary: '边界', analysis_transition: '转移方程',
+    loop_i: '外层循环', segment: '切分', break_msg: '剪枝', done: '完成'
+  };
+  document.getElementById('status1').textContent = names[step.type] || step.type;
+  if (step.i !== undefined && step.k !== undefined) document.getElementById('status2').textContent = `i=${step.i} k=${step.k}`;
+  else if (step.i !== undefined) document.getElementById('status2').textContent = `i=${step.i}`;
+  else document.getElementById('status2').textContent = '—';
+}
+
+function renderAll() {
+  const total = steps.length;
+  document.getElementById('stepNum').textContent = total > 0 ? currentStep + 1 : 0;
+  document.getElementById('stepTotal').textContent = total;
+  document.getElementById('btnStep').disabled = (currentStep >= total - 1);
+  document.getElementById('btnReset').disabled = (total === 0);
+  renderStep(currentStep);
+  renderStepList();
+  updateStatus(steps[currentStep]);
+}
+
+function startDemo() {
+  stopAuto();
+  const data = parseInput();
+  if (!data) return;
+  steps = generateSteps(data);
+  currentStep = 0;
+  renderAll();
+}
+
+function stepForward() {
+  if (steps.length === 0) { startDemo(); return; }
+  if (currentStep < steps.length - 1) { currentStep++; renderAll(); }
+}
+function prevStep() {
+  if (currentStep > 0) { currentStep--; renderAll(); }
+}
+function jumpToStep(idx) {
+  if (idx < 0 || idx >= steps.length) return;
+  currentStep = idx; renderAll();
+}
+function resetSteps() { stopAuto(); currentStep = 0; renderAll(); }
+function resetDemo() {
+  stopAuto(); steps = []; currentStep = -1; renderAll();
+  document.getElementById('demoArea').innerHTML = '<div style="text-align:center;color:#a0aec0;padding:40px 0;">点击「🚀 逐步演示」或「▶️ 自动演示」开始</div>';
+  document.getElementById('stepList').innerHTML = '<div style="color:#a0aec0;font-size:0.78rem;">等待开始...</div>';
+  document.getElementById('stepNum').textContent = '0'; document.getElementById('stepTotal').textContent = '0';
+  document.getElementById('status1').textContent = '—'; document.getElementById('status2').textContent = '—';
+}
+function autoPlay() {
+  if (autoTimer) { stopAuto(); return; }
+  if (steps.length === 0 || currentStep >= steps.length - 1) { startDemo(); if (steps.length === 0) return; currentStep = -1; }
+  const speed = parseInt(document.getElementById('speedSlider').value) || 1200;
+  document.getElementById('btnAuto').textContent = '⏸ 暂停'; document.getElementById('btnStep').disabled = true;
+  function tick() {
+    if (currentStep < steps.length - 1) { currentStep++; renderAll(); if (currentStep < steps.length - 1) { autoTimer = setTimeout(tick, speed); } else { stopAuto(); } }
+  }
+  autoTimer = setTimeout(tick, speed);
+}
+function stopAuto() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  document.getElementById('btnAuto').textContent = '▶️ 自动演示';
+  document.getElementById('btnStep').disabled = (currentStep >= steps.length - 1 && steps.length > 0);
+}
+
+function setExample(n) {
+  const ex = { 1: { s: '159', n: 24 }, 2: { s: '12', n: 3 }, 3: { s: '101', n: 11 } }[n];
+  if (ex) { document.getElementById('inputS').value = ex.s; document.getElementById('inputN').value = ex.n; }
+}
+
+document.getElementById('speedSlider').addEventListener('input', function () {
+  document.getElementById('speedLabel').textContent = this.value + 'ms';
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'ArrowRight') { e.preventDefault(); stepForward(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevStep(); }
+  else if (e.key === ' ') { e.preventDefault(); autoTimer ? stopAuto() : autoPlay(); }
+});
+document.getElementById('inputS').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') document.getElementById('inputN').focus();
+});
+document.getElementById('inputN').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') startDemo();
+});
+
+document.getElementById('codeBlock').textContent = `#include <bits/stdc++.h>
+using namespace std;
+const int N = 45;
+int L, n, w, f[N][100005];
+char c[N];
+
+int main() {
+    cin >> (c + 1) >> n;
+    L = strlen(c + 1);
+
+    memset(f, 0x3f, sizeof(f));
+    f[0][0] = 0;
+
+    for (int i = 0; i < L; ++i) {
+        w = 0;
+        for (int k = i + 1; k <= L; ++k) {
+            w = w * 10 + c[k] - '0';
+            if (w > n) break;
+            for (int j = 0; j + w <= n; ++j) {
+                if (f[i][j] < 0x3f3f3f3f)
+                    f[k][j + w] = min(f[k][j + w], f[i][j] + 1);
+            }
+        }
+    }
+
+    if (f[L][n] < 0x3f3f3f3f)
+        cout << f[L][n];
+    else
+        cout << -1;
+}`;
+</script>
+</body>
+</html>
